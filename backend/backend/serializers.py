@@ -79,3 +79,8 @@ class CountriesSerializer(serializers.ModelSerializer):
             validated_data['createdby'] = request.user.id
             validated_data['updatedby'] = request.user.id
         return super().create(validated_data)
+    
+class AdvicemasterSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = Advicemaster
+        fields = "__all__"

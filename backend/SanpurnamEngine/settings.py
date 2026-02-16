@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'SanpurnamEngine.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hms_latest',
+        'NAME': 'hmis',
         'USER': 'root',
         'PASSWORD': 'root',
         'HOST': 'localhost',

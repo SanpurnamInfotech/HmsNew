@@ -227,8 +227,8 @@ class Countries(models.Model):
         db_table = 'countries'
         
 class Advicemaster(models.Model):
-    advicemaster_id = models.IntegerField(blank=True, null=True)
-    advice_name = models.TextField()
+    advice_code = models.CharField(unique=True, max_length=45)
+    advice_name = models.CharField(max_length=500, blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)

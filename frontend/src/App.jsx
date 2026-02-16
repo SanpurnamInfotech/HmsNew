@@ -10,6 +10,7 @@ import Dashboard from './pages/dashboard/Dashboard';
 import ModuleMst from './pages/masters/ModuleMst';
 import SubmoduleMst from './pages/masters/SubmoduleMst';
 import Activities from './pages/masters/Activities';
+import AdviceMaster from './pages/masters/AdviceMaster';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
           <Route path='moduleMst' element={<ModuleMst />} />
           <Route path='submoduleMst' element={<SubmoduleMst />} />
           <Route path='activities' element={<Activities />} />
+          <Route path='advice_master' element={<AdviceMaster />} />
           
         </Route>
 

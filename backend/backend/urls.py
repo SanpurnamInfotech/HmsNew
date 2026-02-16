@@ -46,4 +46,11 @@ urlpatterns = [
     path('api/countries/create/', CountriesCreateView.as_view(), name='countries-create'),  
     path('api/countries/update/<str:country_code>/', CountriesUpdateView.as_view(), name='countries-update'),
     path('api/countries/delete/<str:country_code>/', CountriesDeleteView.as_view(), name='countries-delete'),
+    
+    
+    path('api/advice_master/', AdvicemasterListView.as_view(), name='advice-list'),
+    path('api/advice_master/detail/<str:advice_code>/', AdvicemasterDetailView.as_view(), name='advice-detail'),
+    path('api/advice_master/create/', AdvicemasterCreateView.as_view(), name='advice-create'),
+    path('api/advice_master/update/<str:advice_code>/', AdvicemasterUpdateView.as_view(), name='advice-update'),
+    path('api/advice_master/delete/<str:advice_code>/', AdvicemasterDeleteView.as_view(), name='advice-delete'),
 ]
