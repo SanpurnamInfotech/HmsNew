@@ -28,8 +28,8 @@ const api = axios.create({
  */
 api.interceptors.request.use(
   (config) => {
-    // Standardizing on 'access_token' for consistency
-    const token = localStorage.getItem("access_token");
+    // Standardizing on 'token' for consistency with AuthContext
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -44,9 +44,14 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
+    // Only redirect if we get a 401 and we're not already on the login page
     if (error.response?.status === 401) {
-      localStorage.clear();
-      if (!window.location.pathname.includes("/admin/login")) {
+      const isLoginPage = window.location.pathname.includes("/admin/login");
+      
+      if (!isLoginPage) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refresh_token");
+        localStorage.removeItem("username");
         window.location.href = "/admin/login";
       }
     }

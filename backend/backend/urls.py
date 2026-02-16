@@ -1,2 +1,49 @@
 from django.urls import path
-from . import views
+from .views import *
+from .api_views import *
+
+urlpatterns = [
+    
+    path('api/', getRoutes),
+    
+    path("api/admin-login/", LoginView.as_view(), name="admin-login"),
+    path("api/admin-register/", RegisterView.as_view(), name="admin-register"),
+    
+    path('api/available_urls/', AvailableURLsView.as_view(), name='available_urls'),
+    
+    path('api/settings/', SettingsListView.as_view(), name='settings-list'),
+    path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
+    path('api/settings/<int:setting_id>/', SettingsDetailView.as_view(), name='settings-detail'),
+    path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
+    path('api/settings/delete/<int:setting_id>/', SettingsDeleteView.as_view(), name='settings-delete'),
+    
+    path('api/usertypes/', UserTypeListView.as_view(), name='usertype-list'),
+    path('api/usertypes/create/', UserTypeCreateView.as_view(), name='usertype-create'),
+    path('api/usertypes/<int:usertype_id>/', UserTypeDetailView.as_view(), name='usertype-detail'),
+    path('api/usertypes/update/<int:usertype_id>/', UserTypeUpdateView.as_view(), name='usertype-update'),
+    path('api/usertypes/delete/<int:usertype_id>/', UserTypeDeleteView.as_view(), name='usertype-delete'),
+    
+    path("api/engine-module/", EngineModuleListView.as_view()),
+    path("api/engine-module/create/", EngineModuleCreateView.as_view()),
+    path("api/engine-module/<str:module_code>/", EngineModuleDetailView.as_view()),
+    path("api/engine-module/update/<str:module_code>/", EngineModuleUpdateView.as_view()),
+    path("api/engine-module/delete/<str:module_code>/", EngineModuleDeleteView.as_view()),
+
+    path("api/engine-submodule/", EngineSubmoduleListView.as_view()),
+    path("api/engine-submodule/create/", EngineSubmoduleCreateView.as_view()),      
+    path("api/engine-submodule/<str:submodule_code>/", EngineSubmoduleDetailView.as_view()),
+    path("api/engine-submodule/update/<str:submodule_code>/", EngineSubmoduleUpdateView.as_view()),
+    path("api/engine-submodule/delete/<str:submodule_code>/", EngineSubmoduleDeleteView.as_view()),
+
+    path("api/engine-activity/", EngineActivityListView.as_view()),
+    path("api/engine-activity/create/", EngineActivityCreateView.as_view()),     
+    path("api/engine-activity/<str:activity_code>/", EngineActivityDetailView.as_view()),
+    path("api/engine-activity/update/<str:activity_code>/", EngineActivityUpdateView.as_view()),
+    path("api/engine-activity/delete/<str:activity_code>/", EngineActivityDeleteView.as_view()),
+    
+    
+    path('api/countries/', CountriesListView.as_view(), name='countries-list'),
+    path('api/countries/create/', CountriesCreateView.as_view(), name='countries-create'),  
+    path('api/countries/update/<str:country_code>/', CountriesUpdateView.as_view(), name='countries-update'),
+    path('api/countries/delete/<str:country_code>/', CountriesDeleteView.as_view(), name='countries-delete'),
+]
