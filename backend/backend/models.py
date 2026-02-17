@@ -2,38 +2,41 @@ from django.db import models
 
 # Create your models here.
 class Users(models.Model):
-    user_id = models.IntegerField(unique=True, blank=True, null=True)
-    username = models.CharField(max_length=20, db_collation='utf8mb3_general_ci')
-    password = models.CharField(max_length=128, db_collation='utf8mb3_general_ci')
-    email = models.CharField(max_length=128, db_collation='utf8mb3_general_ci')
-    activkey = models.CharField(max_length=128, db_collation='utf8mb3_general_ci', blank=True, null=True)
+    user_id = models.IntegerField(blank=True, null=True)
+    username = models.CharField(unique=True, max_length=50)
+    password = models.CharField(max_length=255)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    activkey = models.CharField(max_length=128, blank=True, null=True)
     superuser = models.IntegerField()
     status = models.IntegerField()
-    usertype_id = models.IntegerField()
-    employee_code = models.CharField(max_length=45, db_collation='latin1_bin', blank=True, null=True)
+    usertype_code = models.ForeignKey('UsertypeMaster', models.DO_NOTHING, db_column='usertype_code', to_field='usertype_code', blank=True, null=True)
+    employee_code = models.ForeignKey('EmployeeMaster', models.DO_NOTHING, db_column='employee_code', to_field='employee_code', blank=True, null=True)
+    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
     candidate_id = models.IntegerField(blank=True, null=True)
-    company_code = models.CharField(max_length=45, db_collation='latin1_bin', blank=True, null=True)  
-    createdon = models.DateTimeField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
     lastvisiton = models.DateTimeField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'users'
 
-class Usertype(models.Model):
-    usertype_id= models.IntegerField(blank=True, null=True)
-    usertype_name = models.CharField(max_length=45, blank=True, null=True)
-    financialyear_id = models.IntegerField(blank=True, null=True)
-    company_code = models.CharField(max_length=45, blank=True, null=True)
-    createdon = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updatedon = models.DateTimeField(auto_now=True, blank=True, null=True)
+class UsertypeMaster(models.Model):
+    usertype_code = models.CharField(unique=True, max_length=45)
+    usertype_name = models.CharField(max_length=100)
+    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
+    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
+    status = models.IntegerField()
+    createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
     updatedby = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'usertype'
+        db_table = 'usertype_master'
         
 class SystemRoute(models.Model):
     display_code = models.CharField(unique=True, max_length=45)
@@ -137,89 +140,98 @@ class Permissions(models.Model):
         db_table = 'permissions'
         
         
-class Company(models.Model):
-    company_code = models.CharField(max_length=45, blank=True, null=True)
-    company_name = models.CharField(max_length=45, blank=True, null=True)
-    company_address = models.CharField(max_length=256, blank=True, null=True)
-    company_email = models.CharField(max_length=45, blank=True, null=True)
-    company_phone = models.CharField(max_length=15, blank=True, null=True)
-    company_mobile = models.CharField(max_length=15, blank=True, null=True)
-    company_fax = models.CharField(max_length=45, blank=True, null=True)
-    company_contactperson = models.CharField(max_length=45, blank=True, null=True)
-    company_country = models.CharField(max_length=45, blank=True, null=True)
-    company_state = models.CharField(max_length=45, blank=True, null=True)
-    company_currency = models.CharField(max_length=60, blank=True, null=True)
-    company_registrationNumber = models.CharField(max_length=45, blank=True, null=True)
-    company_gstnumber = models.CharField(db_column='company_GSTNumber', unique=True, max_length=45, blank=True, null=True)  # Field name made lowercase.
-
-    company_timezone = models.CharField(max_length=60, blank=True, null=True)
-    company_logo = models.CharField(max_length=60, blank=True, null=True)
-    createdon = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updatedon = models.DateTimeField(auto_now=True, blank=True, null=True)
+class CompanyMaster(models.Model):
+    company_code = models.CharField(unique=True, max_length=45)
+    company_name = models.CharField(max_length=150)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=255, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    fax = models.CharField(max_length=45, blank=True, null=True)
+    contact_person = models.CharField(max_length=100, blank=True, null=True)
+    country_code = models.CharField(max_length=45, blank=True, null=True)
+    state_code = models.CharField(max_length=45, blank=True, null=True)
+    district_code = models.CharField(max_length=45, blank=True, null=True)
+    city_code = models.CharField(max_length=45, blank=True, null=True)
+    currency = models.CharField(max_length=10, blank=True, null=True)
+    reg_number = models.CharField(max_length=100, blank=True, null=True)
+    gst_number = models.CharField(unique=True, max_length=100, blank=True, null=True)
+    timezone = models.CharField(max_length=100, blank=True, null=True)
+    company_logo = models.CharField(max_length=255, blank=True, null=True)
+    status = models.IntegerField()
+    createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
     updatedby = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'company'
+        db_table = 'company_master'
         
         
-class Employee(models.Model):
-    employee_code = models.CharField(unique=True, max_length=45, blank=True, null=True)
-    employee_firstname = models.CharField(max_length=45, blank=True, null=True)
-    employee_middlename = models.CharField(max_length=45, blank=True, null=True)
-    employee_lastname = models.CharField(max_length=45, blank=True, null=True)
-    employee_joiningdate = models.DateField(blank=True, null=True)
-    employee_qualification = models.CharField(max_length=45, blank=True, null=True)
-    employee_totalexperiance = models.CharField(max_length=45, blank=True, null=True)
-    financialyear_id = models.IntegerField(blank=True, null=True)
-    company_code = models.CharField(max_length=45, blank=True, null=True)
-    department_code = models.CharField(max_length=256, blank=True, null=True)
-    designation_id = models.IntegerField(blank=True, null=True)
-    usertype_id = models.IntegerField(blank=True, null=True)
-    division_code = models.CharField(max_length=256, blank=True, null=True)
-    employee_dob = models.DateField(blank=True, null=True)
-    employee_gender = models.CharField(max_length=10, blank=True, null=True, db_comment='1=>Male,2=>Female')
-    employee_address1 = models.CharField(max_length=256, blank=True, null=True)
-    employee_address2 = models.CharField(max_length=256, blank=True, null=True)
-    employee_country = models.CharField(max_length=45, blank=True, null=True)
-    employee_state = models.CharField(max_length=45, blank=True, null=True)
-    employee_city = models.CharField(max_length=45, blank=True, null=True)
-    employee_pincode = models.CharField(max_length=45, blank=True, null=True)
-    employee_phone = models.CharField(max_length=15, blank=True, null=True)
-    employee_mobile = models.CharField(max_length=15, blank=True, null=True)
-    employee_email = models.CharField(max_length=45, blank=True, null=True)
-    employee_photo = models.BinaryField()
-    employee_status = models.CharField(max_length=45, blank=True, null=True, db_comment='1=>existing,2=>resigned,3=>terminated')
-    contact_id = models.CharField(max_length=45,blank=True, null=True)
+class EmployeeMaster(models.Model):
+    employee_code = models.CharField(unique=True, max_length=45)
+    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code')
+    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
+    department_code = models.CharField(max_length=45, blank=True, null=True)
+    designation_code = models.CharField(max_length=45, blank=True, null=True)
+    usertype_code = models.ForeignKey('UsertypeMaster', models.DO_NOTHING, db_column='usertype_code', to_field='usertype_code', blank=True, null=True)
+    division_code = models.CharField(max_length=45, blank=True, null=True)
+    employee_firstname = models.CharField(max_length=100)
+    employee_middlename = models.CharField(max_length=100, blank=True, null=True)
+    employee_lastname = models.CharField(max_length=100)
+    dob = models.DateField(blank=True, null=True)
+    gender = models.IntegerField(blank=True, null=True, db_comment='1=>Male, 2=>Female, 3=>Other')
+    photo = models.CharField(max_length=255, blank=True, null=True)
+    joining_date = models.DateField(blank=True, null=True)
+    qualification = models.CharField(max_length=150, blank=True, null=True)
+    total_experience = models.CharField(max_length=100, blank=True, null=True)
+    status = models.IntegerField(db_comment='1=>Existing, 2=>Resigned, 3=>Terminated')
     termination_date = models.DateField(blank=True, null=True)
-    termination_reason = models.CharField(max_length=256, blank=True, null=True)
-    createdon = models.DateTimeField(auto_now_add=True, blank=True, null=True)
-    updatedon = models.DateTimeField(auto_now=True, blank=True, null=True)
+    termination_reason = models.TextField(blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    country_code = models.CharField(max_length=45, blank=True, null=True)
+    state_code = models.CharField(max_length=45, blank=True, null=True)
+    district_code = models.CharField(max_length=45, blank=True, null=True)
+    city_code = models.CharField(max_length=45, blank=True, null=True)
+    pincode = models.CharField(max_length=15, blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
     updatedby = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'employee'
+        db_table = 'employee_master'
         
         
-class Financialyear(models.Model):
-    financialyear_id = models.IntegerField(unique=True, blank=True, null=True)
-    financialyear_startyear = models.CharField(max_length=45, blank=True, null=True)
-    financialyear_endyear = models.CharField(max_length=45, blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)
+class FinancialyearMaster(models.Model):
+    financialyear_code = models.CharField(unique=True, max_length=45)
+    start_year = models.IntegerField()
+    end_year = models.IntegerField()
+    status = models.IntegerField()
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'financialyear'
+        db_table = 'financialyear_master'
         
 class Countries(models.Model):
-    country_code = models.CharField(unique=True, max_length=45, blank=True, null=True)
+    country_code = models.CharField(unique=True, max_length=45)
     country_name = models.CharField(max_length=255)
-    createdon = models.DateTimeField(auto_now_add=True,blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(auto_now=True,blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
     updatedby = models.IntegerField(blank=True, null=True)
 
     class Meta:

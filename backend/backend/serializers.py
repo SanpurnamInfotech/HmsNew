@@ -26,9 +26,9 @@ class UsersSerializer(serializers.ModelSerializer):
         model = Users
         fields = '__all__'  
 
-class UsertypeSerializer(serializers.ModelSerializer):
+class UsertypeMasterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Usertype
+        model = UsertypeMaster
         fields = '__all__'  
 
 class PermissionsSerializer(serializers.ModelSerializer):

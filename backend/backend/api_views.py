@@ -102,40 +102,77 @@ class LoginView(APIView):
 
 
 
+from django.contrib.auth.hashers import make_password
+from django.db.models import Max
+from django.utils import timezone # Use Django's timezone utility
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+
 class RegisterView(APIView):
     permission_classes = [CredentialsProvidedPermission]
 
     def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
-        email = request.data.get("email")
+        data = request.data
+        username = data.get("username")
+        password = data.get("password")
 
+        # 1. Validation
         if not username or not password:
             return Response({"error": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
 
         if Users.objects.filter(username=username).exists():
             return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
+        # 2. Dynamic ID generation
         max_id = Users.objects.aggregate(Max('user_id'))['user_id__max']
         next_user_id = (max_id or 0) + 1 
 
-        user = Users.objects.create(
-            user_id=next_user_id, 
-            password=make_password(password),
-            email=email,
-            status=1,
-            superuser=0,
-        )
+        # 3. Dynamic Field Mapping
+        create_params = {
+            "user_id": next_user_id,
+            "status": 1,
+            "superuser": 0,
+            "createdon": timezone.now(), # Sets the exact creation time
+            "lastvisiton": timezone.now(), # Initializes last visit on registration
+            # "createdby": request.user.id if request.user.is_authenticated else next_user_id,
+        }
 
-        refresh = RefreshToken.for_user(user)
+        # List of Foreign Key fields (varchar in DB)
+        fk_fields = ['company_code', 'usertype_code', 'employee_code']
 
-        return Response({
-            "message": "User registered successfully",
-            "user_id": user.user_id, 
-            "access": str(refresh.access_token),
-            "refresh": str(refresh)
-        }, status=status.HTTP_201_CREATED)
+        for key, value in data.items():
+            if value is not None and value != "":
+                if key == 'password':
+                    create_params['password'] = make_password(value)
+                elif key in fk_fields:
+                    create_params[f"{key}_id"] = value
+                else:
+                    create_params[key] = value
 
+        # Handle 'createdby'
+        # If a logged-in admin is creating the user, use their ID. 
+        # Otherwise, if it's a self-registration, the user is created by themselves.
+        if not create_params.get("createdby"):
+            create_params["createdby"] = next_user_id
+
+        # 4. Final Creation
+        try:
+            user = Users.objects.create(**create_params)
+            refresh = RefreshToken.for_user(user)
+
+            return Response({
+                "message": "User registered successfully",
+                "user_id": user.user_id,
+                "username": user.username,
+                "createdon": user.createdon,
+                "access": str(refresh.access_token),
+                "refresh": str(refresh)
+            }, status=status.HTTP_201_CREATED)
+            
+        except Exception as e:
+            return Response({"error": f"Database Error: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Usertype
@@ -145,8 +182,8 @@ class UserTypeListView(APIView):
 
     def get(self, request):
         try:
-            data = Usertype.objects.all().order_by('usertype_name')
-            serializer = UsertypeSerializer(data, many=True)
+            data = UsertypeMaster.objects.all().order_by('usertype_name')
+            serializer = UsertypeMasterSerializer(data, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -157,7 +194,7 @@ class UserTypeCreateView(APIView):
 
     def post(self, request):
         try:
-            serializer = UsertypeSerializer(data=request.data)
+            serializer = UsertypeMasterSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save(
                     createdby=request.user.id,
@@ -172,10 +209,10 @@ class UserTypeDetailView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, usertype_id):
+    def get(self, request, usertype_code):
         try:
-            obj = get_object_or_404(Usertype, usertype_id=usertype_id)
-            serializer = UsertypeSerializer(obj)
+            obj = get_object_or_404(UsertypeMaster, usertype_code=usertype_code)
+            serializer = UsertypeMasterSerializer(obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -184,10 +221,10 @@ class UserTypeUpdateView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def put(self, request, usertype_id):
+    def put(self, request, usertype_code):
         try:
-            obj = get_object_or_404(Usertype, usertype_id=usertype_id)
-            serializer = UsertypeSerializer(obj, data=request.data, partial=True)
+            obj = get_object_or_404(UsertypeMaster, usertype_code=usertype_code)
+            serializer = UsertypeMasterSerializer(obj, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save(
                     updatedby=request.user.id,
@@ -202,9 +239,9 @@ class UserTypeDeleteView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def delete(self, request, usertype_id):
+    def delete(self, request, usertype_code):
         try:
-            obj = get_object_or_404(Usertype, usertype_id=usertype_id)
+            obj = get_object_or_404(UsertypeMaster, usertype_code=usertype_code)
             obj.delete()
             return Response(
                 {"message": "User Type deleted successfully"}, 
@@ -352,7 +389,7 @@ class EngineModuleCreateView(APIView):
                 )
 
                 # 2. Dynamically handle Permissions (Old View Logic)
-                user_types = Usertype.objects.all()
+                user_types = UsertypeMaster.objects.all()
                 for utype in user_types:
                     # Look for permission keys in the incoming React payload
                     r_perm = request.data.get(f'readPermission{utype.id}', 'No')
@@ -360,7 +397,7 @@ class EngineModuleCreateView(APIView):
                     u_perm = request.data.get(f'updatePermission{utype.id}', 'No')
 
                     Permissions.objects.create(
-                        usertype_id=utype.id,
+                        usertype_code=utype.id,
                         module_id=module_obj.id,
                         e_read=r_perm,
                         e_write=w_perm,
@@ -412,7 +449,7 @@ class EngineModuleUpdateView(APIView):
                 )
 
                 # Dynamically Update Permissions
-                user_types = Usertype.objects.all()
+                user_types = UsertypeMaster.objects.all()
                 for utype in user_types:
                     r_perm = request.data.get(f'readPermission{utype.id}', 'No')
                     w_perm = request.data.get(f'writePermission{utype.id}', 'No')
@@ -421,7 +458,7 @@ class EngineModuleUpdateView(APIView):
                     # Use update_or_create to be safe
                     Permissions.objects.update_or_create(
                         module_id=module_obj.id, 
-                        usertype_id=utype.id,
+                        usertype_code=utype.id,
                         defaults={
                             'e_read': r_perm,
                             'e_write': w_perm,
