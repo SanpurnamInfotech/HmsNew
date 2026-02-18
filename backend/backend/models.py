@@ -124,7 +124,6 @@ class Settings(models.Model):
         
 class Permissions(models.Model):
     usertype_code = models.CharField(max_length=45)
-    usertype_name = models.CharField(max_length=225)
     module_code = models.CharField(max_length=45, blank=True, null=True)
     submodule_code = models.CharField(max_length=45, blank=True, null=True)
     activity_code = models.CharField(max_length=45, blank=True, null=True)
