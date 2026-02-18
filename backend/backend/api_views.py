@@ -863,3 +863,810 @@ class AdvicemasterDeleteView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+
+
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import IcdMaster
+from .serializers import IcdMasterSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- ICD MASTER LIST ----------------
+
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def icdmaster_list(request):
+    try:
+        data = IcdMaster.objects.all().order_by('icd_name')
+        serializer = IcdMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- ICD MASTER DETAIL ----------------
+
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def icdmaster_detail(request, icd_code):
+    try:
+        obj = get_object_or_404(IcdMaster, icd_code=icd_code)
+        serializer = IcdMasterSerializer(obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- ICD MASTER CREATE ----------------
+
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def icdmaster_create(request):
+    try:
+        serializer = IcdMasterSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- ICD MASTER UPDATE ----------------
+
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def icdmaster_update(request, icd_code):
+    try:
+        obj = get_object_or_404(IcdMaster, icd_code=icd_code)
+
+        serializer = IcdMasterSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- ICD MASTER DELETE ----------------
+
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def icdmaster_delete(request, icd_code):
+    try:
+        obj = get_object_or_404(IcdMaster, icd_code=icd_code)
+        obj.delete()
+
+        return Response(
+            {"message": "ICD Master deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+
+
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from .models import RoomTypeMaster
+from .serializers import RoomTypeMasterSerializer
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def room_type_master_list(request):
+    try:
+        data = RoomTypeMaster.objects.all().order_by('room_type_name')
+        serializer = RoomTypeMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def room_type_master_create(request):
+    try:
+        serializer = RoomTypeMasterSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def room_type_master_update(request, room_type_code):
+    try:
+        obj = get_object_or_404(RoomTypeMaster, room_type_code=room_type_code)
+        serializer = RoomTypeMasterSerializer(obj, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(updatedby=request.user.id, updatedon=timezone.now())
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def room_type_master_delete(request, room_type_code):
+    try:
+        obj = get_object_or_404(RoomTypeMaster, room_type_code=room_type_code)
+        obj.delete()
+        return Response({"message": "Room Type deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from .models import Bed
+from .serializers import BedSerializer
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def bed_master_list(request):
+    try:
+        beds = Bed.objects.all().order_by('bed_code')
+        serializer = BedSerializer(beds, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def bed_master_create(request):
+    try:
+        serializer = BedSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def bed_master_update(request, bed_code):
+    try:
+        bed = get_object_or_404(Bed, bed_code=bed_code)
+        serializer = BedSerializer(bed, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save(updatedby=request.user.id, updatedon=timezone.now())
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def bed_master_delete(request, bed_code):
+    try:
+        bed = get_object_or_404(Bed, bed_code=bed_code)
+        bed.delete()
+        return Response({"message": "Bed deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import HabitMaster
+from .serializers import HabitMasterSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def habit_master_list(request):
+    try:
+        data = HabitMaster.objects.all().order_by('habit_name')
+        serializer = HabitMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def habit_master_create(request):
+    try:
+        serializer = HabitMasterSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def habit_master_update(request, habit_code):
+    try:
+        obj = get_object_or_404(HabitMaster, habit_code=habit_code)
+
+        serializer = HabitMasterSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def habit_master_delete(request, habit_code):
+    try:
+        obj = get_object_or_404(HabitMaster, habit_code=habit_code)
+        obj.delete()
+
+        return Response(
+            {"message": "Habit deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import HallucinationMaster
+from .serializers import HallucinationMasterSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def hallucination_master_list(request):
+    try:
+        data = HallucinationMaster.objects.all().order_by('hallucination_name')
+        serializer = HallucinationMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def hallucination_master_create(request):
+    try:
+        serializer = HallucinationMasterSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def hallucination_master_update(request, hallucination_code):
+    try:
+        obj = get_object_or_404(
+            HallucinationMaster,
+            hallucination_code=hallucination_code
+        )
+
+        serializer = HallucinationMasterSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def hallucination_master_delete(request, hallucination_code):
+    try:
+        obj = get_object_or_404(
+            HallucinationMaster,
+            hallucination_code=hallucination_code
+        )
+        obj.delete()
+
+        return Response(
+            {"message": "Hallucination deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import HistoryMaster
+from .serializers import HistoryMasterSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def history_master_list(request):
+    try:
+        data = HistoryMaster.objects.all().order_by('history_name')
+        serializer = HistoryMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def history_master_create(request):
+    try:
+        serializer = HistoryMasterSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def history_master_update(request, history_code):
+    try:
+        obj = get_object_or_404(HistoryMaster, history_code=history_code)
+
+        serializer = HistoryMasterSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def history_master_delete(request, history_code):
+    try:
+        obj = get_object_or_404(HistoryMaster, history_code=history_code)
+        obj.delete()
+
+        return Response(
+            {"message": "History deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import MentalIllnessMaster
+from .serializers import MentalIllnessMasterSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def mental_illness_master_list(request):
+    try:
+        data = MentalIllnessMaster.objects.all().order_by('mental_illness_name')
+        serializer = MentalIllnessMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def mental_illness_master_create(request):
+    try:
+        serializer = MentalIllnessMasterSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def mental_illness_master_update(request, mental_illness_code):
+    try:
+        obj = get_object_or_404(
+            MentalIllnessMaster,
+            mental_illness_code=mental_illness_code
+        )
+
+        serializer = MentalIllnessMasterSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def mental_illness_master_delete(request, mental_illness_code):
+    try:
+        obj = get_object_or_404(
+            MentalIllnessMaster,
+            mental_illness_code=mental_illness_code
+        )
+        obj.delete()
+
+        return Response(
+            {"message": "Mental illness deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import DsmMaster
+from .serializers import DsmMasterSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def dsm_master_list(request):
+    try:
+        data = DsmMaster.objects.all().order_by('dsm_name')
+        serializer = DsmMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def dsm_master_create(request):
+    try:
+        serializer = DsmMasterSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def dsm_master_update(request, dsm_code):
+    try:
+        obj = get_object_or_404(
+            DsmMaster,
+            dsm_code=dsm_code
+        )
+
+        serializer = DsmMasterSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def dsm_master_delete(request, dsm_code):
+    try:
+        obj = get_object_or_404(
+            DsmMaster,
+            dsm_code=dsm_code
+        )
+
+        obj.delete()
+
+        return Response(
+            {"message": "DSM deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
