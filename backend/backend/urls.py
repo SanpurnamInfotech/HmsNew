@@ -1,6 +1,16 @@
 from django.urls import path
 from .views import *
 from .api_views import *
+# आधीचे class-based import काढून टाका
+# from .api_views import RoomTypeMasterListView, RoomTypeMasterCreateView, RoomTypeMasterUpdateView, RoomTypeMasterDeleteView
+
+# याची जागा हा import वापरा
+from .api_views import (
+    room_type_master_list,
+    room_type_master_create,
+    room_type_master_update,
+    room_type_master_delete
+)
 
 urlpatterns = [
     
@@ -53,4 +63,31 @@ urlpatterns = [
     path('api/advice_master/create/', AdvicemasterCreateView.as_view(), name='advice-create'),
     path('api/advice_master/update/<str:advice_code>/', AdvicemasterUpdateView.as_view(), name='advice-update'),
     path('api/advice_master/delete/<str:advice_code>/', AdvicemasterDeleteView.as_view(), name='advice-delete'),
+
+
+
+    # ICD MASTER
+
+    path('api/icd-master/', icdmaster_list, name='icdmaster-list'),
+    path('api/icd-master/detail/<str:icd_code>/', icdmaster_detail, name='icdmaster-detail'),
+    path('api/icd-master/create/', icdmaster_create, name='icdmaster-create'),
+    path('api/icd-master/update/<str:icd_code>/', icdmaster_update, name='icdmaster-update'),
+    path('api/icd-master/delete/<str:icd_code>/', icdmaster_delete, name='icdmaster-delete'),
+
+    
+    path('api/room-type-master/', room_type_master_list, name='roomtype-list'),
+    path('api/room-type-master/create/', room_type_master_create, name='roomtype-create'),
+    path('api/room-type-master/update/<str:room_type_code>/', room_type_master_update, name='roomtype-update'),
+    path('api/room-type-master/delete/<str:room_type_code>/', room_type_master_delete, name='roomtype-delete'),
+
+
+    path('api/bed-master/', bed_master_list),
+    path('api/bed-master/create/', bed_master_create),
+    path('api/bed-master/update/<str:bed_code>/', bed_master_update),
+    path('api/bed-master/delete/<str:bed_code>/', bed_master_delete),
 ]
+
+
+
+    
+    

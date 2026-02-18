@@ -11,6 +11,16 @@ import ModuleMst from './pages/masters/ModuleMst';
 import SubmoduleMst from './pages/masters/SubmoduleMst';
 import Activities from './pages/masters/Activities';
 import AdviceMaster from './pages/masters/AdviceMaster';
+import IcdMasterMst from "./pages/masters/IcdMasterMst.jsx";
+import RoomTypeMasterMst from "./pages/masters/RoomTypeMasterMst";
+import BedMaster from "./pages/masters/BedMaster"; 
+
+
+
+
+
+
+
 
 function App() {
   return (
@@ -36,6 +46,12 @@ function App() {
           <Route path='submoduleMst' element={<SubmoduleMst />} />
           <Route path='activities' element={<Activities />} />
           <Route path='advice_master' element={<AdviceMaster />} />
+          <Route path="icd-master" element={<IcdMasterMst />} />
+          <Route path="room-type-master" element={<RoomTypeMasterMst />} />
+           <Route path="bed-master" element={<BedMaster />} />
+
+
+
           
         </Route>
 
