@@ -1,36 +1,53 @@
 import React, { useState } from "react";
-import api from "../../utils/domain";
-import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import {
+  useCrud,
+  useTable,
+  Pagination,
+  TableToolbar,
+} from "../../components/common/BaseCRUD";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCheckCircle,
+  FaTimesCircle,
+} from "react-icons/fa";
 
-const BedMaster = () => {
+const HistoryMaster = () => {
 
-  const BED_PATH = "bed-master";
-  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${BED_PATH}/`);
+  const HISTORY_PATH = "history-master";
+
+  const { data, loading, refresh, createItem, updateItem, deleteItem } =
+    useCrud(`${HISTORY_PATH}/`);
 
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
   const [formData, setFormData] = useState({
-    bed_code: "",
-    bed_name: "",
-    room_type: "",
-    bed_charges: "",
+    history_code: "",
+    history_name: "",
+    sort_order: "",
     status: 1,
-    sort_order: ""
   });
 
-  const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
+  const [modal, setModal] = useState({
+    visible: false,
+    message: "",
+    type: "success",
+  });
 
   const {
-    search, setSearch,
-    currentPage, setCurrentPage,
-    itemsPerPage, setItemsPerPage,
+    search,
+    setSearch,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
     paginatedData,
     effectiveItemsPerPage,
     filteredData,
-    totalPages
+    totalPages,
   } = useTable(data);
 
   const resetForm = () => {
@@ -38,61 +55,63 @@ const BedMaster = () => {
     setIsEdit(false);
     setSelectedRow(null);
     setFormData({
-      bed_code: "",
-      bed_name: "",
-      room_type: "",
-      bed_charges: "",
+      history_code: "",
+      history_name: "",
+      sort_order: "",
       status: 1,
-      sort_order: ""
     });
   };
 
   const showModal = (message, type = "success") =>
-    setModal({ message, visible: true, type });
+    setModal({ visible: true, message, type });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const actionPath = isEdit
-      ? `${BED_PATH}/update/${formData.bed_code}/`
-      : `${BED_PATH}/create/`;
+      ? `${HISTORY_PATH}/update/${formData.history_code}/`
+      : `${HISTORY_PATH}/create/`;
 
     const result = isEdit
       ? await updateItem(actionPath, formData)
       : await createItem(actionPath, formData);
 
     if (result.success) {
-      showModal(`Bed ${isEdit ? "updated" : "created"} successfully!`);
+      showModal(`History ${isEdit ? "updated" : "created"} successfully`);
       resetForm();
       refresh();
     } else {
-      showModal(result.error || "Operation failed!", "error");
+      showModal(result.error || "Operation failed", "error");
     }
   };
 
   const handleDelete = async () => {
     if (!selectedRow) return;
-    // if (!window.confirm("Are you sure you want to delete this Bed record?")) return;
+    // if (!window.confirm("Are you sure you want to delete this record?")) return;
 
-    const result = await deleteItem(`${BED_PATH}/delete/${selectedRow.bed_code}/`);
+    const result = await deleteItem(
+      `${HISTORY_PATH}/delete/${selectedRow.history_code}/`
+    );
 
     if (result.success) {
-      showModal("Bed deleted successfully!");
+      showModal("History deleted successfully");
       setSelectedRow(null);
       refresh();
     } else {
-      showModal(result.error || "Delete failed!", "error");
+      showModal(result.error || "Delete failed", "error");
     }
   };
 
-  if (loading) return (
-    <div className="loading-overlay">
-      <div className="loading-spinner-container text-center">
-        <div className="loading-spinner mx-auto mb-4"></div>
-        <p className="text-emerald-700 font-bold">Loading Bed Master...</p>
+  if (loading) {
+    return (
+      <div className="loading-overlay">
+        <div className="loading-spinner-container text-center">
+          <div className="loading-spinner mx-auto mb-4"></div>
+          <p className="text-emerald-700 font-bold">Loading History...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div className="app-container">
@@ -102,13 +121,18 @@ const BedMaster = () => {
         <div className="modal-overlay">
           <div className="modal-container">
             <div className="modal-body text-center">
-              <div className="modal-icon-container mb-4">
-                {modal.type === "success"
-                  ? <FaCheckCircle className="text-4xl text-emerald-500 mx-auto" />
-                  : <FaTimesCircle className="text-4xl text-red-500 mx-auto" />
-                }
-              </div>
-              <h3 className={`text-xl font-bold mb-2 ${modal.type === "success" ? "text-emerald-700" : "text-red-700"}`}>
+              {modal.type === "success" ? (
+                <FaCheckCircle className="text-4xl text-emerald-500 mx-auto mb-3" />
+              ) : (
+                <FaTimesCircle className="text-4xl text-red-500 mx-auto mb-3" />
+              )}
+              <h3
+                className={`text-xl font-bold mb-2 ${
+                  modal.type === "success"
+                    ? "text-emerald-700"
+                    : "text-red-700"
+                }`}
+              >
                 {modal.type === "success" ? "Success" : "Error"}
               </h3>
               <p className="text-gray-600 mb-6">{modal.message}</p>
@@ -123,11 +147,13 @@ const BedMaster = () => {
         </div>
       )}
 
-      {/* HEADER – Submodule style */}
+      {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
-        <h4 className="text-2xl font-black text-gray-800 tracking-tight">
-          Bed Master
-        </h4>
+        <div>
+          <h4 className="text-2xl font-black text-gray-800 tracking-tight">
+            History Master
+          </h4>
+        </div>
 
         {!showForm && (
           <div className="flex gap-2">
@@ -163,75 +189,88 @@ const BedMaster = () => {
         )}
       </div>
 
-      {/* FORM – Submodule animation & inputs */}
+      {/* FORM */}
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100 animate-in zoom-in-95 duration-200">
+
           <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">
-            {isEdit ? "Update Bed" : "Create New Bed"}
+            {isEdit ? "Update History" : "Create History"}
           </h6>
 
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+          <form
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            onSubmit={handleSubmit}
+          >
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Bed Code</label>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                History Code
+              </label>
               <input
-                className={`w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all ${isEdit ? "bg-gray-50 text-gray-400" : ""}`}
-                value={formData.bed_code}
+                className={`w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all ${
+                  isEdit ? "bg-gray-50 text-gray-400" : ""
+                }`}
+                value={formData.history_code}
                 disabled={isEdit}
                 required
                 onChange={(e) =>
-                  setFormData({ ...formData, bed_code: e.target.value.toUpperCase() })
+                  setFormData({
+                    ...formData,
+                    history_code: e.target.value.toUpperCase(),
+                  })
+                }
+                placeholder="E.G. HIS_BASIC"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                History Name
+              </label>
+              <input
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                value={formData.history_name}
+                required
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    history_name: e.target.value,
+                  })
+                }
+                placeholder="E.G. Medical History"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Sort Order
+              </label>
+              <input
+                type="number"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
+                value={formData.sort_order}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    sort_order: e.target.value,
+                  })
                 }
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Bed Name</label>
-              <input
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                value={formData.bed_name}
-                required
-                onChange={(e) => setFormData({ ...formData, bed_name: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Room Type</label>
-              <input
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                value={formData.room_type}
-                required
-                onChange={(e) => setFormData({ ...formData, room_type: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Bed Charges</label>
-              <input
-                type="number"
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                value={formData.bed_charges}
-                required
-                onChange={(e) => setFormData({ ...formData, bed_charges: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Sort Order</label>
-              <input
-                type="number"
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                value={formData.sort_order}
-                onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Status</label>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Status
+              </label>
               <select
                 className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all appearance-none"
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: Number(e.target.value) })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    status: Number(e.target.value),
+                  })
+                }
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
@@ -255,9 +294,10 @@ const BedMaster = () => {
         </div>
       )}
 
-      {/* TABLE – Submodule look */}
+      {/* TABLE */}
       {!showForm && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in duration-500">
+
           <TableToolbar
             itemsPerPage={itemsPerPage}
             setItemsPerPage={setItemsPerPage}
@@ -271,64 +311,71 @@ const BedMaster = () => {
               <thead>
                 <tr className="bg-gray-50/50 border-b border-gray-100">
                   <th className="px-6 py-4 w-16"></th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Bed Code</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Bed Name</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Room Type</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">Charges</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">Sort</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                    Code
+                  </th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                    History Name
+                  </th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">
+                    Sort
+                  </th>
+                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">
+                    Status
+                  </th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-50">
                 {paginatedData.map((row) => (
                   <tr
-                    key={row.bed_code}
+                    key={row.history_code}
                     onClick={() =>
-                      setSelectedRow(selectedRow?.bed_code === row.bed_code ? null : row)
+                      setSelectedRow(
+                        selectedRow?.history_code === row.history_code
+                          ? null
+                          : row
+                      )
                     }
-                    className={`group cursor-pointer transition-colors duration-150
-                      ${selectedRow?.bed_code === row.bed_code
+                    className={`group cursor-pointer transition-colors duration-150 ${
+                      selectedRow?.history_code === row.history_code
                         ? "bg-emerald-50/40"
                         : "hover:bg-gray-50/50"
-                      }`}
+                    }`}
                   >
                     <td className="px-6 py-4">
                       <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
-                          ${selectedRow?.bed_code === row.bed_code
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                          selectedRow?.history_code === row.history_code
                             ? "border-emerald-500 bg-emerald-500"
                             : "border-gray-200 group-hover:border-emerald-300"
-                          }`}
+                        }`}
                       >
-                        {selectedRow?.bed_code === row.bed_code && (
+                        {selectedRow?.history_code === row.history_code && (
                           <div className="w-1.5 h-1.5 rounded-full bg-white" />
                         )}
                       </div>
                     </td>
 
                     <td className="px-6 py-4 font-black text-gray-800 text-sm">
-                      {row.bed_code}
+                      {row.history_code}
                     </td>
+
                     <td className="px-6 py-4 font-bold text-gray-700">
-                      {row.bed_name}
+                      {row.history_name}
                     </td>
-                    <td className="px-6 py-4 text-gray-500 text-xs font-medium uppercase">
-                      {row.room_type}
-                    </td>
-                    <td className="px-6 py-4 text-center font-mono text-xs">
-                      {row.bed_charges}
-                    </td>
+
                     <td className="px-6 py-4 text-center font-mono text-xs">
                       {row.sort_order}
                     </td>
+
                     <td className="px-6 py-4 text-center">
                       <span
-                        className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
-                          ${row.status === 1
+                        className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                          row.status === 1
                             ? "bg-emerald-100 text-emerald-700"
                             : "bg-rose-100 text-rose-700"
-                          }`}
+                        }`}
                       >
                         {row.status === 1 ? "Active" : "Inactive"}
                       </span>
@@ -348,10 +395,12 @@ const BedMaster = () => {
               totalPages={totalPages}
             />
           </div>
+
         </div>
       )}
+
     </div>
   );
 };
 
-export default BedMaster;
+export default HistoryMaster;

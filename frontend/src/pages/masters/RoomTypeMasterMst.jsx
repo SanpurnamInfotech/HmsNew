@@ -53,7 +53,7 @@ const RoomTypeMasterMst = () => {
 
   const handleDelete = async () => {
     if (!selectedRow) return;
-    if (!window.confirm("Are you sure you want to delete this Room Type?")) return;
+    // if (!window.confirm("Are you sure you want to delete this Room Type?")) return;
 
     const result = await deleteItem(`${PATH}/delete/${selectedRow.room_type_code}/`);
     if (result.success) {

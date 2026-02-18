@@ -14,6 +14,15 @@ import AdviceMaster from './pages/masters/AdviceMaster';
 import IcdMasterMst from "./pages/masters/IcdMasterMst.jsx";
 import RoomTypeMasterMst from "./pages/masters/RoomTypeMasterMst";
 import BedMaster from "./pages/masters/BedMaster"; 
+import HabitMaster from "./pages/masters/HabitMaster";
+import HallucinationMaster from "./pages/masters/HallucinationMaster";
+import HistoryMaster from "./pages/masters/HistoryMaster";
+import MentalIllnessMaster from "./pages/masters/MentalIllnessMaster";
+import DsmMaster from "./pages/masters/DsmMaster";
+
+
+
+
 
 
 
@@ -49,10 +58,14 @@ function App() {
           <Route path="icd-master" element={<IcdMasterMst />} />
           <Route path="room-type-master" element={<RoomTypeMasterMst />} />
            <Route path="bed-master" element={<BedMaster />} />
+           <Route path="habit-master" element={<HabitMaster />} />
+           <Route path="hallucination-master" element={<HallucinationMaster />} />
+           <Route path="history-master" element={<HistoryMaster />} />
+           <Route path="mental-illness-master" element={<MentalIllnessMaster />} />
+           <Route path="dsm-master" element={<DsmMaster />} />
 
 
 
-          
         </Route>
 
         {/* Redirect root to login or dashboard */}

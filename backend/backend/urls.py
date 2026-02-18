@@ -85,6 +85,35 @@ urlpatterns = [
     path('api/bed-master/create/', bed_master_create),
     path('api/bed-master/update/<str:bed_code>/', bed_master_update),
     path('api/bed-master/delete/<str:bed_code>/', bed_master_delete),
+
+    path('api/habit-master/', habit_master_list, name='habit-master-list'),
+    path('api/habit-master/create/', habit_master_create, name='habit-master-create'),
+    path('api/habit-master/update/<str:habit_code>/', habit_master_update, name='habit-master-update'),
+    path('api/habit-master/delete/<str:habit_code>/', habit_master_delete, name='habit-master-delete'),
+
+    path('api/hallucination-master/', hallucination_master_list, name='hallucination-master-list'),
+    path('api/hallucination-master/create/', hallucination_master_create, name='hallucination-master-create'),
+    path('api/hallucination-master/update/<str:hallucination_code>/', hallucination_master_update, name='hallucination-master-update'),
+    path('api/hallucination-master/delete/<str:hallucination_code>/', hallucination_master_delete, name='hallucination-master-delete'),
+
+    path('api/history-master/', history_master_list, name='history-master-list'),
+    path('api/history-master/create/', history_master_create, name='history-master-create'),
+    path('api/history-master/update/<str:history_code>/', history_master_update, name='history-master-update'),
+    path('api/history-master/delete/<str:history_code>/', history_master_delete, name='history-master-delete'),
+
+
+    path('api/mental-illness-master/',mental_illness_master_list,name='mental-illness-master-list'),
+    path('api/mental-illness-master/create/',mental_illness_master_create,name='mental-illness-master-create'),
+    path('api/mental-illness-master/update/<str:mental_illness_code>/',mental_illness_master_update, name='mental-illness-master-update'),
+    path('api/mental-illness-master/delete/<str:mental_illness_code>/',mental_illness_master_delete,name='mental-illness-master-delete'),
+
+        
+    path('api/dsm-master/', dsm_master_list, name='dsm-master-list'),
+    path('api/dsm-master/create/', dsm_master_create, name='dsm-master-create'),
+    path('api/dsm-master/update/<str:dsm_code>/', dsm_master_update, name='dsm-master-update'),
+    path('api/dsm-master/delete/<str:dsm_code>/', dsm_master_delete, name='dsm-master-delete'),
+
+
 ]
 
 

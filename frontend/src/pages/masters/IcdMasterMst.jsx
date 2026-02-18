@@ -52,7 +52,7 @@ const IcdMasterMst = () => {
 
   const handleDelete = async () => {
     if (!selectedRow) return;
-    if (!window.confirm("Are you sure you want to delete this ICD record?")) return;
+    // if (!window.confirm("Are you sure you want to delete this ICD record?")) return;
 
     const result = await deleteItem(`${ICD_PATH}/delete/${selectedRow.icd_code}/`);
     if (result.success) {
