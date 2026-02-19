@@ -23,21 +23,7 @@ class Users(models.Model):
         managed = False
         db_table = 'users'
 
-class UsertypeMaster(models.Model):
-    usertype_code = models.CharField(unique=True, max_length=45)
-    usertype_name = models.CharField(max_length=100)
-    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
-    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
-    status = models.IntegerField()
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
 
-    class Meta:
-        managed = False
-        db_table = 'usertype_master'
-        
 class SystemRoute(models.Model):
     display_code = models.CharField(unique=True, max_length=45)
     display_name = models.CharField(max_length=225)
@@ -229,6 +215,9 @@ class FinancialyearMaster(models.Model):
         managed = False
         db_table = 'financialyear_master'
         
+from django.db import models
+
+
 class Countries(models.Model):
     country_code = models.CharField(unique=True, max_length=45)
     country_name = models.CharField(max_length=255)
@@ -240,7 +229,7 @@ class Countries(models.Model):
     class Meta:
         managed = False
         db_table = 'countries'
-        
+
 class Advicemaster(models.Model):
     advice_code = models.CharField(unique=True, max_length=45)
     advice_name = models.CharField(max_length=500, blank=True, null=True)
@@ -254,6 +243,17 @@ class Advicemaster(models.Model):
         db_table = 'advicemaster'
 
 
+
+from django.db import models
+
+
+class Cities(models.Model):
+    city_code = models.CharField(unique=True, max_length=45)
+    city_name = models.CharField(max_length=255)
+    district_code = models.ForeignKey('Districts', models.DO_NOTHING, db_column='district_code', to_field='district_code')    
+    state_code = models.CharField(max_length=45)
+    country_code = models.CharField(max_length=45)
+    status = models.IntegerField(blank=True, null=True)
 class IcdMaster(models.Model):
     icd_code = models.CharField(unique=True, max_length=45)
     icd_name = models.CharField(max_length=255)
@@ -266,6 +266,36 @@ class IcdMaster(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'cities'
+
+from django.db import models
+
+
+class Districts(models.Model):
+    district_code = models.CharField(unique=True, max_length=45)
+    district_name = models.CharField(max_length=225)
+    state_code = models.ForeignKey('States', models.DO_NOTHING, db_column='state_code', to_field='state_code')
+    country_code = models.CharField(max_length=45)
+    status = models.IntegerField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField()
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField()
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'districts'
+
+from django.db import models
+
+
+class States(models.Model):
+    country_code = models.ForeignKey('Countries', models.DO_NOTHING, db_column='country_code', to_field='country_code')
+    state_code = models.CharField(unique=True, max_length=45)
+    state_name = models.CharField(max_length=255)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
         db_table = 'icd_master'
 
 
@@ -283,6 +313,17 @@ class RoomTypeMaster(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'states'
+
+from django.db import models
+
+
+class UsertypeMaster(models.Model):
+    usertype_code = models.CharField(unique=True, max_length=45)
+    usertype_name = models.CharField(max_length=100)
+    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
+    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
+    status = models.IntegerField()
         db_table = 'room_type_master'
 
 
@@ -300,6 +341,18 @@ class Bed(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'usertype_master'
+
+
+from django.db import models
+
+
+class Account(models.Model):
+    account_code = models.CharField(unique=True, max_length=45)
+    account_name = models.CharField(max_length=100)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    account_number = models.CharField(unique=True, max_length=45)
+    bank_code = models.ForeignKey('Bankdetails', models.DO_NOTHING, db_column='bank_code', to_field='bank_code')
         db_table = 'bed'
 
 
@@ -317,6 +370,62 @@ class HabitMaster(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'account'
+
+
+class Bankdetails(models.Model):
+    bank_code = models.CharField(unique=True, max_length=45)
+    bank_name = models.CharField(max_length=255, blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'bankdetails'
+
+
+from django.db import models
+
+
+class ComplaintMaster(models.Model):
+    complaint_code = models.CharField(unique=True, max_length=45)
+    complaint_name = models.CharField(max_length=225)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    created_on = models.DateTimeField(blank=True, null=True)
+    created_by = models.IntegerField(blank=True, null=True)
+    updated_on = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'complaint_master'
+
+from django.db import models
+
+
+class Doctor(models.Model):
+    doctor_code = models.CharField(unique=True, max_length=25)
+    doctor_name = models.CharField(max_length=100)
+    department_code = models.ForeignKey('Departments', models.DO_NOTHING, db_column='department_code', to_field='department_code')
+    qualification = models.CharField(max_length=150, blank=True, null=True)
+    total_experience = models.CharField(max_length=100, blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=20, blank=True, null=True)
+    marital_status_code = models.ForeignKey('MaritalStatusMaster', models.DO_NOTHING, db_column='marital_status_code', to_field='marital_status_code', blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    city_code = models.ForeignKey('Cities', models.DO_NOTHING, db_column='city_code', to_field='city_code', blank=True, null=True)
+    district_code = models.ForeignKey('Districts', models.DO_NOTHING, db_column='district_code', to_field='district_code', blank=True, null=True)
+    state_code = models.ForeignKey('States', models.DO_NOTHING, db_column='state_code', to_field='state_code', blank=True, null=True)
+    country_code = models.ForeignKey('Countries', models.DO_NOTHING, db_column='country_code', to_field='country_code', blank=True, null=True)
+    pincode = models.CharField(max_length=15, blank=True, null=True)
         db_table = 'habit_master'
 
 
@@ -332,6 +441,41 @@ class HallucinationMaster(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'doctor'
+
+
+class Departments(models.Model):
+    department_code = models.CharField(unique=True, max_length=45)
+    department_name = models.CharField(max_length=255, blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'departments'
+
+
+class MaritalStatusMaster(models.Model):
+    marital_status_code = models.CharField(unique=True, max_length=45)
+    marital_status_name = models.CharField(max_length=100, blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'marital_status_master'
+
+
+from django.db import models
+
+
+class ExpensesMaster(models.Model):
+    expenses_code = models.CharField(unique=True, max_length=25)
+    expenses_name = models.CharField(max_length=100)
         db_table = 'hallucination_master'
 
 
@@ -347,6 +491,15 @@ class HistoryMaster(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'expenses_master'
+
+
+from django.db import models
+
+
+class MseMaster(models.Model):
+    mse_code = models.CharField(unique=True, max_length=25)
+    mse_name = models.CharField(max_length=100)
         db_table = 'history_master'
 
 
@@ -363,6 +516,14 @@ class MentalIllnessMaster(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'mse_master'
+
+from django.db import models
+
+
+class ThoughtContentMaster(models.Model):
+    thought_content_code = models.CharField(unique=True, max_length=25)
+    thought_content_name = models.CharField(max_length=100)
         db_table = 'mental_illness_master'
 
 
@@ -379,6 +540,14 @@ class DsmMaster(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'thought_content_master'
+
+from django.db import models
+
+
+class MoodHistoryMaster(models.Model):
+    mood_history_code = models.CharField(unique=True, max_length=25)
+    mood_history_name = models.CharField(max_length=100)
         db_table = 'dsm_master'
 
 
@@ -394,6 +563,17 @@ class PremorbidPersonalityMaster(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'mood_history_master'
+
+from django.db import models
+
+
+class Noticeboard(models.Model):
+    notice_code = models.CharField(unique=True, max_length=45)
+    notice_name = models.CharField(max_length=255)
+    notice_description = models.TextField()
+    notice_srart_date = models.DateField(blank=True, null=True)
+    notice_expiry_date = models.DateField(blank=True, null=True)
         db_table = 'premorbid_personality_master'
 
 
@@ -411,4 +591,5 @@ class PossessionMaster(models.Model):
 
     class Meta:
         managed = False
+        db_table = 'noticeboard'
         db_table = 'possession_master'
