@@ -547,3 +547,120 @@ class DsmMasterSerializer(serializers.ModelSerializer):
 
 
 
+
+from rest_framework import serializers
+from .models import PremorbidPersonalityMaster
+from django.utils import timezone
+
+
+class PremorbidPersonalityMasterSerializer(serializers.ModelSerializer):
+
+    createdon = serializers.DateTimeField(
+        format="%d-%m-%Y %H:%M:%S",
+        read_only=True
+    )
+    updatedon = serializers.DateTimeField(
+        format="%d-%m-%Y %H:%M:%S",
+        read_only=True
+    )
+
+    class Meta:
+        model = PremorbidPersonalityMaster
+        fields = [
+            'premorbid_personality_code',
+            'premorbid_personality_name',
+            'status',
+            'sort_order',
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby'
+        ]
+
+        read_only_fields = [
+            'createdon',
+            'updatedon',
+            'createdby',
+            'updatedby'
+        ]
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+
+        if request and hasattr(request, 'user'):
+            validated_data['createdby'] = request.user.id
+            validated_data['updatedby'] = request.user.id
+
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+
+        if request and hasattr(request, 'user'):
+            instance.updatedby = request.user.id
+
+        instance.updatedon = timezone.now()
+
+        return super().update(instance, validated_data)
+    
+
+from rest_framework import serializers
+from .models import PossessionMaster
+from django.utils import timezone
+
+
+class PossessionMasterSerializer(serializers.ModelSerializer):
+
+    createdon = serializers.DateTimeField(
+        format="%d-%m-%Y %H:%M:%S",
+        read_only=True
+    )
+    updatedon = serializers.DateTimeField(
+        format="%d-%m-%Y %H:%M:%S",
+        read_only=True
+    )
+
+    class Meta:
+        model = PossessionMaster
+        fields = [
+            'possession_code',
+            'possession_name',
+            'status',
+            'sort_order',
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby'
+        ]
+
+        read_only_fields = [
+            'createdon',
+            'updatedon',
+            'createdby',
+            'updatedby'
+        ]
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+
+        if request and hasattr(request, 'user'):
+            validated_data['createdby'] = request.user.id
+            validated_data['updatedby'] = request.user.id
+
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+
+        if request and hasattr(request, 'user'):
+            instance.updatedby = request.user.id
+
+        instance.updatedon = timezone.now()
+
+        return super().update(instance, validated_data)

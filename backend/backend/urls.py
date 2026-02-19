@@ -116,6 +116,19 @@ urlpatterns = [
     path('api/dsm-master/delete/<str:dsm_code>/', dsm_master_delete, name='dsm-master-delete'),
 
 
+    path('api/premorbid-personality-master/',premorbid_personality_master_list,name='premorbid-personality-master-list'),
+    path('api/premorbid-personality-master/create/',premorbid_personality_master_create,name='premorbid-personality-master-create'),
+    path('api/premorbid-personality-master/update/<str:premorbid_personality_code>/',premorbid_personality_master_update,name='premorbid-personality-master-update'),
+    path('api/premorbid-personality-master/delete/<str:premorbid_personality_code>/',premorbid_personality_master_delete,name='premorbid-personality-master-delete'),
+
+    path('api/possession-master/',possession_master_list,name='possession-master-list'),
+    path('api/possession-master/create/', possession_master_create,name='possession-master-create'),
+    path('api/possession-master/update/<str:possession_code>/',possession_master_update,name='possession-master-update'),
+    path('api/possession-master/delete/<str:possession_code>/',possession_master_delete,name='possession-master-delete'),
+
+
+
+
 ]
 
 

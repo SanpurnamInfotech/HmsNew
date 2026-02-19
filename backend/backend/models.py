@@ -380,3 +380,35 @@ class DsmMaster(models.Model):
     class Meta:
         managed = False
         db_table = 'dsm_master'
+
+
+class PremorbidPersonalityMaster(models.Model):
+    premorbid_personality_code = models.CharField(unique=True, max_length=25)
+    premorbid_personality_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'premorbid_personality_master'
+
+
+
+
+class PossessionMaster(models.Model):
+    possession_code = models.CharField(unique=True, max_length=25)
+    possession_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'possession_master'
