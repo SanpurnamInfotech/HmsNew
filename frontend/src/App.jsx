@@ -19,6 +19,10 @@ import HallucinationMaster from "./pages/masters/HallucinationMaster";
 import HistoryMaster from "./pages/masters/HistoryMaster";
 import MentalIllnessMaster from "./pages/masters/MentalIllnessMaster";
 import DsmMaster from "./pages/masters/DsmMaster";
+import PremorbidPersonalityMst from "./pages/masters/PremorbidPersonalityMst";
+import PossessionMaster from "./pages/masters/PossessionMaster";
+
+
 
 
 
@@ -63,6 +67,10 @@ function App() {
            <Route path="history-master" element={<HistoryMaster />} />
            <Route path="mental-illness-master" element={<MentalIllnessMaster />} />
            <Route path="dsm-master" element={<DsmMaster />} />
+           <Route path="premorbid-personality-master"element={<PremorbidPersonalityMst />}/>
+           <Route path="possession-master"element={<PossessionMaster />}/>
+
+
 
 
 

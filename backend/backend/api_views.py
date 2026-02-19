@@ -1632,3 +1632,246 @@ def dsm_master_delete(request, dsm_code):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import PremorbidPersonalityMaster
+from .serializers import PremorbidPersonalityMasterSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def premorbid_personality_master_list(request):
+    try:
+        data = PremorbidPersonalityMaster.objects.all().order_by(
+            'premorbid_personality_name'
+        )
+
+        serializer = PremorbidPersonalityMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def premorbid_personality_master_create(request):
+    try:
+        serializer = PremorbidPersonalityMasterSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def premorbid_personality_master_update(request, premorbid_personality_code):
+    try:
+        obj = get_object_or_404(
+            PremorbidPersonalityMaster,
+            premorbid_personality_code=premorbid_personality_code
+        )
+
+        serializer = PremorbidPersonalityMasterSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def premorbid_personality_master_delete(request, premorbid_personality_code):
+    try:
+        obj = get_object_or_404(
+            PremorbidPersonalityMaster,
+            premorbid_personality_code=premorbid_personality_code
+        )
+
+        obj.delete()
+
+        return Response(
+            {"message": "Premorbid personality deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+    
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import PossessionMaster
+from .serializers import PossessionMasterSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def possession_master_list(request):
+    try:
+        data = PossessionMaster.objects.all().order_by(
+            'possession_name'
+        )
+
+        serializer = PossessionMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def possession_master_create(request):
+    try:
+        serializer = PossessionMasterSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def possession_master_update(request, possession_code):
+    try:
+        obj = get_object_or_404(
+            PossessionMaster,
+            possession_code=possession_code
+        )
+
+        serializer = PossessionMasterSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def possession_master_delete(request, possession_code):
+    try:
+        obj = get_object_or_404(
+            PossessionMaster,
+            possession_code=possession_code
+        )
+
+        obj.delete()
+
+        return Response(
+            {"message": "Possession deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
