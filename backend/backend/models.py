@@ -109,13 +109,16 @@ class Settings(models.Model):
         db_table = 'settings'
         
 class Permissions(models.Model):
-    usertype_id = models.CharField(max_length=25, blank=True, null=True)
-    module_code = models.CharField(max_length=25, blank=True, null=True)
-    submodule_code = models.CharField(max_length=25, blank=True, null=True)
-    activity_code = models.IntegerField(blank=True, null=True)
+    usertype_code = models.CharField(max_length=45)
+    usertype_name = models.CharField(max_length=225)
+    module_code = models.CharField(max_length=45, blank=True, null=True)
+    submodule_code = models.CharField(max_length=45, blank=True, null=True)
+    activity_code = models.CharField(max_length=45, blank=True, null=True)
     e_read = models.CharField(max_length=10, blank=True, null=True)
     e_write = models.CharField(max_length=10, blank=True, null=True)
     e_update = models.CharField(max_length=10, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)
@@ -251,6 +254,10 @@ class Cities(models.Model):
     state_code = models.CharField(max_length=45)
     country_code = models.CharField(max_length=45)
     status = models.IntegerField(blank=True, null=True)
+class IcdMaster(models.Model):
+    icd_code = models.CharField(unique=True, max_length=45)
+    icd_name = models.CharField(max_length=255)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
@@ -289,6 +296,16 @@ class States(models.Model):
     state_name = models.CharField(max_length=255)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
+        db_table = 'icd_master'
+
+
+
+class RoomTypeMaster(models.Model):
+    room_type_code = models.CharField(unique=True, max_length=20)
+    room_type_name = models.CharField(max_length=100)
+    base_charges = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
+    status = models.IntegerField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)
@@ -307,6 +324,16 @@ class UsertypeMaster(models.Model):
     financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
     company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
     status = models.IntegerField()
+        db_table = 'room_type_master'
+
+
+class Bed(models.Model):
+    bed_code = models.CharField(unique=True, max_length=45)
+    bed_name = models.CharField(max_length=100, blank=True, null=True)
+    room_type = models.CharField(max_length=50)
+    bed_charges = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active/Available, 0=Inactive') 
+    sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)
@@ -326,6 +353,14 @@ class Account(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     account_number = models.CharField(unique=True, max_length=45)
     bank_code = models.ForeignKey('Bankdetails', models.DO_NOTHING, db_column='bank_code', to_field='bank_code')
+        db_table = 'bed'
+
+
+
+
+class HabitMaster(models.Model):
+    habit_code = models.CharField(unique=True, max_length=25)
+    habit_name = models.CharField(max_length=100)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -391,6 +426,12 @@ class Doctor(models.Model):
     state_code = models.ForeignKey('States', models.DO_NOTHING, db_column='state_code', to_field='state_code', blank=True, null=True)
     country_code = models.ForeignKey('Countries', models.DO_NOTHING, db_column='country_code', to_field='country_code', blank=True, null=True)
     pincode = models.CharField(max_length=15, blank=True, null=True)
+        db_table = 'habit_master'
+
+
+class HallucinationMaster(models.Model):
+    hallucination_code = models.CharField(unique=True, max_length=25)
+    hallucination_name = models.CharField(max_length=100)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -435,6 +476,12 @@ from django.db import models
 class ExpensesMaster(models.Model):
     expenses_code = models.CharField(unique=True, max_length=25)
     expenses_name = models.CharField(max_length=100)
+        db_table = 'hallucination_master'
+
+
+class HistoryMaster(models.Model):
+    history_code = models.CharField(unique=True, max_length=25)
+    history_name = models.CharField(max_length=100)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -453,6 +500,13 @@ from django.db import models
 class MseMaster(models.Model):
     mse_code = models.CharField(unique=True, max_length=25)
     mse_name = models.CharField(max_length=100)
+        db_table = 'history_master'
+
+
+
+class MentalIllnessMaster(models.Model):
+    mental_illness_code = models.CharField(unique=True, max_length=25)
+    mental_illness_name = models.CharField(max_length=100)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -470,6 +524,13 @@ from django.db import models
 class ThoughtContentMaster(models.Model):
     thought_content_code = models.CharField(unique=True, max_length=25)
     thought_content_name = models.CharField(max_length=100)
+        db_table = 'mental_illness_master'
+
+
+
+class DsmMaster(models.Model):
+    dsm_code = models.CharField(unique=True, max_length=25)
+    dsm_name = models.CharField(max_length=100)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -487,6 +548,12 @@ from django.db import models
 class MoodHistoryMaster(models.Model):
     mood_history_code = models.CharField(unique=True, max_length=25)
     mood_history_name = models.CharField(max_length=100)
+        db_table = 'dsm_master'
+
+
+class PremorbidPersonalityMaster(models.Model):
+    premorbid_personality_code = models.CharField(unique=True, max_length=25)
+    premorbid_personality_name = models.CharField(max_length=100)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -507,6 +574,14 @@ class Noticeboard(models.Model):
     notice_description = models.TextField()
     notice_srart_date = models.DateField(blank=True, null=True)
     notice_expiry_date = models.DateField(blank=True, null=True)
+        db_table = 'premorbid_personality_master'
+
+
+
+
+class PossessionMaster(models.Model):
+    possession_code = models.CharField(unique=True, max_length=25)
+    possession_name = models.CharField(max_length=100)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -517,3 +592,4 @@ class Noticeboard(models.Model):
     class Meta:
         managed = False
         db_table = 'noticeboard'
+        db_table = 'possession_master'

@@ -1,6 +1,16 @@
 from django.urls import path
 from .views import *
 from .api_views import *
+# आधीचे class-based import काढून टाका
+# from .api_views import RoomTypeMasterListView, RoomTypeMasterCreateView, RoomTypeMasterUpdateView, RoomTypeMasterDeleteView
+
+# याची जागा हा import वापरा
+from .api_views import (
+    room_type_master_list,
+    room_type_master_create,
+    room_type_master_update,
+    room_type_master_delete
+)
 
 
 
@@ -30,6 +40,8 @@ urlpatterns = [
     path("api/engine-module/<str:module_code>/", EngineModuleDetailView.as_view()),
     path("api/engine-module/update/<str:module_code>/", EngineModuleUpdateView.as_view()),
     path("api/engine-module/delete/<str:module_code>/", EngineModuleDeleteView.as_view()),
+   
+   path('api/universal-permissions/', UniversalPermissionsView.as_view(), name='universal-permissions'),
 
     path("api/engine-submodule/", EngineSubmoduleListView.as_view()),
     path("api/engine-submodule/create/", EngineSubmoduleCreateView.as_view()),      
@@ -119,3 +131,72 @@ urlpatterns = [
     path('api/noticeboard/update/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-update'),
     path('api/noticeboard/delete/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-delete'),
 ]
+
+
+    # ICD MASTER
+
+    path('api/icd-master/', icdmaster_list, name='icdmaster-list'),
+    path('api/icd-master/detail/<str:icd_code>/', icdmaster_detail, name='icdmaster-detail'),
+    path('api/icd-master/create/', icdmaster_create, name='icdmaster-create'),
+    path('api/icd-master/update/<str:icd_code>/', icdmaster_update, name='icdmaster-update'),
+    path('api/icd-master/delete/<str:icd_code>/', icdmaster_delete, name='icdmaster-delete'),
+
+    
+    path('api/room-type-master/', room_type_master_list, name='roomtype-list'),
+    path('api/room-type-master/create/', room_type_master_create, name='roomtype-create'),
+    path('api/room-type-master/update/<str:room_type_code>/', room_type_master_update, name='roomtype-update'),
+    path('api/room-type-master/delete/<str:room_type_code>/', room_type_master_delete, name='roomtype-delete'),
+
+
+    path('api/bed-master/', bed_master_list),
+    path('api/bed-master/create/', bed_master_create),
+    path('api/bed-master/update/<str:bed_code>/', bed_master_update),
+    path('api/bed-master/delete/<str:bed_code>/', bed_master_delete),
+
+    path('api/habit-master/', habit_master_list, name='habit-master-list'),
+    path('api/habit-master/create/', habit_master_create, name='habit-master-create'),
+    path('api/habit-master/update/<str:habit_code>/', habit_master_update, name='habit-master-update'),
+    path('api/habit-master/delete/<str:habit_code>/', habit_master_delete, name='habit-master-delete'),
+
+    path('api/hallucination-master/', hallucination_master_list, name='hallucination-master-list'),
+    path('api/hallucination-master/create/', hallucination_master_create, name='hallucination-master-create'),
+    path('api/hallucination-master/update/<str:hallucination_code>/', hallucination_master_update, name='hallucination-master-update'),
+    path('api/hallucination-master/delete/<str:hallucination_code>/', hallucination_master_delete, name='hallucination-master-delete'),
+
+    path('api/history-master/', history_master_list, name='history-master-list'),
+    path('api/history-master/create/', history_master_create, name='history-master-create'),
+    path('api/history-master/update/<str:history_code>/', history_master_update, name='history-master-update'),
+    path('api/history-master/delete/<str:history_code>/', history_master_delete, name='history-master-delete'),
+
+
+    path('api/mental-illness-master/',mental_illness_master_list,name='mental-illness-master-list'),
+    path('api/mental-illness-master/create/',mental_illness_master_create,name='mental-illness-master-create'),
+    path('api/mental-illness-master/update/<str:mental_illness_code>/',mental_illness_master_update, name='mental-illness-master-update'),
+    path('api/mental-illness-master/delete/<str:mental_illness_code>/',mental_illness_master_delete,name='mental-illness-master-delete'),
+
+        
+    path('api/dsm-master/', dsm_master_list, name='dsm-master-list'),
+    path('api/dsm-master/create/', dsm_master_create, name='dsm-master-create'),
+    path('api/dsm-master/update/<str:dsm_code>/', dsm_master_update, name='dsm-master-update'),
+    path('api/dsm-master/delete/<str:dsm_code>/', dsm_master_delete, name='dsm-master-delete'),
+
+
+    path('api/premorbid-personality-master/',premorbid_personality_master_list,name='premorbid-personality-master-list'),
+    path('api/premorbid-personality-master/create/',premorbid_personality_master_create,name='premorbid-personality-master-create'),
+    path('api/premorbid-personality-master/update/<str:premorbid_personality_code>/',premorbid_personality_master_update,name='premorbid-personality-master-update'),
+    path('api/premorbid-personality-master/delete/<str:premorbid_personality_code>/',premorbid_personality_master_delete,name='premorbid-personality-master-delete'),
+
+    path('api/possession-master/',possession_master_list,name='possession-master-list'),
+    path('api/possession-master/create/', possession_master_create,name='possession-master-create'),
+    path('api/possession-master/update/<str:possession_code>/',possession_master_update,name='possession-master-update'),
+    path('api/possession-master/delete/<str:possession_code>/',possession_master_delete,name='possession-master-delete'),
+
+
+
+
+]
+
+
+
+    
+    

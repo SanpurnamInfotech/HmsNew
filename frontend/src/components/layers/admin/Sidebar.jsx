@@ -67,22 +67,22 @@ const Sidebar = ({ collapsed, theme, isMobile }) => {
 
   const navLinkStyles = (isActive) => `flex items-center px-4 py-3 my-1 transition-colors duration-200 cursor-pointer 
     ${isActive 
-      ? (isDark ? 'bg-blue-600 text-white' : 'bg-blue-50 text-blue-600 border-r-4 border-blue-600') 
-      : (isDark ? 'hover:bg-slate-800 hover:text-white' : 'hover:bg-gray-100 hover:text-blue-600')}`;
+      ? (isDark ? 'bg-green-600 text-white' : 'bg-green-50 text-green-600 border-r-4 border-green-600') 
+      : (isDark ? 'hover:bg-slate-800 hover:text-white' : 'hover:bg-gray-100 hover:text-green-600')}`;
 
   const submenuItemStyles = (isActive) => `block pl-12 pr-4 py-2 text-sm transition-colors duration-200 
     ${isActive 
-      ? 'text-blue-500 font-medium' 
-      : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-blue-600')}`;
+      ? 'text-green-500 font-medium' 
+      : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-green-600')}`;
 
   return (
     <div className={sidebarStyles}>
       {/* Brand Header */}
       <div className={`flex items-center h-16 px-6 border-b ${isDark ? 'border-slate-800' : 'border-gray-100'}`}>
-        <div className="w-3 h-3 rounded-full bg-blue-500 shrink-0"></div>
+        <div className="w-3 h-3 rounded-full bg-green-500 shrink-0"></div>
         {!collapsed && (
           <span className="ml-3 font-bold text-lg tracking-tight truncate">
-            HMS <span className="text-blue-500">Admin</span>
+            HMS <span className="text-green-500">Admin</span>
           </span>
         )}
       </div>
@@ -111,7 +111,7 @@ const Sidebar = ({ collapsed, theme, isMobile }) => {
                 onClick={() => setExpanded(expanded === mod.module_code ? null : mod.module_code)}
               >
                 <div className="flex items-center flex-1">
-                  <div className={`w-2 h-2 rounded-sm rotate-45 shrink-0 ${expanded === mod.module_code ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
+                  <div className={`w-2 h-2 rounded-sm rotate-45 shrink-0 ${expanded === mod.module_code ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                   {!collapsed && <span className="ml-4 font-medium truncate">{mod.module_name}</span>}
                 </div>
                 

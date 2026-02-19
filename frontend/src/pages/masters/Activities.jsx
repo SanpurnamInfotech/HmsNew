@@ -49,14 +49,15 @@ const Activities = () => {
     fetchModules();
     fetchSubmodules();
     fetchUserTypes();
-    fetchAvailableUrls(); // Add this line to fetch dynamic URLs
+    fetchAvailableUrls();
   }, []);
 
+  // Updated to fetch using the Universal View parameters
   useEffect(() => {
-    if (isEdit && formData.activity_code) {
-      fetchActivityPermissions(formData.activity_code);
+    if (isEdit && formData.activity_code && formData.module_code && formData.submodule_code) {
+      fetchActivityPermissions();
     }
-  }, [isEdit, formData.activity_code]);
+  }, [isEdit, formData.activity_code, formData.module_code, formData.submodule_code]);
 
   const fetchModules = async () => {
     try {
@@ -80,31 +81,25 @@ const Activities = () => {
     } catch (error) { console.error(error); }
   };
 
-  const fetchActivityPermissions = async (code) => {
+  const fetchActivityPermissions = async () => {
     try {
-      const response = await api.get(`${ACTIVITY_PATH}/permissions/${code}/`);
+      // Logic corrected to use the Universal view with Query Params
+      const { module_code, submodule_code, activity_code } = formData;
+      const response = await api.get(`universal-permissions/?module=${module_code}&submodule=${submodule_code}&activity=${activity_code}`);
       setPermissionsData(response.data || {});
     } catch (error) { setPermissionsData({}); }
   };
 
   const fetchAvailableUrls = async () => {
     try {
-      const response = await api.get("available-urls/"); 
-      // Format the response to match the expected structure
-      const formattedUrls = response.data.map(item => ({
-        label: item.label,
-        value: item.value.startsWith('/') ? item.value : `/${item.value}`
-      }));
-      setUrlOptions(formattedUrls);
+      const response = await api.get("available_urls/");
+      setUrlOptions(response.data || []);
     } catch (error) {
-      console.error("Error fetching dynamic URLs:", error);
-      // Fallback to some common URLs if API fails
+      console.error("Error fetching system routes:", error);
       setUrlOptions([
         { label: "Dashboard", value: "/admin/dashboard" },
-        { label: "Countries", value: "/admin/countries" },
         { label: "Module Master", value: "/admin/moduleMst" },
-        { label: "Submodule Master", value: "/admin/submoduleMst" },
-        { label: "Activities", value: "/admin/activities" }
+        { label: "Submodule Master", value: "/admin/submoduleMst" }
       ]);
     }
   };
@@ -145,6 +140,7 @@ const Activities = () => {
 
   const handleDelete = async () => {
     if (!selectedActivity) return;
+    if (!window.confirm("Are you sure you want to delete this activity?")) return;
     const result = await deleteItem(`${ACTIVITY_PATH}/delete/${selectedActivity.activity_code}/`);
     if (result.success) {
       showModal("Activity deleted successfully!");
@@ -193,14 +189,19 @@ const Activities = () => {
         )}
       </div>
 
-      {/* FORM SECTION */}
       {showForm && (
         <div className="form-container">
           <h6 className="text-lg font-bold mb-6 text-gray-800">{isEdit ? "Update Activity" : "Create New Activity"}</h6>
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
               <label className="form-label">Activity Code</label>
-              <input className={`form-input ${isEdit ? "bg-gray-100" : ""}`} value={formData.activity_code} disabled={isEdit} required onChange={e => setFormData({ ...formData, activity_code: e.target.value.toUpperCase() })} />
+              <input 
+                className={`form-input ${isEdit ? "bg-gray-100" : ""}`} 
+                value={formData.activity_code} 
+                disabled={isEdit} 
+                required 
+                onChange={e => setFormData({ ...formData, activity_code: e.target.value.toUpperCase().replace(/\s/g, '_') })} 
+              />
             </div>
             <div className="space-y-1.5">
               <label className="form-label">Activity Name</label>
@@ -257,7 +258,7 @@ const Activities = () => {
 
             {/* PERMISSIONS MATRIX */}
             <div className="md:col-span-2 mt-4">
-              <h6 className="text-sm font-bold text-green-700 mb-3 uppercase tracking-wider">Role Access Permissions</h6>
+              <h6 className="text-sm font-bold text-green-700 mb-3 uppercase tracking-wider">Activity Permissions</h6>
               <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm bg-gray-50/50">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-gray-100 text-gray-600">
@@ -271,7 +272,7 @@ const Activities = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-100">
                     {userTypes.map((utype) => {
-                      const uId = utype.usertype_id;
+                      const uId = utype.usertype_code;
                       const isAll = permissionsData[`readPermission${uId}`] === "Yes" && permissionsData[`writePermission${uId}`] === "Yes" && permissionsData[`updatePermission${uId}`] === "Yes";
                       return (
                         <tr key={uId} className="hover:bg-white transition-colors">
@@ -300,8 +301,8 @@ const Activities = () => {
             </div>
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button className="btn-primary px-10">{isEdit ? "Update" : "Save"}</button>
-              <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
+               <button type="submit" className="btn-primary px-10">{isEdit ? "Update" : "Save"}</button>
+               <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
         </div>
