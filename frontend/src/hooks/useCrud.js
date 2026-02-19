@@ -36,23 +36,6 @@ export const useCrud = (endpoint) => {
     fetchData();
   }, [fetchData]);
 
-  // Helper to extract error message from various API response formats
-  const getErrorMessage = (data, defaultMsg) => {
-    if (!data) return defaultMsg;
-    // Check for explicit error field
-    if (data.error) return data.error;
-    if (data.detail) return data.detail;
-    if (data.message) return data.message;
-    // Check for field-specific validation errors
-    let firstError = null;
-    for (const [field, errors] of Object.entries(data)) {
-      if (Array.isArray(errors) && errors.length > 0) {
-        if (!firstError) firstError = `${field}: ${errors[0]}`;
-      }
-    }
-    return firstError || defaultMsg;
-  };
-
   // Generic Create
   const createItem = async (createEndpoint, payload) => {
     try {
@@ -60,9 +43,7 @@ export const useCrud = (endpoint) => {
       await fetchData(); // Auto-refresh
       return { success: true, data: res.data };
     } catch (err) {
-      console.error("Create Error:", err.response?.data || err.message);
-      const errorMsg = getErrorMessage(err.response?.data, "Creation failed");
-      return { success: false, error: errorMsg || "Creation failed" };
+      return { success: false, error: err.response?.data?.message || "Creation failed" };
     }
   };
 
@@ -73,9 +54,7 @@ export const useCrud = (endpoint) => {
       await fetchData(); // Auto-refresh
       return { success: true, data: res.data };
     } catch (err) {
-      console.error("Update Error:", err.response?.data || err.message);
-      const errorMsg = getErrorMessage(err.response?.data, "Update failed");
-      return { success: false, error: errorMsg || "Update failed" };
+      return { success: false, error: err.response?.data?.message || "Update failed" };
     }
   };
 
@@ -86,9 +65,7 @@ export const useCrud = (endpoint) => {
       await fetchData(); // Auto-refresh
       return { success: true };
     } catch (err) {
-      console.error("Delete Error:", err.response?.data || err.message);
-      const errorMsg = getErrorMessage(err.response?.data, "Delete failed");
-      return { success: false, error: errorMsg || "Delete failed" };
+      return { success: false, error: err.response?.data?.message || "Delete failed" };
     }
   };
 
