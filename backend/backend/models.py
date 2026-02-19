@@ -123,13 +123,16 @@ class Settings(models.Model):
         db_table = 'settings'
         
 class Permissions(models.Model):
-    usertype_id = models.CharField(max_length=25, blank=True, null=True)
-    module_code = models.CharField(max_length=25, blank=True, null=True)
-    submodule_code = models.CharField(max_length=25, blank=True, null=True)
-    activity_code = models.IntegerField(blank=True, null=True)
+    usertype_code = models.CharField(max_length=45)
+    usertype_name = models.CharField(max_length=225)
+    module_code = models.CharField(max_length=45, blank=True, null=True)
+    submodule_code = models.CharField(max_length=45, blank=True, null=True)
+    activity_code = models.CharField(max_length=45, blank=True, null=True)
     e_read = models.CharField(max_length=10, blank=True, null=True)
     e_write = models.CharField(max_length=10, blank=True, null=True)
     e_update = models.CharField(max_length=10, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)

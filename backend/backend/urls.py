@@ -38,6 +38,8 @@ urlpatterns = [
     path("api/engine-module/<str:module_code>/", EngineModuleDetailView.as_view()),
     path("api/engine-module/update/<str:module_code>/", EngineModuleUpdateView.as_view()),
     path("api/engine-module/delete/<str:module_code>/", EngineModuleDeleteView.as_view()),
+   
+   path('api/universal-permissions/', UniversalPermissionsView.as_view(), name='universal-permissions'),
 
     path("api/engine-submodule/", EngineSubmoduleListView.as_view()),
     path("api/engine-submodule/create/", EngineSubmoduleCreateView.as_view()),      

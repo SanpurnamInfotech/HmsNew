@@ -339,37 +339,24 @@ class SettingsDeleteView(APIView):
         return Response({"message": "Setting deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 # Available url
-from django.urls import get_resolver
 
 class AvailableURLsView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        
         try:
-            resolver = get_resolver()
-            # Extract names/paths from the resolver
-            raw_paths = list(resolver.reverse_dict.keys())
+            routes = SystemRoute.objects.all().order_by('display_name')
             
             url_list = []
-            seen_values = set()
-
-            for path in raw_paths:
-                # We only want string-based named routes, excluding internal django/admin routes
-                if isinstance(path, str) and not any(x in path for x in ['admin', 'api-auth', 'token']):
-                    # Clean the label: 'module_mst' -> 'Module Mst'
-                    label = path.replace('_', ' ').replace('-', ' ').title()
-                    
-                    # The actual URL value (we prepend / for the frontend router)
-                    value = f"/{path.strip('/')}"
-                    
-                    if value not in seen_values:
-                        url_list.append({"label": label, "value": value})
-                        seen_values.add(value)
+            for route in routes:
+                url_list.append({
+                    "label": route.display_name,
+                    "value": f"/{route.react_path.strip('/')}" # Ensures format is '/path'
+                })
             
-            # Sort alphabetically by label
-            sorted_list = sorted(url_list, key=lambda x: x['label'])
-            return Response(sorted_list, status=status.HTTP_200_OK)
+            return Response(url_list, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -380,114 +367,165 @@ class EngineModuleCreateView(APIView):
 
     def post(self, request):
         try:
-            serializer = EngineModuleSerializer(data=request.data)
-            if serializer.is_valid():
+            with transaction.atomic():
                 # 1. Save the Module
-                module_obj = serializer.save(
-                    createdby=request.user.id,
-                    createdon=timezone.now(),
-                )
-
-                # 2. Dynamically handle Permissions (Old View Logic)
-                user_types = UsertypeMaster.objects.all()
-                for utype in user_types:
-                    # Look for permission keys in the incoming React payload
-                    r_perm = request.data.get(f'readPermission{utype.id}', 'No')
-                    w_perm = request.data.get(f'writePermission{utype.id}', 'No')
-                    u_perm = request.data.get(f'updatePermission{utype.id}', 'No')
-
-                    Permissions.objects.create(
-                        usertype_code=utype.id,
-                        module_id=module_obj.id,
-                        e_read=r_perm,
-                        e_write=w_perm,
-                        e_update=u_perm,
+                serializer = EngineModuleSerializer(data=request.data)
+                if serializer.is_valid():
+                    # Save the module and capture the instance
+                    module_instance = serializer.save(
+                        created_by=request.user.id,
+                        created_on=timezone.now(),
                     )
+                    
+                    # 2. Handle Permissions
+                    # We use usertype_code because that is what is defined in your UsertypeMaster model
+                    user_types = UsertypeMaster.objects.all()
+                    
+                    for utype in user_types:
+                        u_id = utype.usertype_code
+                        
+                        read_val = request.data.get(f'readPermission{u_id}', 'No')
+                        write_val = request.data.get(f'writePermission{u_id}', 'No')
+                        update_val = request.data.get(f'updatePermission{u_id}', 'No')
 
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                        # Use the specific field names required by your Permissions model
+                        Permissions.objects.update_or_create(
+                            usertype_code=u_id,
+                            module_code=module_instance.module_code,
+                            submodule_code=None,
+                            activity_code=None,
+                            defaults={
+                                'e_read': read_val,
+                                'e_write': write_val,
+                                'e_update': update_val,
+                            }
+                        )
+
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         except Exception as e:
+            # Printing to console helps you see the exact error if it happens again
+            print(f"Error in EngineModuleCreateView: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
+
 class EngineModuleListView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
         try:
+            # Ordered by sequence as requested in previous instructions
+            # Removed 'id' because it doesn't exist in EngineModule model
             data = EngineModule.objects.all().order_by('sequence')
             serializer = EngineModuleSerializer(data, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
- 
-class EngineModuleDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-    def get(self, request, module_code, format=None):
-        module = get_object_or_404(EngineModule, module_code=module_code)
-        serializer = EngineModuleSerializer(module)
- 
-        return Response(serializer.data, status=status.HTTP_200_OK)
- 
+            print(f"Error in EngineModuleListView: {str(e)}")
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 class EngineModuleUpdateView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def put(self, request, module_code):
         try:
-            # Find the module by code
-            obj = get_object_or_404(EngineModule, module_code=module_code)
-            serializer = EngineModuleSerializer(obj, data=request.data, partial=True)
-            
-            if serializer.is_valid():
-                module_obj = serializer.save(
-                    updatedby=request.user.id,
-                    updatedon=timezone.now()
-                )
-
-                # Dynamically Update Permissions
-                user_types = UsertypeMaster.objects.all()
-                for utype in user_types:
-                    r_perm = request.data.get(f'readPermission{utype.id}', 'No')
-                    w_perm = request.data.get(f'writePermission{utype.id}', 'No')
-                    u_perm = request.data.get(f'updatePermission{utype.id}', 'No')
-
-                    # Use update_or_create to be safe
-                    Permissions.objects.update_or_create(
-                        module_id=module_obj.id, 
-                        usertype_code=utype.id,
-                        defaults={
-                            'e_read': r_perm,
-                            'e_write': w_perm,
-                            'e_update': u_perm
-                        }
+            with transaction.atomic():
+                obj = get_object_or_404(EngineModule, module_code=module_code)
+                serializer = EngineModuleSerializer(obj, data=request.data, partial=True)
+                
+                if serializer.is_valid():
+                    module_instance = serializer.save(
+                        updated_by=request.user.id,
+                        updated_on=timezone.now()
                     )
 
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                    user_types = UsertypeMaster.objects.all()
+                    for utype in user_types:
+                        u_id = utype.usertype_code
+                        read_val = request.data.get(f'readPermission{u_id}', 'No')
+                        write_val = request.data.get(f'writePermission{u_id}', 'No')
+                        update_val = request.data.get(f'updatePermission{u_id}', 'No')
+
+                        # update_or_create ensures we don't get 'Duplicate Entry' errors
+                        # and by specifying submodule_code/activity_code=None we avoid MultipleObjectsReturned
+                        Permissions.objects.update_or_create(
+                            module_code=module_instance.module_code,
+                            usertype_code=u_id,
+                            submodule_code=None,
+                            activity_code=None,
+                            defaults={
+                                'e_read': read_val,
+                                'e_write': write_val,
+                                'e_update': update_val,
+                            }
+                        )
+
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            print(f"Error in EngineModuleUpdateView: {str(e)}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
 class EngineModuleDeleteView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+
     def delete(self, request, module_code):
         try:
-            module = get_object_or_404(EngineModule, module_code=module_code)
-            module.delete()
-    
-            return Response(
-                {"message": "Engine Module deleted successfully"},
-                status=status.HTTP_204_NO_CONTENT
-            )
+            with transaction.atomic():
+                module = get_object_or_404(EngineModule, module_code=module_code)
+                # First delete ALL permissions associated with this module
+                # including submodules and activities
+                Permissions.objects.filter(module_code=module.module_code).delete()
+                module.delete()
+        
+                return Response(
+                    {"message": "Engine Module and associated permissions deleted successfully"},
+                    status=status.HTTP_200_OK 
+                )
         except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class EngineModuleDetailView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self, request, module_code, format=None):
+        module = get_object_or_404(EngineModule, module_code=module_code)
+        serializer = EngineModuleSerializer(module)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+# Universal Permissions 
+class UniversalPermissionsView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Extract filters from the URL query parameters
+            m_code = request.query_params.get('module')
+            s_code = request.query_params.get('submodule')
+            a_code = request.query_params.get('activity')
+
+            # Build the query dynamically
+            # We filter for exactly what is provided; missing levels are treated as None (NULL)
+            perms = Permissions.objects.filter(
+                module_code=m_code,
+                submodule_code=s_code,
+                activity_code=a_code
             )
+
+            data = {}
+            for p in perms:
+                u_id = p.usertype_code
+                data[f'readPermission{u_id}'] = p.e_read
+                data[f'writePermission{u_id}'] = p.e_write
+                data[f'updatePermission{u_id}'] = p.e_update
+                
+            return Response(data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
 # Engine Submodule
 class EngineSubmoduleCreateView(APIView):
