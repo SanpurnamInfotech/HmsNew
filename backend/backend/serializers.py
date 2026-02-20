@@ -36,10 +36,10 @@ class PermissionsSerializer(serializers.ModelSerializer):
         model = Permissions
         fields = '__all__'  
         
-class SettingsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Settings
-        fields = '__all__'  
+# class SettingsSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Settings
+#         fields = '__all__'  
         
 class EngineModuleSerializer(serializers.ModelSerializer):  
     class Meta:
@@ -664,3 +664,93 @@ class PossessionMasterSerializer(serializers.ModelSerializer):
         instance.updatedon = timezone.now()
 
         return super().update(instance, validated_data)
+    
+    
+   
+   
+from rest_framework import serializers
+from .models import FinancialyearMaster
+from django.utils import timezone
+
+
+class FinancialyearMasterSerializer(serializers.ModelSerializer):
+
+    createdon = serializers.DateTimeField(
+        format="%d-%m-%Y %H:%M:%S",
+        read_only=True
+    )
+    updatedon = serializers.DateTimeField(
+        format="%d-%m-%Y %H:%M:%S",
+        read_only=True
+    )
+
+    class Meta:
+        model = FinancialyearMaster
+        fields = [
+            'financialyear_code',
+            'start_year',
+            'end_year',
+            'status',
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby'
+        ]
+
+        read_only_fields = [
+            'createdon',
+            'updatedon',
+            'createdby',
+            'updatedby'
+        ]
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+
+        if request and hasattr(request, 'user'):
+            validated_data['createdby'] = request.user.id
+            validated_data['updatedby'] = request.user.id
+
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+
+        if request and hasattr(request, 'user'):
+            instance.updatedby = request.user.id
+
+        instance.updatedon = timezone.now()
+
+        return super().update(instance, validated_data)
+   
+   
+from rest_framework import serializers
+from .models import Settings
+
+
+class SettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Settings
+        fields = "__all__"
+
+    
+    
+
+
+class MedicineSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Medicine
+        fields = "__all__"
+        
+
+
+
+class MedicineCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MedicineCategory
+        fields = "__all__"        

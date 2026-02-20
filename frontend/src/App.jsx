@@ -21,6 +21,14 @@ import MentalIllnessMaster from "./pages/masters/MentalIllnessMaster";
 import DsmMaster from "./pages/masters/DsmMaster";
 import PremorbidPersonalityMst from "./pages/masters/PremorbidPersonalityMst";
 import PossessionMaster from "./pages/masters/PossessionMaster";
+import FinancialYearMst from "./pages/masters/FinancialYearMst";
+import SettingsMst from "./pages/masters/SettingsMst";
+import MedicineCategory from './pages/masters/MedicineCategory';
+import MedicineMst from './pages/masters/MedicineMst';
+
+
+
+
 
 
 
@@ -69,6 +77,16 @@ function App() {
            <Route path="dsm-master" element={<DsmMaster />} />
            <Route path="premorbid-personality-master"element={<PremorbidPersonalityMst />}/>
            <Route path="possession-master"element={<PossessionMaster />}/>
+           <Route path="financialyear-master"element={<FinancialYearMst />}/>
+           <Route path="settings"element={<SettingsMst />}/>
+           <Route path="medicine-category" element={<MedicineCategory/>}/>
+           <Route path="medicine" element={<MedicineMst/>}/>
+           
+
+
+          
+            
+           
 
 
 

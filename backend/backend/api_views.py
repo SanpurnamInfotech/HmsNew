@@ -252,91 +252,91 @@ class UserTypeDeleteView(APIView):
 
 
 
-class SettingsListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-    def get(self, request, format=None):
-        settings = Settings.objects.all()
-        serializer = SettingsSerializer(settings, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# class SettingsListView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
+#     def get(self, request, format=None):
+#         settings = Settings.objects.all()
+#         serializer = SettingsSerializer(settings, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class SettingsDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-    def get(self, request, setting_id, format=None):
-        setting = get_object_or_404(Settings, setting_id=setting_id)
-        serializer = SettingsSerializer(setting)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# class SettingsDetailView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
+#     def get(self, request, setting_id, format=None):
+#         setting = get_object_or_404(Settings, setting_id=setting_id)
+#         serializer = SettingsSerializer(setting)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class SettingsCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class SettingsCreateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request, format=None):
-        data = request.data.copy()
+#     def post(self, request, format=None):
+#         data = request.data.copy()
 
-        # 1. Clean data: Convert empty strings to None (null) for the database
-        for field in ['module_code', 'submodule_code', 'activity_code']:
-            if data.get(field) == "":
-                data[field] = None
+#         # 1. Clean data: Convert empty strings to None (null) for the database
+#         for field in ['module_code', 'submodule_code', 'activity_code']:
+#             if data.get(field) == "":
+#                 data[field] = None
 
-        # 2. Duplicate Check with improved logic
-        if Settings.objects.filter(
-            setting_name=data.get('setting_name'),
-            module_code=data.get('module_code'),
-            submodule_code=data.get('submodule_code'),
-            activity_code=data.get('activity_code')
-        ).exists():
-            return Response({"error": "This configuration already exists"}, status=status.HTTP_400_BAD_REQUEST)
+#         # 2. Duplicate Check with improved logic
+#         if Settings.objects.filter(
+#             setting_name=data.get('setting_name'),
+#             module_code=data.get('module_code'),
+#             submodule_code=data.get('submodule_code'),
+#             activity_code=data.get('activity_code')
+#         ).exists():
+#             return Response({"error": "This configuration already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = SettingsSerializer(data=data)
-        if serializer.is_valid():
-            # 3. Use request.user.id for tracking
-            serializer.save(
-                createdby=request.user.id,
-                updatedby=request.user.id,
-                createdon=timezone.now(),
-                updatedon=timezone.now()
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         serializer = SettingsSerializer(data=data)
+#         if serializer.is_valid():
+#             # 3. Use request.user.id for tracking
+#             serializer.save(
+#                 createdby=request.user.id,
+#                 updatedby=request.user.id,
+#                 createdon=timezone.now(),
+#                 updatedon=timezone.now()
+#             )
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        # If serializer fails, it returns why (e.g., "This field is required")
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         # If serializer fails, it returns why (e.g., "This field is required")
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class SettingsUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class SettingsUpdateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, setting_id, format=None):
-        setting = get_object_or_404(Settings, setting_id=setting_id)
-        serializer = SettingsSerializer(setting)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    def put(self, request, setting_id, format=None):
-        setting = get_object_or_404(Settings, setting_id=setting_id)
-        data = request.data.copy()
+#     def get(self, request, setting_id, format=None):
+#         setting = get_object_or_404(Settings, setting_id=setting_id)
+#         serializer = SettingsSerializer(setting)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#     def put(self, request, setting_id, format=None):
+#         setting = get_object_or_404(Settings, setting_id=setting_id)
+#         data = request.data.copy()
 
-        serializer = SettingsSerializer(setting, data=data, partial=True)
-        if serializer.is_valid():
-            serializer.save(
-                updatedby=request.user.id,
-                updatedon=timezone.now()
-            )
-            return Response(serializer.data, status=status.HTTP_200_OK)
+#         serializer = SettingsSerializer(setting, data=data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save(
+#                 updatedby=request.user.id,
+#                 updatedon=timezone.now()
+#             )
+#             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class SettingsDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class SettingsDeleteView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, setting_id, format=None):
-        setting = get_object_or_404(Settings, setting_id=setting_id)
-        serializer = SettingsSerializer(setting)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    def delete(self, request, setting_id, format=None):
-        setting = get_object_or_404(Settings, setting_id=setting_id)
-        setting.delete()
-        return Response({"message": "Setting deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+#     def get(self, request, setting_id, format=None):
+#         setting = get_object_or_404(Settings, setting_id=setting_id)
+#         serializer = SettingsSerializer(setting)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#     def delete(self, request, setting_id, format=None):
+#         setting = get_object_or_404(Settings, setting_id=setting_id)
+#         setting.delete()
+#         return Response({"message": "Setting deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
 # Available url
 
@@ -1913,3 +1913,486 @@ def possession_master_delete(request, possession_code):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import FinancialyearMaster
+from .serializers import FinancialyearMasterSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def financialyear_master_list(request):
+    try:
+        data = FinancialyearMaster.objects.all().order_by(
+            'start_year'
+        )
+
+        serializer = FinancialyearMasterSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def financialyear_master_create(request):
+    try:
+        serializer = FinancialyearMasterSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def financialyear_master_update(request, financialyear_code):
+    try:
+        obj = get_object_or_404(
+            FinancialyearMaster,
+            financialyear_code=financialyear_code
+        )
+
+        serializer = FinancialyearMasterSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def financialyear_master_delete(request, financialyear_code):
+    try:
+        obj = get_object_or_404(
+            FinancialyearMaster,
+            financialyear_code=financialyear_code
+        )
+
+        obj.delete()
+
+        return Response(
+            {"message": "Financial year deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+        
+        
+        
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import Settings
+from .serializers import SettingsSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def settings_list(request):
+    try:
+        data = Settings.objects.all().order_by('setting_id')
+
+        serializer = SettingsSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def settings_create(request):
+    try:
+        serializer = SettingsSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def settings_update(request, setting_id):
+    try:
+        obj = get_object_or_404(
+            Settings,
+            setting_id=setting_id
+        )
+
+        serializer = SettingsSerializer(
+            obj,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def settings_delete(request, setting_id):
+    try:
+        obj = get_object_or_404(
+            Settings,
+            setting_id=setting_id
+        )
+
+        obj.delete()
+
+        return Response(
+            {"message": "Setting deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import Medicine
+from .serializers import MedicineSerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def medicine_list(request):
+    try:
+        data = Medicine.objects.all().order_by('medicine_name')
+
+        serializer = MedicineSerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def medicine_create(request):
+    try:
+        serializer = MedicineSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def medicine_update(request, medicine_code):
+    try:
+        obj = get_object_or_404(
+            Medicine,
+            medicine_code=medicine_code
+        )
+
+        serializer = MedicineSerializer(
+            obj,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def medicine_delete(request, medicine_code):
+    try:
+        obj = get_object_or_404(
+            Medicine,
+            medicine_code=medicine_code
+        )
+
+        obj.delete()
+
+        return Response(
+            {"message": "Medicine deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )        
+        
+
+
+
+
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework import permissions, status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import MedicineCategory
+from .serializers import MedicineCategorySerializer
+
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+# ---------------- LIST ----------------
+@api_view(['GET'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def medicine_category_list(request):
+    try:
+        data = MedicineCategory.objects.all().order_by('medicine_cat_name')
+
+        serializer = MedicineCategorySerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- CREATE ----------------
+@api_view(['POST'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def medicine_category_create(request):
+    try:
+        serializer = MedicineCategorySerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(
+                createdby=request.user.id,
+                updatedby=request.user.id,
+                createdon=timezone.now(),
+                updatedon=timezone.now()
+            )
+
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- UPDATE ----------------
+@api_view(['PUT'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def medicine_category_update(request, medicine_cat_code):
+    try:
+        obj = get_object_or_404(
+            MedicineCategory,
+            medicine_cat_code=medicine_cat_code
+        )
+
+        serializer = MedicineCategorySerializer(
+            obj,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save(
+                updatedby=request.user.id,
+                updatedon=timezone.now()
+            )
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ---------------- DELETE ----------------
+@api_view(['DELETE'])
+@authentication_classes([CustomJWTAuthentication, SessionAuthentication])
+@permission_classes([permissions.IsAuthenticated])
+def medicine_category_delete(request, medicine_cat_code):
+    try:
+        obj = get_object_or_404(
+            MedicineCategory,
+            medicine_cat_code=medicine_cat_code
+        )
+
+        obj.delete()
+
+        return Response(
+            {"message": "Medicine category deleted successfully"},
+            status=status.HTTP_204_NO_CONTENT
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )        

@@ -21,11 +21,11 @@ urlpatterns = [
     
     path('api/available_urls/', AvailableURLsView.as_view(), name='available_urls'),
     
-    path('api/settings/', SettingsListView.as_view(), name='settings-list'),
-    path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
-    path('api/settings/<int:setting_id>/', SettingsDetailView.as_view(), name='settings-detail'),
-    path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
-    path('api/settings/delete/<int:setting_id>/', SettingsDeleteView.as_view(), name='settings-delete'),
+    # path('api/settings/', SettingsListView.as_view(), name='settings-list'),
+    # path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
+    # path('api/settings/<int:setting_id>/', SettingsDetailView.as_view(), name='settings-detail'),
+    # path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
+    # path('api/settings/delete/<int:setting_id>/', SettingsDeleteView.as_view(), name='settings-delete'),
     
     path('api/usertypes/', UserTypeListView.as_view(), name='usertype-list'),
     path('api/usertypes/create/', UserTypeCreateView.as_view(), name='usertype-create'),
@@ -125,9 +125,31 @@ urlpatterns = [
     path('api/possession-master/create/', possession_master_create,name='possession-master-create'),
     path('api/possession-master/update/<str:possession_code>/',possession_master_update,name='possession-master-update'),
     path('api/possession-master/delete/<str:possession_code>/',possession_master_delete,name='possession-master-delete'),
-
-
-
+     
+        
+    path('api/financialyear-master/',financialyear_master_list,name='financialyear-master-list'),
+    path('api/financialyear-master/create/',financialyear_master_create,name='financialyear-master-create'),
+    path('api/financialyear-master/update/<str:financialyear_code>/',financialyear_master_update,name='financialyear-master-update'),
+    path('api/financialyear-master/delete/<str:financialyear_code>/',financialyear_master_delete,name='financialyear-master-delete'),
+    
+    
+    
+    path('api/settings/',settings_list,name='settings-list'),
+    path('api/settings/create/',settings_create,name='settings-create'),
+    path('api/settings/update/<int:setting_id>/',settings_update,name='settings-update'),
+    path('api/settings/delete/<int:setting_id>/',settings_delete,name='settings-delete'),
+    
+    
+    path('api/medicine/', medicine_list, name='medicine-list'),
+    path('api/medicine/create/', medicine_create, name='medicine-create'),
+    path('api/medicine/update/<str:medicine_code>/', medicine_update, name='medicine-update'),
+    path('api/medicine/delete/<str:medicine_code>/', medicine_delete, name='medicine-delete'),
+    
+    
+    path('api/medicine-category/', medicine_category_list, name='medicine-category-list'),
+    path('api/medicine-category/create/', medicine_category_create, name='medicine-category-create'),
+    path('api/medicine-category/update/<str:medicine_cat_code>/', medicine_category_update, name='medicine-category-update'),
+    path('api/medicine-category/delete/<str:medicine_cat_code>/', medicine_category_delete, name='medicine-category-delete'),
 
 ]
 
