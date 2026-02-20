@@ -11,6 +11,18 @@ import ModuleMst from './pages/masters/ModuleMst';
 import SubmoduleMst from './pages/masters/SubmoduleMst';
 import Activities from './pages/masters/Activities';
 import AdviceMaster from './pages/masters/AdviceMaster';
+import CompanyMaster from './pages/masters/CompanyMaster';
+import EmployeeMaster from './pages/masters/EmployeeMaster';
+import MaritalStatusMaster from './pages/masters/MaritalStatusMaster';
+import RelationMaster from './pages/masters/RelationMaster';
+import Departments from './pages/masters/Departments';
+import BloodGroupMaster from './pages/masters/BloodGroupMaster';
+import BloodDonor from './pages/masters/BloodDonor';
+import BankDetails from "./pages/masters/BankDetails";
+
+
+
+
 
 function App() {
   return (
@@ -36,6 +48,20 @@ function App() {
           <Route path='submoduleMst' element={<SubmoduleMst />} />
           <Route path='activities' element={<Activities />} />
           <Route path='advice_master' element={<AdviceMaster />} />
+          <Route path="company_master" element={<CompanyMaster />} />
+          <Route path="employee_master" element={<EmployeeMaster />} />
+          <Route path='marital_status_master' element={<MaritalStatusMaster />} />
+          <Route path='relation_master' element={<RelationMaster />} />
+          <Route path="departments" element={<Departments />} />
+          <Route path="blood_group_master" element={<BloodGroupMaster />} />
+          <Route path="blood_donor" element={<BloodDonor />} />
+          <Route path="bankdetails" element={<BankDetails />} />
+
+
+
+
+
+
           
         </Route>
 

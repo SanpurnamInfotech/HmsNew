@@ -53,4 +53,54 @@ urlpatterns = [
     path('api/advice_master/create/', AdvicemasterCreateView.as_view(), name='advice-create'),
     path('api/advice_master/update/<str:advice_code>/', AdvicemasterUpdateView.as_view(), name='advice-update'),
     path('api/advice_master/delete/<str:advice_code>/', AdvicemasterDeleteView.as_view(), name='advice-delete'),
+
+    path('api/company_master/', CompanyMasterListView.as_view(), name='company-master-list'),
+    path('api/company_master/detail/<str:company_code>/', CompanyMasterDetailView.as_view(), name='company-master-detail'),
+    path('api/company_master/create/', CompanyMasterCreateView.as_view(), name='company-master-create'),
+    path('api/company_master/update/<str:company_code>/', CompanyMasterUpdateView.as_view(), name='company-master-update'),
+    path('api/company_master/delete/<str:company_code>/', CompanyMasterDeleteView.as_view(), name='company-master-delete'),
+
+    path('api/employee_master/', EmployeeMasterListView.as_view(), name='employee-master-list'),
+    path('api/employee_master/detail/<str:employee_code>/', EmployeeMasterDetailView.as_view(), name='employee-master-detail'),
+    path('api/employee_master/create/', EmployeeMasterCreateView.as_view(), name='employee-master-create'),
+    path('api/employee_master/update/<str:employee_code>/', EmployeeMasterUpdateView.as_view(), name='employee-master-update'),
+    path('api/employee_master/delete/<str:employee_code>/', EmployeeMasterDeleteView.as_view(), name='employee-master-delete'),
+
+    path('api/marital_status_master/', MaritalStatusMasterListView.as_view(), name='marital-status-list'),
+    path('api/marital_status_master/detail/<str:marital_status_code>/', MaritalStatusMasterDetailView.as_view(), name='marital-status-detail'),
+    path('api/marital_status_master/create/', MaritalStatusMasterCreateView.as_view(), name='marital-status-create'),
+    path('api/marital_status_master/update/<str:marital_status_code>/', MaritalStatusMasterUpdateView.as_view(), name='marital-status-update'),
+    path('api/marital_status_master/delete/<str:marital_status_code>/', MaritalStatusMasterDeleteView.as_view(), name='marital-status-delete'),
+  
+    path('api/relation_master/', RelationMasterListView.as_view(), name='relation-list'),
+    path('api/relation_master/detail/<str:relation_code>/', RelationMasterDetailView.as_view(), name='realtion-detail'),
+    path('api/relation_master/create/', RelationMasterCreateView.as_view(), name='relation-create'),
+    path('api/relation_master/update/<str:relation_code>/', RelationMasterUpdateView.as_view(), name='relation-update'),
+    path('api/relation_master/delete/<str:relation_code>/', RelationMasterDeleteView.as_view(), name='relation-delete'),
+
+    path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
+    path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
+    path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
+    path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
+    path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
+
+    path('api/blood_group_master/', BloodGroupMasterListView.as_view(), name='blood-group-master-list'),
+    path('api/blood_group_master/detail/<str:blood_group_code>/', BloodGroupMasterDetailView.as_view(), name='blood-group-master-detail'),
+    path('api/blood_group_master/create/', BloodGroupMasterCreateView.as_view(), name='blood-group-master-create'),
+    path('api/blood_group_master/update/<str:blood_group_code>/', BloodGroupMasterUpdateView.as_view(), name='blood-group-master-update'),
+    path('api/blood_group_master/delete/<str:blood_group_code>/', BloodGroupMasterDeleteView.as_view(), name='blood-group-master-delete'),
+
+    path("api/blood_donor/", BloodDonorListView.as_view(), name="blood-donor-list"),
+    path("api/blood_donor/detail/<int:pk>/", BloodDonorDetailView.as_view(), name="blood-donor-detail"),
+    path("api/blood_donor/create/", BloodDonorCreateView.as_view(), name="blood-donor-create"),
+    path("api/blood_donor/update/<int:pk>/", BloodDonorUpdateView.as_view(), name="blood-donor-update"),
+    path("api/blood_donor/delete/<int:pk>/", BloodDonorDeleteView.as_view(), name="blood-donor-delete"),
+
+    path('api/bankdetails/', BankdetailsListView.as_view(), name='bankdetails-list'),
+    path('api/bankdetails/detail/<str:bank_code>/', BankdetailsDetailView.as_view(), name='bankdetails-detail'),
+    path('api/bankdetails/create/', BankdetailsCreateView.as_view(), name='bankdetails-create'),
+    path('api/bankdetails/update/<str:bank_code>/', BankdetailsUpdateView.as_view(), name='bankdetails-update'),
+    path('api/bankdetails/delete/<str:bank_code>/', BankdetailsDeleteView.as_view(), name='bankdetails-delete'),
+
+
 ]

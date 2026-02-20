@@ -84,3 +84,51 @@ class AdvicemasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Advicemaster
         fields = "__all__"
+
+class CompanyMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyMaster
+        fields = '__all__'
+
+class EmployeeMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeMaster
+        fields = '__all__'
+
+class MaritalStatusMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaritalStatusMaster
+        fields = '__all__'
+
+class RelationMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RelationMaster
+        fields = '__all__'
+
+class DepartmentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Departments
+        fields = '__all__'
+
+class BloodGroupMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BloodGroupMaster
+        fields = "__all__"
+        extra_kwargs = {
+            "createdon": {"required": False},
+            "updatedon": {"required": False},
+            "createdby": {"required": False},
+            "updatedby": {"required": False},
+        }
+
+class BloodDonorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BloodDonor
+        fields = "__all__"
+
+class BankdetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bankdetails
+        fields = "__all__"
+        read_only_fields = ("createdon", "createdby", "updatedon", "updatedby")
+

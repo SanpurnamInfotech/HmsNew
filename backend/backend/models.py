@@ -173,7 +173,7 @@ class CompanyMaster(models.Model):
         
 class EmployeeMaster(models.Model):
     employee_code = models.CharField(unique=True, max_length=45)
-    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code')
+    company_code = models.CharField(max_length=45, blank=True, null=True)
     financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
     department_code = models.CharField(max_length=45, blank=True, null=True)
     designation_code = models.CharField(max_length=45, blank=True, null=True)
@@ -249,3 +249,110 @@ class Advicemaster(models.Model):
     class Meta:
         managed = False
         db_table = 'advicemaster'
+
+class MaritalStatusMaster(models.Model):
+    marital_status_code = models.CharField(unique=True, max_length=45)
+    marital_status_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True)        # 1=Active, 0=Inactive
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'marital_status_master'
+
+class RelationMaster(models.Model):
+    relation_code  = models.CharField(unique=True, max_length=45)
+    relation_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True)        # 1=Active, 0=Inactive
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'relation_master'        
+
+class Departments(models.Model):
+    department_code = models.CharField(unique=True, max_length=25)
+    department_name = models.CharField(max_length=100)
+    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
+    company_code  = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)     # 1=Active, 0=Inactive
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'departments'
+
+class BloodGroupMaster(models.Model):
+    blood_group_code = models.CharField(unique=True, max_length=10)
+    blood_group_name = models.CharField(unique=True, max_length=20)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField()
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField()
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'blood_group_master'
+
+class BloodDonor(models.Model):
+    donor_firstname = models.CharField(max_length=255)
+    donor_middlename = models.CharField(max_length=255, blank=True, null=True)
+    donor_lastname = models.CharField(max_length=255)
+    blood_group_code = models.CharField(max_length=10)
+    gender = models.CharField(max_length=45, blank=True, null=True)
+    age = models.IntegerField(blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.TextField(blank=True, null=True)
+    address2 = models.TextField(blank=True, null=True)
+    last_donation_date = models.DateTimeField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, default=1)
+    sort_order = models.IntegerField(blank=True, null=True, default=1000)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "blood_donor"
+
+class Bankdetails(models.Model):
+    bank_code = models.CharField(unique=True, max_length=45)
+    bank_name = models.CharField(max_length=100)
+    employee_code = models.CharField(max_length=45, blank=True, null=True)
+    bank_address = models.CharField(max_length=255, blank=True, null=True)
+    bank_phone = models.CharField(max_length=45, blank=True, null=True)
+    bank_branch = models.CharField(max_length=100, blank=True, null=True)
+    bank_ifsc = models.CharField(max_length=45, blank=True, null=True)
+    bank_accountno = models.CharField(max_length=45, blank=True, null=True)
+    bank_ddpayableaddress = models.CharField(max_length=255, blank=True, null=True)
+    financialyear_code = models.CharField(max_length=45, blank=True, null=True)
+    company_code = models.CharField(max_length=45, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'bankdetails'
+
+
