@@ -57,10 +57,15 @@ const HallucinationMaster = () => {
       ? `${BASE_PATH}/update/${formData.hallucination_code}/`
       : `${BASE_PATH}/create/`;
 
-    const result = isEdit
-      ? await updateItem(actionPath, formData)
-      : await createItem(actionPath, formData);
+   const payload = { ...formData };
 
+if (payload.sort_order === "" || payload.sort_order === null) {
+  delete payload.sort_order;
+}
+
+const result = isEdit
+  ? await updateItem(actionPath, payload)
+  : await createItem(actionPath, payload);
     if (result.success) {
       showModal(`Hallucination ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
@@ -130,7 +135,7 @@ const HallucinationMaster = () => {
       {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
         <div>
-          <h4 className="text-2xl font-black text-gray-800 tracking-tight">
+          <h4 className="text-xl font-bold text-gray-800">
             Hallucination Master
           </h4>
         </div>
@@ -287,15 +292,22 @@ const HallucinationMaster = () => {
               <thead>
                 <tr className="bg-gray-50 border-b">
                   <th className="px-6 py-4 w-16"></th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Code</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Name</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Sort</th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Status</th>
+                  <th className="text-admin-th">Code</th>
+                  <th className="text-admin-th">Name</th>
+                  <th className="text-admin-th">Sort</th>
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-50">
-                {paginatedData.map((h) => (
+                {[...paginatedData]
+  .sort((a, b) => {
+    const sa = a.sort_order ?? 999999;
+    const sb = b.sort_order ?? 999999;
+    return sa - sb;
+  })
+  .map(h => (
+ 
                   <tr
                     key={h.hallucination_code}
                     onClick={() =>
@@ -319,19 +331,19 @@ const HallucinationMaster = () => {
                       }`} />
                     </td>
 
-                    <td className="px-6 py-4 font-bold text-gray-800">
+                    <td className="text-admin-td">
                       {h.hallucination_code}
                     </td>
 
-                    <td className="px-6 py-4 font-semibold text-gray-700">
+                    <td className="text-admin-td">
                       {h.hallucination_name}
                     </td>
 
-                    <td className="px-6 py-4 text-center text-sm">
+                    <td className="text-admin-td">
                       {h.sort_order}
                     </td>
 
-                    <td className="px-6 py-4 text-center">
+                    <td className="text-admin-td">
                       <span
                         className={`inline-flex px-3 py-1 rounded-full text-[10px] font-bold ${
                           h.status === 1

@@ -77,10 +77,15 @@ const DsmMaster = () => {
     const actionPath = isEdit
       ? `${PATH}/update/${formData.dsm_code}/`
       : `${PATH}/create/`;
+const payload = { ...formData };
 
-    const result = isEdit
-      ? await updateItem(actionPath, formData)
-      : await createItem(actionPath, formData);
+if (payload.sort_order === "" || payload.sort_order === null) {
+  delete payload.sort_order;
+}
+
+const result = isEdit
+  ? await updateItem(actionPath, payload)
+  : await createItem(actionPath, payload);
 
     if (result.success) {
       showModal(`DSM ${isEdit ? "updated" : "created"} successfully`);
@@ -164,7 +169,7 @@ const DsmMaster = () => {
       {/* ================= HEADER ================= */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
         <div>
-          <h4 className="text-2xl font-black text-gray-800 tracking-tight">
+          <h4 className="text-xl font-bold text-gray-800">
             DSM Master
           </h4>
         </div>
@@ -337,77 +342,75 @@ const DsmMaster = () => {
               <thead>
                 <tr className="bg-gray-50/50 border-b border-gray-100">
                   <th className="px-6 py-4 w-16"></th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                  <th className="text-admin-th">
                     Code
                   </th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                  <th className="text-admin-th">
                     Name
                   </th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">
+                  <th className="text-admin-th">
                     Sort
                   </th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">
+                  <th className="text-admin-th">
                     Status
                   </th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-50">
-                {paginatedData.map((row) => (
-                  <tr
-                    key={row.dsm_code}
-                    onClick={() =>
-                      setSelectedRow(
-                        selectedRow?.dsm_code === row.dsm_code
-                          ? null
-                          : row
-                      )
-                    }
-                    className={`group cursor-pointer transition-colors duration-150 ${
-                      selectedRow?.dsm_code === row.dsm_code
-                        ? "bg-emerald-50/40"
-                        : "hover:bg-gray-50/50"
-                    }`}
-                  >
-                    <td className="px-6 py-4">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                          selectedRow?.dsm_code === row.dsm_code
-                            ? "border-emerald-500 bg-emerald-500"
-                            : "border-gray-200 group-hover:border-emerald-300"
-                        }`}
-                      >
-                        {selectedRow?.dsm_code === row.dsm_code && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                        )}
-                      </div>
-                    </td>
+               {[...paginatedData]
+  .sort((a, b) => {
+    const sa = a.sort_order ?? 999999;
+    const sb = b.sort_order ?? 999999;
+    return Number(sa) - Number(sb);
+  })
+  .map(m => (
+    <tr
+      key={m.dsm_code}
+      onClick={() =>
+        setSelectedRow(
+          selectedRow?.dsm_code === m.dsm_code ? null : m
+        )
+      }
+      className={`group cursor-pointer transition-colors duration-150 ${
+        selectedRow?.dsm_code === m.dsm_code
+          ? "bg-emerald-50/40"
+          : "hover:bg-gray-50/50"
+      }`}
+    >
+      <td className="px-6 py-4">
+        <div
+          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+            selectedRow?.dsm_code === m.dsm_code
+              ? "border-emerald-500 bg-emerald-500"
+              : "border-gray-200 group-hover:border-emerald-300"
+          }`}
+        >
+          {selectedRow?.dsm_code === m.dsm_code && (
+            <div className="w-1.5 h-1.5 rounded-full bg-white" />
+          )}
+        </div>
+      </td>
 
-                    <td className="px-6 py-4 font-black text-gray-800 text-sm">
-                      {row.dsm_code}
-                    </td>
+      <td className="text-admin-td">
+        {m.dsm_code}
+      </td>
 
-                    <td className="px-6 py-4 font-bold text-gray-700">
-                      {row.dsm_name}
-                    </td>
+      <td className="text-admin-td">
+        {m.dsm_name}
+      </td>
 
-                    <td className="px-6 py-4 text-center font-mono text-xs">
-                      {row.sort_order}
-                    </td>
-
-                    <td className="px-6 py-4 text-center">
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                          row.status === 1
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"
-                        }`}
-                      >
-                        {row.status === 1 ? "Active" : "Inactive"}
+      <td className="text-admin-td">
+        {m.sort_order}
+      </td>
+                    <td className="text-admin-td">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${m.status === 1 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                        {m.status === 1 ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                  </tr>
-                ))}
+
+    </tr>
+  ))}
               </tbody>
             </table>
           </div>

@@ -38,19 +38,7 @@ class UsertypeMaster(models.Model):
         managed = False
         db_table = 'usertype_master'
         
-class SystemRoute(models.Model):
-    display_code = models.CharField(unique=True, max_length=45)
-    display_name = models.CharField(max_length=225)
-    react_path = models.CharField(unique=True, max_length=255)
-    status = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
 
-    class Meta:
-        managed = False
-        db_table = 'system_route'
         
 class EngineModule(models.Model):
     module_code = models.CharField(unique=True, max_length=25)

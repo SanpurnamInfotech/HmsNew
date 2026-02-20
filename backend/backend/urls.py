@@ -1,16 +1,7 @@
 from django.urls import path
 from .views import *
 from .api_views import *
-# आधीचे class-based import काढून टाका
-# from .api_views import RoomTypeMasterListView, RoomTypeMasterCreateView, RoomTypeMasterUpdateView, RoomTypeMasterDeleteView
 
-# याची जागा हा import वापरा
-from .api_views import (
-    room_type_master_list,
-    room_type_master_create,
-    room_type_master_update,
-    room_type_master_delete
-)
 
 urlpatterns = [
     
@@ -18,8 +9,6 @@ urlpatterns = [
     
     path("api/admin-login/", LoginView.as_view(), name="admin-login"),
     path("api/admin-register/", RegisterView.as_view(), name="admin-register"),
-    
-    path('api/available_urls/', AvailableURLsView.as_view(), name='available_urls'),
     
     path('api/settings/', SettingsListView.as_view(), name='settings-list'),
     path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),

@@ -63,7 +63,7 @@ const AdminLayout = () => {
                 onClick={toggleSidebar}
                 className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800' : 'hover:bg-gray-100'}`}
               >
-                <FaBars className="text-xl text-green-500" />
+                <FaBars className="text-xl text-green-800" />
               </button>
               {/* <h1 className="text-lg font-bold tracking-tight hidden sm:block">Medical Center</h1> */}
             </div>
@@ -80,7 +80,7 @@ const AdminLayout = () => {
 
               {/* Notification */}
               <div className="relative cursor-pointer p-2 group">
-                <FaBell className={`text-xl transition-colors ${isDark ? 'text-slate-400 group-hover:text-white' : 'text-gray-500 group-hover:text-green-600'}`} />
+                <FaBell className={`text-xl transition-colors ${isDark ? 'text-slate-400 group-hover:text-white' : 'text-gray-500 group-hover:text-green-900'}`} />
                 <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border-2 border-white dark:border-slate-900"></span>
@@ -94,8 +94,8 @@ const AdminLayout = () => {
                   <p className={`text-[10px] uppercase tracking-wider font-semibold mt-1 ${isDark ? 'text-slate-500' : 'text-gray-400'}`}>Super User</p>
                 </div>
                 <div className="relative">
-                  <FaUserCircle className="text-3xl text-green-500" />
-                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                  <FaUserCircle className="text-3xl text-green-800" />
+                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-800 border-2 border-white dark:border-slate-900 rounded-full"></div>
                 </div>
               </div>
             </div>

@@ -48,7 +48,7 @@ const HistoryMaster = () => {
     effectiveItemsPerPage,
     filteredData,
     totalPages,
-  } = useTable(data);
+  } = useTable(data || []);
 
   const resetForm = () => {
     setShowForm(false);
@@ -72,9 +72,15 @@ const HistoryMaster = () => {
       ? `${HISTORY_PATH}/update/${formData.history_code}/`
       : `${HISTORY_PATH}/create/`;
 
-    const result = isEdit
-      ? await updateItem(actionPath, formData)
-      : await createItem(actionPath, formData);
+    const payload = { ...formData };
+
+if (payload.sort_order === "" || payload.sort_order === null) {
+  delete payload.sort_order;
+}
+
+const result = isEdit
+  ? await updateItem(actionPath, payload)
+  : await createItem(actionPath, payload);
 
     if (result.success) {
       showModal(`History ${isEdit ? "updated" : "created"} successfully`);
@@ -150,7 +156,7 @@ const HistoryMaster = () => {
       {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
         <div>
-          <h4 className="text-2xl font-black text-gray-800 tracking-tight">
+          <h4 className="text-xl font-bold text-gray-800">
             History Master
           </h4>
         </div>
@@ -326,63 +332,69 @@ const HistoryMaster = () => {
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-50">
-                {paginatedData.map((row) => (
-                  <tr
-                    key={row.history_code}
-                    onClick={() =>
-                      setSelectedRow(
-                        selectedRow?.history_code === row.history_code
-                          ? null
-                          : row
-                      )
-                    }
-                    className={`group cursor-pointer transition-colors duration-150 ${
-                      selectedRow?.history_code === row.history_code
-                        ? "bg-emerald-50/40"
-                        : "hover:bg-gray-50/50"
-                    }`}
-                  >
-                    <td className="px-6 py-4">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                          selectedRow?.history_code === row.history_code
-                            ? "border-emerald-500 bg-emerald-500"
-                            : "border-gray-200 group-hover:border-emerald-300"
-                        }`}
-                      >
-                        {selectedRow?.history_code === row.history_code && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                        )}
-                      </div>
-                    </td>
+             <tbody className="divide-y divide-gray-50">
+  {[...paginatedData]
+    .sort((a, b) => {
+      const sa = Number(a.sort_order ?? 999999);
+      const sb = Number(b.sort_order ?? 999999);
+      return sa - sb;
+    })
+    .map(row => (
+      <tr
+        key={row.history_code}
+        onClick={() =>
+          setSelectedRow(
+            selectedRow?.history_code === row.history_code
+              ? null
+              : row
+          )
+        }
+        className={`group cursor-pointer transition-colors duration-150 ${
+          selectedRow?.history_code === row.history_code
+            ? "bg-emerald-50/40"
+            : "hover:bg-gray-50/50"
+        }`}
+      >
+        <td className="px-6 py-4">
+          <div
+            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+              selectedRow?.history_code === row.history_code
+                ? "border-emerald-500 bg-emerald-500"
+                : "border-gray-200 group-hover:border-emerald-300"
+            }`}
+          >
+            {selectedRow?.history_code === row.history_code && (
+              <div className="w-1.5 h-1.5 rounded-full bg-white" />
+            )}
+          </div>
+        </td>
 
-                    <td className="px-6 py-4 font-black text-gray-800 text-sm">
-                      {row.history_code}
-                    </td>
+        <td className="px-6 py-4 font-black text-gray-800 text-sm">
+          {row.history_code}
+        </td>
 
-                    <td className="px-6 py-4 font-bold text-gray-700">
-                      {row.history_name}
-                    </td>
+        <td className="px-6 py-4 font-bold text-gray-700">
+          {row.history_name}
+        </td>
 
-                    <td className="px-6 py-4 text-center font-mono text-xs">
-                      {row.sort_order}
-                    </td>
+        <td className="px-6 py-4 text-center font-mono text-xs">
+          {row.sort_order}
+        </td>
 
-                    <td className="px-6 py-4 text-center">
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                          row.status === 1
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"
-                        }`}
-                      >
-                        {row.status === 1 ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+        <td className="px-6 py-4 text-center">
+          <span
+            className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+              row.status === 1
+                ? "bg-emerald-100 text-emerald-700"
+                : "bg-rose-100 text-rose-700"
+            }`}
+          >
+            {row.status === 1 ? "Active" : "Inactive"}
+          </span>
+        </td>
+      </tr>
+    ))}
+</tbody>
             </table>
           </div>
 

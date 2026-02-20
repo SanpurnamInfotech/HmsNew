@@ -338,27 +338,6 @@ class SettingsDeleteView(APIView):
         setting.delete()
         return Response({"message": "Setting deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
 
-# Available url
-
-class AvailableURLsView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        
-        try:
-            routes = SystemRoute.objects.all().order_by('display_name')
-            
-            url_list = []
-            for route in routes:
-                url_list.append({
-                    "label": route.display_name,
-                    "value": f"/{route.react_path.strip('/')}" # Ensures format is '/path'
-                })
-            
-            return Response(url_list, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # Engine
 class EngineModuleCreateView(APIView):

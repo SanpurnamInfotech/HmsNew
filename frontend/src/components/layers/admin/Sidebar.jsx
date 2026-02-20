@@ -31,8 +31,11 @@ const Sidebar = ({ collapsed, theme, isMobile }) => {
         const moduleArr = Array.isArray(modRes.data) ? modRes.data : modRes.data?.results || [];
         const submoduleArr = Array.isArray(subRes.data) ? subRes.data : subRes.data?.results || [];
 
+        // Sort and Structure Menu
         const menu = moduleArr
           .filter((m) => m.status === 1 || m.status === "ACTIVE")
+          /* SORT PARENT MODULES BY SEQUENCE */
+          .sort((a, b) => (parseInt(a.sequence) || 999) - (parseInt(b.sequence) || 999))
           .map((m) => ({
             ...m,
             children: submoduleArr
@@ -41,6 +44,8 @@ const Sidebar = ({ collapsed, theme, isMobile }) => {
                   String(s.module_code) === String(m.module_code) &&
                   (s.status === 1 || s.status === "ACTIVE")
               )
+              /* SORT SUBMODULES BY SEQUENCE */
+              .sort((a, b) => (parseInt(a.sequence) || 999) - (parseInt(b.sequence) || 999))
               .map((s) => ({
                 ...s,
                 url: s.url.replace(/^\/?admin\/?/, ""),
@@ -67,22 +72,22 @@ const Sidebar = ({ collapsed, theme, isMobile }) => {
 
   const navLinkStyles = (isActive) => `flex items-center px-4 py-3 my-1 transition-colors duration-200 cursor-pointer 
     ${isActive 
-      ? (isDark ? 'bg-green-600 text-white' : 'bg-green-50 text-green-600 border-r-4 border-green-600') 
-      : (isDark ? 'hover:bg-slate-800 hover:text-white' : 'hover:bg-gray-100 hover:text-green-600')}`;
+      ? (isDark ? 'bg-green-900 text-white' : 'bg-green-50 text-green-900 border-r-4 border-green-900') 
+      : (isDark ? 'hover:bg-slate-800 hover:text-white' : 'hover:bg-gray-100 hover:text-green-900')}`;
 
   const submenuItemStyles = (isActive) => `block pl-12 pr-4 py-2 text-sm transition-colors duration-200 
     ${isActive 
-      ? 'text-green-500 font-medium' 
-      : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-green-600')}`;
+      ? 'text-green-800 font-medium' 
+      : (isDark ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-green-900')}`;
 
   return (
     <div className={sidebarStyles}>
       {/* Brand Header */}
       <div className={`flex items-center h-16 px-6 border-b ${isDark ? 'border-slate-800' : 'border-gray-100'}`}>
-        <div className="w-3 h-3 rounded-full bg-green-500 shrink-0"></div>
+        <div className="w-3 h-3 rounded-full bg-green-800 shrink-0"></div>
         {!collapsed && (
           <span className="ml-3 font-bold text-lg tracking-tight truncate">
-            HMS <span className="text-green-500">Admin</span>
+            HMS <span className="text-green-800">Admin</span>
           </span>
         )}
       </div>
@@ -111,7 +116,7 @@ const Sidebar = ({ collapsed, theme, isMobile }) => {
                 onClick={() => setExpanded(expanded === mod.module_code ? null : mod.module_code)}
               >
                 <div className="flex items-center flex-1">
-                  <div className={`w-2 h-2 rounded-sm rotate-45 shrink-0 ${expanded === mod.module_code ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                  <div className={`w-2 h-2 rounded-sm rotate-45 shrink-0 ${expanded === mod.module_code ? 'bg-green-800' : 'bg-gray-400'}`}></div>
                   {!collapsed && <span className="ml-4 font-medium truncate">{mod.module_name}</span>}
                 </div>
                 

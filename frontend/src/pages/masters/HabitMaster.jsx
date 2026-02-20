@@ -60,11 +60,15 @@ const HabitMaster = () => {
     const path = isEdit
       ? `${HABIT_PATH}/update/${formData.habit_code}/`
       : `${HABIT_PATH}/create/`;
+const payload = { ...formData };
 
-    const result = isEdit
-      ? await updateItem(path, formData)
-      : await createItem(path, formData);
+if (payload.sort_order === "" || payload.sort_order === null) {
+  delete payload.sort_order;
+}
 
+const result = isEdit
+  ? await updateItem(path, payload)
+  : await createItem(path, payload);
     if (result.success) {
       showModal(`Habit ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
@@ -134,7 +138,7 @@ const HabitMaster = () => {
       {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
         <div>
-          <h4 className="text-2xl font-black text-gray-800 tracking-tight">
+          <h4 className="text-xl font-bold text-gray-800">
             Habit Master
           </h4>
         </div>
@@ -271,35 +275,43 @@ const HabitMaster = () => {
               <thead>
                 <tr className="bg-gray-50/50 border-b border-gray-100">
                   <th className="px-6 py-4 w-16"></th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                  <th className="text-admin-th">
                     Habit Code
                   </th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                  <th className="text-admin-th">
                     Habit Name
                   </th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">
+                  <th className="text-admin-th">
                     Sort
                   </th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">
+                  <th className="text-admin-th">
                     Status
                   </th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-50">
-                {paginatedData.map((h) => (
-                  <tr
-                    key={h.habit_code}
-                    onClick={() =>
-                      setSelectedHabit(
-                        selectedHabit?.habit_code === h.habit_code ? null : h
-                      )
-                    }
-                    className={`group cursor-pointer transition-colors duration-150
-                      ${selectedHabit?.habit_code === h.habit_code
-                        ? "bg-emerald-50/40"
-                        : "hover:bg-gray-50/50"
-                      }`}
+               {[...paginatedData]
+  .sort((a, b) => {
+    const sa = Number(a.sort_order ?? 999999);
+    const sb = Number(b.sort_order ?? 999999);
+    return sa - sb;
+  })
+  .map(h => (
+    <tr
+      key={h.habit_code}
+      onClick={() =>
+        setSelectedHabit(
+          selectedHabit?.habit_code === h.habit_code ? null : h
+        )
+      }
+      className={`group cursor-pointer transition-colors duration-150
+        ${
+          selectedHabit?.habit_code === h.habit_code
+            ? "bg-emerald-50/40"
+            : "hover:bg-gray-50/50"
+        }`}
+    
                   >
                     <td className="px-6 py-4">
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
@@ -313,19 +325,19 @@ const HabitMaster = () => {
                       </div>
                     </td>
 
-                    <td className="px-6 py-4 font-black text-gray-800 text-sm">
+                    <td className="text-admin-td">
                       {h.habit_code}
                     </td>
 
-                    <td className="px-6 py-4 font-bold text-gray-700">
+                    <td className="text-admin-td">
                       {h.habit_name}
                     </td>
 
-                    <td className="px-6 py-4 text-center font-mono text-xs">
+                    <td className="text-admin-td">
                       {h.sort_order}
                     </td>
 
-                    <td className="px-6 py-4 text-center">
+                    <td className="text-admin-td">
                       <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
                         ${h.status === 1
                           ? "bg-emerald-100 text-emerald-700"

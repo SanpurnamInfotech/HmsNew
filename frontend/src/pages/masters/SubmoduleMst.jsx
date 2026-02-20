@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import api from "../../utils/domain"; 
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
 import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
+import { adminRoutes } from "../../routes/routeConfig"; 
 
 const SubmoduleMst = () => {
   /* ================= DATA FETCHING ================= */
@@ -31,6 +32,17 @@ const SubmoduleMst = () => {
   });
   const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
 
+  /* ================= SORTING LOGIC ================= */
+  // Senior Dev implementation: Sort by sequence before passing to useTable
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      const seqA = parseInt(a.sequence) || 999; 
+      const seqB = parseInt(b.sequence) || 999;
+      return seqA - seqB;
+    });
+  }, [data]);
+
   /* ================= TABLE LOGIC ================= */
   const { 
     search, setSearch, 
@@ -40,16 +52,21 @@ const SubmoduleMst = () => {
     effectiveItemsPerPage, 
     filteredData,
     totalPages 
-  } = useTable(data);
+  } = useTable(sortedData);
 
   /* ================= EFFECTS ================= */
   useEffect(() => {
-    fetchModules();
     fetchUserTypes();
-    fetchNavigationUrls();
+    fetchModules();
+
+    const formattedRoutes = adminRoutes.map(route => ({
+      label: route.label,
+      value: `/admin/${route.path}` 
+    }));
+
+    setUrlOptions(formattedRoutes);
   }, []);
 
-  // Fetch permissions using the Universal View format
   useEffect(() => {
     if (isEdit && formData.submodule_code && formData.module_code) {
       fetchSubmodulePermissions();
@@ -73,16 +90,8 @@ const SubmoduleMst = () => {
     } catch (error) { console.error("UserType fetch error:", error); }
   };
 
-  const fetchNavigationUrls = async () => {
-    try {
-      const response = await api.get("available_urls/"); 
-      setUrlOptions(response.data || []);
-    } catch (error) { console.error("Error fetching engine URLs:", error); }
-  };
-
   const fetchSubmodulePermissions = async () => {
     try {
-      // Corrected to use the Universal view with Query Params
       const { module_code, submodule_code } = formData;
       const response = await api.get(`universal-permissions/?module=${module_code}&submodule=${submodule_code}`);
       setPermissionsData(response.data || {});
@@ -105,6 +114,13 @@ const SubmoduleMst = () => {
   /* ================= CRUD OPERATIONS ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Keeping URL mandatory as requested
+    if (!formData.url) {
+        showModal("Navigation URL is required", "error");
+        return;
+    }
+
     const finalPayload = { ...formData, ...permissionsData };
     const actionPath = isEdit 
       ? `${SUBMODULE_PATH}/update/${formData.submodule_code}/` 
@@ -136,11 +152,8 @@ const SubmoduleMst = () => {
   };
 
   if (loading) return (
-    <div className="loading-overlay">
-      <div className="loading-spinner-container text-center">
-        <div className="loading-spinner mx-auto mb-4"></div>
-        <p className="text-emerald-700 font-bold">Synchronizing Engine...</p>
-      </div>
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
     </div>
   );
 
@@ -148,22 +161,20 @@ const SubmoduleMst = () => {
     <div className="app-container">
       {/* NOTIFICATION MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body text-center p-6">
-              <div className="mb-4">
-                {modal.type === "success" ? (
-                  <FaCheckCircle size={50} className="text-emerald-500 mx-auto" />
-                ) : (
-                  <FaTimesCircle size={50} className="text-red-500 mx-auto" />
-                )}
-              </div>
-              <h3 className={`text-xl font-bold mb-2 ${modal.type === "success" ? "text-emerald-700" : "text-red-700"}`}>
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-              <p className="text-gray-600 mb-6">{modal.message}</p>
-              <button className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-2.5 rounded-lg font-semibold" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
+        <div className="modal-overlay fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
+          <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div className="mb-4">
+              {modal.type === "success" ? (
+                <FaCheckCircle size={50} className="text-emerald-500 mx-auto" />
+              ) : (
+                <FaTimesCircle size={50} className="text-red-500 mx-auto" />
+              )}
             </div>
+            <h3 className={`text-xl font-bold mb-2 ${modal.type === "success" ? "text-emerald-700" : "text-red-700"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            <p className="text-gray-600 mb-6">{modal.message}</p>
+            <button className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-2.5 rounded-lg font-semibold" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
           </div>
         </div>
       )}
@@ -240,11 +251,11 @@ const SubmoduleMst = () => {
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Icon Class</label>
-              <input className="w-full px-4 py-3 rounded-lg border border-gray-200" value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} placeholder="bi bi-list" />
+              <input className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" value={formData.icon} onChange={e => setFormData({ ...formData, icon: e.target.value })} placeholder="bi bi-list" />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Sequence</label>
-              <input className="w-full px-4 py-3 rounded-lg border border-gray-200" type="number" value={formData.sequence} onChange={e => setFormData({ ...formData, sequence: e.target.value })} />
+              <input className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" type="number" value={formData.sequence} onChange={e => setFormData({ ...formData, sequence: e.target.value })} />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Status</label>
@@ -333,13 +344,14 @@ const SubmoduleMst = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="table-header-row">
-                  <th className="table-th w-16"></th>
-                  <th className="table-th">Submodule Code</th>
-                  <th className="table-th">Submodule Name</th>
-                  <th className="table-th">Module Name</th>
-                  <th className="table-th">Endpoint</th>
-                  <th className="table-th text-center">Status</th>
+                <tr className="bg-gray-50/50">
+                  <th className="px-6 py-4 w-16"></th>
+                  <th className="text-admin-th">Submodule Code</th>
+                  <th className="text-admin-th">Submodule Name</th>
+                  <th className="text-admin-th">Module Name</th>
+                  <th className="text-admin-th">Endpoint</th>
+                  {/* <th className="text-admin-th text-center">Sequence</th> */}
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -351,12 +363,13 @@ const SubmoduleMst = () => {
                             {selectedSubmodule?.submodule_code === s.submodule_code && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                     </td>
-                    <td className="table-td text-admin-id">{s.submodule_code}</td>
-                    <td className="table-td font-medium text-gray-800">{s.submodule_name}</td>
-                    <td className="table-td text-gray-500">{s.module_code}</td>
-                    <td className="table-td text-gray-400 text-xs italic">{s.url || 'N/A'}</td>
-                    <td className="table-td text-center">
-                      <span className={`badge ${s.status === 1 ? 'badge-success' : 'badge-danger'}`}>
+                    <td className="text-admin-td">{s.submodule_code}</td>
+                    <td className="text-admin-td">{s.submodule_name}</td>
+                    <td className="text-admin-td">{s.module_code}</td>
+                    <td className="text-admin-td">{s.url || 'N/A'}</td>
+                    {/* <td className="text-admin-td">{s.sequence || '-'}</td> */}
+                    <td className="text-admin-td">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${s.status === 1 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
                         {s.status === 1 ? 'Active' : 'Inactive'}
                       </span>
                     </td>
