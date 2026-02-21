@@ -1892,3 +1892,98 @@ def possession_master_delete(request, possession_code):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from django.db import transaction
+
+class PrescriptionListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # Prefetching items to avoid N+1 database queries
+            data = PrescriptionHeader.objects.all().prefetch_related('prescriptionitems_set').order_by('-createdon')
+            serializer = PrescriptionHeaderSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class PrescriptionDetailView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, prescription_code):
+        try:
+            obj = get_object_or_404(PrescriptionHeader, prescription_code=prescription_code)
+            serializer = PrescriptionHeaderSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class PrescriptionCreateView(APIView):
+    # ... auth/permissions ...
+    def post(self, request):
+        try:
+            # We use a transaction here so if items fail, the header isn't created
+            with transaction.atomic():
+                serializer = PrescriptionHeaderSerializer(data=request.data, context={'request': request})
+                if serializer.is_valid():
+                    serializer.save(
+                        createdby=request.user.id,
+                        createdon=timezone.now()
+                    )
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class PrescriptionUpdateView(APIView):
+    # ... auth/permissions ...
+    def put(self, request, prescription_code):
+        try:
+            obj = get_object_or_404(PrescriptionHeader, prescription_code=prescription_code)
+            serializer = PrescriptionHeaderSerializer(obj, data=request.data, partial=True)
+            
+            if serializer.is_valid():
+                with transaction.atomic():
+                    # Save Header
+                    updated_obj = serializer.save(
+                        updatedby=request.user.id,
+                        updatedon=timezone.now()
+                    )
+                    
+                    # Save Items if provided
+                    if 'items' in request.data:
+                        # 1. Clear existing
+                        PrescriptionItems.objects.filter(prescription_code=updated_obj).delete()
+                        # 2. Re-insert
+                        for item in request.data['items']:
+                            # Ensure we link to the object instance
+                            PrescriptionItems.objects.create(prescription_code=updated_obj, **item)
+                            
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class PrescriptionDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, prescription_code):
+        try:
+            obj = get_object_or_404(PrescriptionHeader, prescription_code=prescription_code)
+            # Standard SQL ON DELETE CASCADE might handle this, 
+            # but explicit delete ensures child items are removed.
+            with transaction.atomic():
+                PrescriptionItems.objects.filter(prescription_code=obj).delete()
+                obj.delete()
+            return Response({"message": "Prescription deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

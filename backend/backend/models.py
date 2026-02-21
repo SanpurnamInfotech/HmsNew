@@ -220,6 +220,8 @@ class FinancialyearMaster(models.Model):
 class Countries(models.Model):
     country_code = models.CharField(unique=True, max_length=45)
     country_name = models.CharField(max_length=255)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)
@@ -229,9 +231,89 @@ class Countries(models.Model):
         managed = False
         db_table = 'countries'
         
+class States(models.Model):
+    country_code = models.ForeignKey('Countries', models.DO_NOTHING, db_column='country_code', to_field='country_code')
+    state_code = models.CharField(unique=True, max_length=45)
+    state_name = models.CharField(max_length=255)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'states'
+        
+class Districts(models.Model):
+    district_code = models.CharField(unique=True, max_length=45)
+    district_name = models.CharField(max_length=225)
+    state_code = models.ForeignKey('States', models.DO_NOTHING, db_column='state_code', to_field='state_code')
+    country_code = models.CharField(max_length=45)
+    status = models.IntegerField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField()
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField()
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'districts'
+        
+class Cities(models.Model):
+    city_code = models.CharField(unique=True, max_length=45)
+    city_name = models.CharField(max_length=255)
+    district_code = models.ForeignKey('Districts', models.DO_NOTHING, db_column='district_code', to_field='district_code')
+    state_code = models.CharField(max_length=45)
+    country_code = models.CharField(max_length=45)
+    status = models.IntegerField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'cities'
+        
+class MaritalStatusMaster(models.Model):
+    marital_status_code = models.CharField(unique=True, max_length=45)
+    marital_status_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'marital_status_master'
+        
+class Departments(models.Model):
+    department_code = models.CharField(unique=True, max_length=25)
+    department_name = models.CharField(max_length=100)
+    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code')
+    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code')
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'departments'
+        
 class Advicemaster(models.Model):
     advice_code = models.CharField(unique=True, max_length=45)
     advice_name = models.CharField(max_length=500, blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)
@@ -400,3 +482,150 @@ class PossessionMaster(models.Model):
     class Meta:
         managed = False
         db_table = 'possession_master'
+        
+        
+class MedicineCategory(models.Model):
+    medicine_cat_code = models.CharField(unique=True, max_length=45)
+    medicine_cat_name = models.CharField(max_length=225)
+    description = models.TextField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'medicine_category'
+        
+class Medicine(models.Model):
+    medicine_code = models.CharField(unique=True, max_length=45)
+    medicine_cat_code = models.ForeignKey('MedicineCategory', models.DO_NOTHING, db_column='medicine_cat_code', to_field='medicine_cat_code')  
+    medicine_name = models.CharField(max_length=225)
+    generic_name = models.CharField(max_length=225, blank=True, null=True)
+    qty = models.IntegerField(blank=True, null=True)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    prescription_required = models.IntegerField(blank=True, null=True, db_comment='1=Yes, 0=No')
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'medicine'
+        
+class Doctor(models.Model):
+    doctor_code = models.CharField(unique=True, max_length=45)
+    doctor_name = models.CharField(max_length=100)
+    department_code = models.ForeignKey('Departments', models.DO_NOTHING, db_column='department_code', to_field='department_code')
+    qualification = models.CharField(max_length=150, blank=True, null=True)
+    total_experience = models.CharField(max_length=100, blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=20, blank=True, null=True)
+    marital_status_code = models.ForeignKey('MaritalStatusMaster', models.DO_NOTHING, db_column='marital_status_code', to_field='marital_status_code', blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    city_code = models.ForeignKey('Cities', models.DO_NOTHING, db_column='city_code', to_field='city_code', blank=True, null=True)
+    district_code = models.ForeignKey('Districts', models.DO_NOTHING, db_column='district_code', to_field='district_code', blank=True, null=True)
+    state_code = models.ForeignKey('States', models.DO_NOTHING, db_column='state_code', to_field='state_code', blank=True, null=True)
+    country_code = models.ForeignKey('Countries', models.DO_NOTHING, db_column='country_code', to_field='country_code', blank=True, null=True)
+    pincode = models.CharField(max_length=15, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'doctor'
+        
+class Patient(models.Model):
+    patient_code = models.CharField(unique=True, max_length=45)
+    hospital_code = models.CharField(max_length=45)
+    patient_first_name = models.CharField(max_length=100)
+    patient_middle_name = models.CharField(max_length=100, blank=True, null=True)
+    patient_last_name = models.CharField(max_length=100)
+    dob = models.DateField(blank=True, null=True)
+    age = models.IntegerField(blank=True, null=True)
+    gender = models.IntegerField(blank=True, null=True, db_comment='1=>Male, 2=>Female, 3=>Other')
+    marital_status_code = models.CharField(max_length=45, blank=True, null=True)
+    blood_group_code = models.CharField(max_length=10, blank=True, null=True)
+    occupation = models.CharField(max_length=100, blank=True, null=True)
+    aadhar_no = models.CharField(max_length=20, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    city_code = models.CharField(max_length=45, blank=True, null=True)
+    district_code = models.CharField(max_length=45, blank=True, null=True)
+    state_code = models.CharField(max_length=45, blank=True, null=True)
+    country_code = models.CharField(max_length=45, blank=True, null=True)
+    pincode = models.CharField(max_length=15, blank=True, null=True)
+    weight_kg = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    informant = models.CharField(max_length=100, blank=True, null=True)
+    relation_code = models.CharField(max_length=45, blank=True, null=True)
+    reliability = models.CharField(max_length=45, blank=True, null=True)
+    referred_by_dr = models.CharField(max_length=100, blank=True, null=True)
+    emergency_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    emergency_contact_relation = models.CharField(max_length=45, blank=True, null=True)
+    patient_photo_path = models.CharField(max_length=255, blank=True, null=True)
+    renew_date = models.DateField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'patient'
+        
+class PrescriptionHeader(models.Model):
+    prescription_code = models.CharField(unique=True, max_length=45)
+    prescription_name = models.CharField(max_length=225)
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+    doctor_code = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctor_code', to_field='doctor_code')
+    prescription_date = models.DateTimeField(blank=True, null=True)
+    diagnosis = models.TextField()
+    symptoms = models.TextField()
+    next_visit_date = models.DateField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'prescription_header'
+        
+class PrescriptionItems(models.Model):
+    prescription_code = models.ForeignKey('PrescriptionHeader', models.DO_NOTHING, db_column='prescription_code', to_field='prescription_code')    
+    medicine_code = models.ForeignKey('Medicine', models.DO_NOTHING, db_column='medicine_code', to_field='medicine_code')
+    dosage = models.CharField(max_length=100, blank=True, null=True)
+    duration = models.CharField(max_length=50, blank=True, null=True)
+    instructions = models.CharField(max_length=255, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'prescription_items'

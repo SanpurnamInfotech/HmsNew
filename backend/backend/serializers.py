@@ -57,37 +57,81 @@ class EngineActivitySerializer(serializers.ModelSerializer):
         fields = "__all__"
         
 
-class CountriesSerializer(serializers.ModelSerializer):
-    createdon = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
-    updatedon = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
+
+    
+class CountriesSerializer(serializers.ModelSerializer):  
     class Meta:
         model = Countries
-        fields = [
-            'id', 
-            'country_code', 
-            'country_name', 
-            'createdon', 
-            'createdby', 
-            'updatedon', 
-            'updatedby'
-        ]
-        read_only_fields = ['id', 'createdby', 'updatedby']
+        fields = "__all__"
+    
+class StatesSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = States
+        fields = "__all__"
+class CitiesSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = Cities
+        fields = "__all__"
+class DistrictsSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = Districts
+        fields = "__all__"
+class FinancialyearMasterSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = FinancialyearMaster
+        fields = "__all__"
+class MaritalStatusMasterSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = MaritalStatusMaster
+        fields = "__all__"
+class DoctorSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = Doctor
+        fields = "__all__"
+class PatientSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = Patient
+        fields = "__all__"
+        
+class DepartmentsSerializer(serializers.ModelSerializer):  
+    class Meta:
+        model = Departments
+        fields = "__all__"
+        
+from rest_framework import serializers
+from django.db import transaction
+from .models import PrescriptionHeader, PrescriptionItems
+
+class PrescriptionItemsSerializer(serializers.ModelSerializer):
+    medicine_name = serializers.ReadOnlyField(source='medicine_code.medicine_name')
+
+    class Meta:
+        model = PrescriptionItems
+        fields = ['medicine_code', 'medicine_name', 'dosage', 'duration', 'instructions', 'status']
+
+class PrescriptionHeaderSerializer(serializers.ModelSerializer):
+    # Using 'items' to represent the child records
+    items = PrescriptionItemsSerializer(many=True, source='prescriptionitems_set', required=False)
+    patient_name = serializers.ReadOnlyField(source='patient_code.patient_name')
+    doctor_name = serializers.ReadOnlyField(source='doctor_code.doctor_name')
+
+    class Meta:
+        model = PrescriptionHeader
+        fields = '__all__'
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            validated_data['createdby'] = request.user.id
-            validated_data['updatedby'] = request.user.id
-        return super().create(validated_data)
-    
+        items_data = self.context.get('request').data.get('items', [])
+        with transaction.atomic():
+            prescription = PrescriptionHeader.objects.create(**validated_data)
+            for item in items_data:
+                PrescriptionItems.objects.create(prescription_code=prescription, **item)
+        return prescription
+        
 class AdvicemasterSerializer(serializers.ModelSerializer):  
     class Meta:
         model = Advicemaster
         fields = "__all__"
 
-from rest_framework import serializers
-from .models import IcdMaster
-from django.utils import timezone
 
 
 class IcdMasterSerializer(serializers.ModelSerializer):
@@ -195,10 +239,7 @@ class RoomTypeMasterSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
     
-    
-from rest_framework import serializers
-from .models import Bed
-from django.utils import timezone
+
 
 class BedSerializer(serializers.ModelSerializer):
 
@@ -251,9 +292,6 @@ class BedSerializer(serializers.ModelSerializer):
     
 
 
-from rest_framework import serializers
-from .models import HabitMaster
-from django.utils import timezone
 
 
 class HabitMasterSerializer(serializers.ModelSerializer):

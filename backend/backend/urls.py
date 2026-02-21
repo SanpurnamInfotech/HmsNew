@@ -116,7 +116,14 @@ urlpatterns = [
     path('api/possession-master/delete/<str:possession_code>/',possession_master_delete,name='possession-master-delete'),
 
 
+    path('api/prescriptions/',PrescriptionListView.as_view(), name='prescription-list'),
+    path('api/prescriptions/create/',PrescriptionCreateView.as_view(), name='prescription-create'),
+    path('api/prescriptions/detail/<str:prescription_code>/',PrescriptionDetailView.as_view(), name='prescription-detail'),
+    path('api/prescriptions/update/<str:prescription_code>/',PrescriptionUpdateView.as_view(), name='prescription-update'),
+    path('api/prescriptions/delete/<str:prescription_code>/',PrescriptionDeleteView.as_view(), name='prescription-delete'),
 
+    # This is the specific endpoint used by your PrescriptionReport.jsx
+    path('api/prescription-report/<str:prescription_code>/',PrescriptionDetailView.as_view(), name='prescription-report-data'),
 
 ]
 

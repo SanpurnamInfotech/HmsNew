@@ -14,6 +14,7 @@ import MentalIllnessMaster from "../pages/masters/MentalIllnessMaster";
 import DsmMaster from "../pages/masters/DsmMaster";
 import PremorbidPersonalityMst from "../pages/masters/PremorbidPersonalityMst";
 import PossessionMaster from "../pages/masters/PossessionMaster";
+import PrescriptionReport from "../pages/PrescriptionReport";
 
 
 export const adminRoutes = [
@@ -33,6 +34,7 @@ export const adminRoutes = [
   { path: "dsm_master", label: "DSM Master", component: DsmMaster },
   { path: "premorbid_personality_master", label: "Premorbid Personality Master", component: PremorbidPersonalityMst },
   { path: "possession_master", label: "Possession Master", component: PossessionMaster },
+  { path: "prescription", label: "Prescription", component: PrescriptionReport },
 
  
   
