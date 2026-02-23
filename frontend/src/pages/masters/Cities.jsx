@@ -155,9 +155,9 @@ const Cities = () => {
         </h4>
 
         {!showForm && (
-          <div className="flex items-center gap-2">
+          <div className="flex gap-2">
             <button
-              className="btn-primary"
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md shadow-emerald-100"
               onClick={() => setShowForm(true)}
             >
               <FaPlus size={14} /> Add New

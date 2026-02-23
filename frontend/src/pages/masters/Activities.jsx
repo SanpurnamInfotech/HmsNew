@@ -220,7 +220,7 @@ const Activities = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase">Parent Module</label>
               <select className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none" value={formData.module_code} required onChange={e => setFormData({ ...formData, module_code: e.target.value, submodule_code: "" })}>
-                <option value="">Select Module</option>
+                <option value="" disabled>Select Module</option>
                 {modules.map(m => <option key={m.module_code} value={m.module_code}>{m.module_name}</option>)}
               </select>
             </div>
@@ -228,7 +228,7 @@ const Activities = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase">Submodule</label>
               <select className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none disabled:bg-gray-50" value={formData.submodule_code} required disabled={!formData.module_code} onChange={e => setFormData({ ...formData, submodule_code: e.target.value })}>
-                <option value="">Select Submodule</option>
+                <option value="" disabled>Select Submodule</option>
                 {availableSubmodules.map(sm => <option key={sm.submodule_code} value={sm.submodule_code}>{sm.submodule_name}</option>)}
               </select>
             </div>

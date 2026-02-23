@@ -24,6 +24,8 @@ import ThoughtContentMaster from "../pages/masters/ThoughtContentMaster";
 import ComplaintMaster from "../pages/masters/ComplaintMaster";
 import MseMaster from "../pages/masters/MseMaster";
 import Noticeboard from "../pages/masters/Noticeboard";
+import FinancialyearMaster from "../pages/masters/FinancialyearMaster";
+import Settings from "../pages/masters/Settings";
 
 
 export const adminRoutes = [
@@ -54,6 +56,8 @@ export const adminRoutes = [
   { path: "ComplaintMaster", label: "Complaint Master", component: ComplaintMaster },
   { path: "MseMaster", label: "MseMaster", component: MseMaster },
   { path: "Noticeboard", label: "Noticeboard", component: Noticeboard },
+  { path: "Settings", label: "Settings", component: Settings },
+  { path: "FinancialyearMaster", label: "Financialyear Master", component: FinancialyearMaster },
 
 
  

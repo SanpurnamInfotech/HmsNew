@@ -1,16 +1,28 @@
 import React, { useState } from "react";
-import api from "../../utils/domain";
-import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import {
+  useCrud,
+  useTable,
+  Pagination,
+  TableToolbar,
+} from "../../components/common/BaseCRUD";
+
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaBoxOpen, // Used as a placeholder for "Possessions"
+} from "react-icons/fa";
 
 const PossessionMaster = () => {
-
   /* ================= API ================= */
-  const POSSESSION_PATH = "possession-master";
-  const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud(`${POSSESSION_PATH}/`);
+  const PATH = "possession";
 
-  /* ================= UI STATES ================= */
+  const { data, loading, refresh, createItem, updateItem, deleteItem } =
+    useCrud(`${PATH}/`);
+
+  /* ================= UI STATE ================= */
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -18,32 +30,31 @@ const PossessionMaster = () => {
   const [formData, setFormData] = useState({
     possession_code: "",
     possession_name: "",
+    sort_order: "",
     status: 1,
-    sort_order: ""
   });
 
   const [modal, setModal] = useState({
-    message: "",
     visible: false,
-    type: "success"
+    message: "",
+    type: "success",
   });
 
-  /* ================= TABLE LOGIC ================= */
+  /* ================= TABLE ================= */
   const {
-    search, setSearch,
-    currentPage, setCurrentPage,
-    itemsPerPage, setItemsPerPage,
+    search,
+    setSearch,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
     paginatedData,
     effectiveItemsPerPage,
     filteredData,
-    totalPages
+    totalPages,
   } = useTable(data);
 
   /* ================= HELPERS ================= */
-
-  const showModal = (message, type = "success") =>
-    setModal({ message, visible: true, type });
-
   const resetForm = () => {
     setShowForm(false);
     setIsEdit(false);
@@ -51,23 +62,32 @@ const PossessionMaster = () => {
     setFormData({
       possession_code: "",
       possession_name: "",
+      sort_order: "",
       status: 1,
-      sort_order: ""
     });
   };
 
-  /* ================= SUBMIT ================= */
+  const showModal = (message, type = "success") =>
+    setModal({ visible: true, message, type });
 
+  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const actionPath = isEdit
-      ? `${POSSESSION_PATH}/update/${formData.possession_code}/`
-      : `${POSSESSION_PATH}/create/`;
+      ? `${PATH}/update/${formData.possession_code}/`
+      : `${PATH}/create/`;
+
+    const payload = { ...formData };
+
+    // Remove sort_order if empty to prevent backend type errors
+    if (payload.sort_order === "" || payload.sort_order === null) {
+      delete payload.sort_order;
+    }
 
     const result = isEdit
-      ? await updateItem(actionPath, formData)
-      : await createItem(actionPath, formData);
+      ? await updateItem(actionPath, payload)
+      : await createItem(actionPath, payload);
 
     if (result.success) {
       showModal(`Possession ${isEdit ? "updated" : "created"} successfully`);
@@ -79,18 +99,15 @@ const PossessionMaster = () => {
   };
 
   /* ================= DELETE ================= */
-
   const handleDelete = async () => {
     if (!selectedRow) return;
 
-    if (!window.confirm("Are you sure you want to delete this record?")) return;
-
     const result = await deleteItem(
-      `${POSSESSION_PATH}/delete/${selectedRow.possession_code}/`
+      `${PATH}/delete/${selectedRow.possession_code}/`
     );
 
     if (result.success) {
-      showModal("Possession deleted successfully");
+      showModal("Record deleted successfully");
       setSelectedRow(null);
       refresh();
     } else {
@@ -99,20 +116,21 @@ const PossessionMaster = () => {
   };
 
   /* ================= LOADING ================= */
-
-  if (loading)
+  if (loading) {
     return (
       <div className="loading-overlay">
         <div className="loading-spinner-container text-center">
           <div className="loading-spinner mx-auto mb-4"></div>
-          <p className="text-emerald-700 font-bold">Loading Possession Master...</p>
+          <p className="text-emerald-700 font-bold">
+            Loading Possession Master...
+          </p>
         </div>
       </div>
     );
+  }
 
   return (
     <div className="app-container">
-
       {/* ================= MODAL ================= */}
       {modal.visible && (
         <div className="modal-overlay">
@@ -146,26 +164,24 @@ const PossessionMaster = () => {
       {/* ================= HEADER ================= */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
         <div>
-          <h4 className="text-2xl font-black text-gray-800 tracking-tight">
-            Possession Master
-          </h4>
+          <h4 className="text-xl font-bold text-gray-800">Possession Master</h4>
         </div>
 
         {!showForm && (
           <div className="flex gap-2">
             <button
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md"
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md shadow-emerald-100"
               onClick={() => setShowForm(true)}
             >
               <FaPlus size={14} /> Add New
             </button>
 
             {selectedRow && (
-              <div className="flex gap-2">
+              <div className="flex gap-2 animate-in slide-in-from-right-5">
                 <button
                   className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md"
                   onClick={() => {
-                    setFormData({ ...selectedRow });
+                    setFormData(selectedRow);
                     setIsEdit(true);
                     setShowForm(true);
                   }}
@@ -187,81 +203,80 @@ const PossessionMaster = () => {
 
       {/* ================= FORM ================= */}
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100 animate-in zoom-in-95 duration-200">
           <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">
             {isEdit ? "Update Possession" : "Create Possession"}
           </h6>
 
-          <form
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-            onSubmit={handleSubmit}
-          >
-
+          <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
+            {/* CODE */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
                 Possession Code
               </label>
               <input
-                className={`w-full px-4 py-3 rounded-lg border border-gray-200 outline-none ${isEdit ? "bg-gray-50 text-gray-400" : ""}`}
+                className={`w-full px-4 py-3 rounded-lg border border-gray-200 
+                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 
+                outline-none transition-all ${isEdit ? "bg-gray-50 text-gray-400" : ""}`}
                 value={formData.possession_code}
                 disabled={isEdit}
                 required
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    possession_code: e.target.value.toUpperCase()
+                    possession_code: e.target.value.toUpperCase(),
                   })
                 }
               />
             </div>
 
+            {/* NAME */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
                 Possession Name
               </label>
               <input
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 
+                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 
+                outline-none transition-all"
                 value={formData.possession_name}
                 required
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    possession_name: e.target.value
+                    possession_name: e.target.value,
                   })
                 }
               />
             </div>
 
+            {/* SORT */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
                 Sort Order
               </label>
               <input
                 type="number"
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 
+                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 
+                outline-none transition-all"
                 value={formData.sort_order}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    sort_order: e.target.value
+                    sort_order: e.target.value,
                   })
                 }
               />
             </div>
 
+            {/* STATUS */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase">
-                Status
-              </label>
-              <select
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none"
-                value={formData.status}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    status: Number(e.target.value)
-                  })
-                }
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Status</label>
+              <select 
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 appearance-none focus:ring-2 focus:ring-emerald-500/20" 
+                value={formData.status} 
+                onChange={e => setFormData({...formData, status: parseInt(e.target.value)})}
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
@@ -269,7 +284,7 @@ const PossessionMaster = () => {
             </div>
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-2.5 rounded-lg text-sm font-bold">
+              <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-emerald-100">
                 {isEdit ? "Update" : "Save"}
               </button>
               <button
@@ -280,15 +295,13 @@ const PossessionMaster = () => {
                 Cancel
               </button>
             </div>
-
           </form>
         </div>
       )}
 
       {/* ================= TABLE ================= */}
       {!showForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in duration-500">
           <TableToolbar
             itemsPerPage={itemsPerPage}
             setItemsPerPage={setItemsPerPage}
@@ -300,66 +313,82 @@ const PossessionMaster = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-gray-50 border-b">
+                <tr className="bg-gray-50/50 border-b border-gray-100">
                   <th className="px-6 py-4 w-16"></th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase">Code</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase">Name</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase text-center">Sort</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase text-center">Status</th>
+                  <th className="text-admin-th">Code</th>
+                  <th className="text-admin-th">Name</th>
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-50">
-                {paginatedData.map((row) => (
-                  <tr
-                    key={row.possession_code}
-                    onClick={() =>
-                      setSelectedRow(
-                        selectedRow?.possession_code === row.possession_code
-                          ? null
-                          : row
-                      )
-                    }
-                    className={`cursor-pointer ${selectedRow?.possession_code === row.possession_code ? "bg-emerald-50/40" : "hover:bg-gray-50"}`}
-                  >
-                    <td className="px-6 py-4">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedRow?.possession_code === row.possession_code ? "border-emerald-500 bg-emerald-500" : "border-gray-200"}`}>
-                        {selectedRow?.possession_code === row.possession_code && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                        )}
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 font-bold text-gray-800">
-                      {row.possession_code}
-                    </td>
-
-                    <td className="px-6 py-4 text-gray-700">
-                      {row.possession_name}
-                    </td>
-
-                    <td className="px-6 py-4 text-center text-sm">
-                      {row.sort_order}
-                    </td>
-
-                    <td className="px-6 py-4 text-center">
-                      <span
-                        className={`inline-flex px-3 py-1 rounded-full text-[10px] font-bold ${
-                          row.status === 1
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"
+                {paginatedData.length > 0 ? (
+                  [...paginatedData]
+                    .sort((a, b) => {
+                      const sa = a.sort_order ?? 999999;
+                      const sb = b.sort_order ?? 999999;
+                      return Number(sa) - Number(sb);
+                    })
+                    .map((item) => (
+                      <tr
+                        key={item.possession_code}
+                        onClick={() =>
+                          setSelectedRow(
+                            selectedRow?.possession_code === item.possession_code
+                              ? null
+                              : item
+                          )
+                        }
+                        className={`group cursor-pointer transition-colors duration-150 ${
+                          selectedRow?.possession_code === item.possession_code
+                            ? "bg-emerald-50/40"
+                            : "hover:bg-gray-50/50"
                         }`}
                       >
-                        {row.status === 1 ? "Active" : "Inactive"}
-                      </span>
+                        <td className="px-6 py-4">
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                              selectedRow?.possession_code === item.possession_code
+                                ? "border-emerald-500 bg-emerald-500"
+                                : "border-gray-200 group-hover:border-emerald-300"
+                            }`}
+                          >
+                            {selectedRow?.possession_code === item.possession_code && (
+                              <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                            )}
+                          </div>
+                        </td>
+
+                        <td className="text-admin-td">{item.possession_code}</td>
+                        <td className="text-admin-td">{item.possession_name}</td>
+                        <td className="text-admin-td">
+                          <span
+                            className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              item.status === 1
+                                ? "bg-emerald-50 text-emerald-600"
+                                : "bg-red-50 text-red-600"
+                            }`}
+                          >
+                            {item.status === 1 ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-20 text-center">
+                      <FaBoxOpen size={48} className="mb-4 text-gray-200 mx-auto" />
+                      <p className="text-lg font-medium text-gray-400">
+                        No possession records found
+                      </p>
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
 
-          <div className="bg-white border-t p-6">
+          <div className="bg-white border-t border-gray-50 p-6">
             <Pagination
               totalEntries={filteredData.length}
               itemsPerPage={effectiveItemsPerPage}
@@ -368,7 +397,6 @@ const PossessionMaster = () => {
               totalPages={totalPages}
             />
           </div>
-
         </div>
       )}
     </div>

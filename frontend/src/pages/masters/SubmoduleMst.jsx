@@ -219,7 +219,7 @@ const SubmoduleMst = () => {
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Parent Module</label>
               <select className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all appearance-none" value={formData.module_code} required onChange={e => setFormData({ ...formData, module_code: e.target.value })}>
-                <option value="">Select Parent Engine</option>
+                <option value="" disabled>Select Parent Engine</option>
                 {modules.map(m => <option key={m.module_code} value={m.module_code}>{m.module_name}</option>)}
               </select>
             </div>

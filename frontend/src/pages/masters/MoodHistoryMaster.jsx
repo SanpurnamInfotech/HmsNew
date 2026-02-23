@@ -187,7 +187,11 @@ const MoodHistoryMaster = () => {
 
       {/* ================= FORM ================= */}
       {showForm && (
-        <div className="form-container">
+                <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100 animate-in zoom-in-95 duration-200">
+
+          <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">
+            {isEdit ? "Update Mood History" : "Create Mood History"}
+          </h6>
           <form
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
             onSubmit={handleSubmit}

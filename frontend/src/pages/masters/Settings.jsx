@@ -1,251 +1,542 @@
-import React, { useState, useEffect } from "react";
-import { useCrud, useTable, BootstrapPagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { Button, Table, Form, Card, Row, Col, Spinner } from 'react-bootstrap';
-import api from "../../utils/domain"; 
-
+import React, { useEffect, useState } from "react";
+import api from "../../utils/domain";
+import {
+  useCrud,
+  useTable,
+  Pagination,
+  TableToolbar
+} from "../../components/common/BaseCRUD";
+ 
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCheckCircle,
+  FaTimesCircle
+} from "react-icons/fa";
+ 
 const Settings = () => {
-  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud("settings/");
-  
+ 
+  /* ================= API ================= */
+  const PATH = "settings";
+  const { data, loading, refresh, createItem, updateItem, deleteItem } =
+    useCrud(`${PATH}/`);
+ 
+  /* ================= DROPDOWNS ================= */
   const [modules, setModules] = useState([]);
   const [submodules, setSubmodules] = useState([]);
   const [activities, setActivities] = useState([]);
+ 
   const [filteredSubmodules, setFilteredSubmodules] = useState([]);
   const [filteredActivities, setFilteredActivities] = useState([]);
-
+ 
+  /* ================= UI STATES ================= */
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [selectedSetting, setSelectedSetting] = useState(null);
-
-  const { 
-    search, setSearch, 
-    currentPage, setCurrentPage, 
-    itemsPerPage, setItemsPerPage, 
-    paginatedData, 
-    effectiveItemsPerPage, 
-    filteredData 
-  } = useTable(data);
-
+  const [selectedRow, setSelectedRow] = useState(null);
+ 
   const [formData, setFormData] = useState({
-    setting_id: "", setting_name: "", setting_value: "",
-    setting_value2: "", used_for: "", module_code: "",
-    submodule_code: "", activity_code: "",
+    setting_id: "",
+    setting_name: "",
+    module_code: "",
+    submodule_code: "",
+    activity_code: "",
+    setting_value: "",
+    setting_value2: "",
+    used_for: ""
   });
-
-  const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
-
+ 
+  const [modal, setModal] = useState({
+    message: "",
+    visible: false,
+    type: "success"
+  });
+ 
+  /* ================= TABLE ================= */
+  const {
+    search, setSearch,
+    currentPage, setCurrentPage,
+    itemsPerPage, setItemsPerPage,
+    paginatedData,
+    effectiveItemsPerPage,
+    filteredData,
+    totalPages
+  } = useTable(data);
+ 
+  /* ================= LOAD DROPDOWNS ================= */
   useEffect(() => {
-    const fetchDropdowns = async () => {
-      try {
-        const [modRes, subRes, actRes] = await Promise.all([
-          api.get("engine-module/"),
-          api.get("engine-submodule/"),
-          api.get("engine-activity/")
-        ]);
-        setModules(modRes.data?.results || modRes.data || []);
-        setSubmodules(subRes.data?.results || subRes.data || []);
-        setActivities(actRes.data?.results || actRes.data || []);
-      } catch (err) { console.error("Dropdown error:", err); }
+    const load = async () => {
+      const [m, sm, a] = await Promise.all([
+        api.get("engine-module/"),
+        api.get("engine-submodule/"),
+        api.get("engine-activity/")
+      ]);
+ 
+      setModules(m.data?.results || m.data || []);
+      setSubmodules(sm.data?.results || sm.data || []);
+      setActivities(a.data?.results || a.data || []);
     };
-    fetchDropdowns();
+ 
+    load();
   }, []);
-
+ 
+  /* ================= FILTER SUBMODULE ================= */
   useEffect(() => {
-    if (formData.module_code) {
-      setFilteredSubmodules(submodules.filter(sm => String(sm.module_code) === String(formData.module_code)));
-    } else { setFilteredSubmodules([]); }
+    if (!formData.module_code) {
+      setFilteredSubmodules([]);
+      return;
+    }
+ 
+    setFilteredSubmodules(
+      submodules.filter(
+        sm => String(sm.module_code) === String(formData.module_code)
+      )
+    );
   }, [formData.module_code, submodules]);
-
+ 
+  /* ================= FILTER ACTIVITY ================= */
   useEffect(() => {
-    if (formData.submodule_code) {
-      setFilteredActivities(activities.filter(act => String(act.submodule_code) === String(formData.submodule_code)));
-    } else { setFilteredActivities([]); }
+    if (!formData.submodule_code) {
+      setFilteredActivities([]);
+      return;
+    }
+ 
+    setFilteredActivities(
+      activities.filter(
+        a => String(a.submodule_code) === String(formData.submodule_code)
+      )
+    );
   }, [formData.submodule_code, activities]);
-
-  const showModal = (message, type = "success") => setModal({ message, visible: true, type });
-
+ 
+  /* ================= HELPERS ================= */
   const resetForm = () => {
-    setShowForm(false); setIsEdit(false); setSelectedSetting(null);
+    setShowForm(false);
+    setIsEdit(false);
+    setSelectedRow(null);
     setFormData({
-      setting_id: "", setting_name: "", setting_value: "",
-      setting_value2: "", used_for: "", module_code: "",
-      submodule_code: "", activity_code: "",
+      setting_id: "",
+      setting_name: "",
+      module_code: "",
+      submodule_code: "",
+      activity_code: "",
+      setting_value: "",
+      setting_value2: "",
+      used_for: ""
     });
   };
-
+ 
+  const showModal = (message, type = "success") =>
+    setModal({ message, visible: true, type });
+ 
+  /* ================= CRUD ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = isEdit 
-      ? await updateItem(`settings/update/${formData.setting_id}/`, formData)
-      : await createItem(`settings/create/`, formData);
-
+ 
+    const actionPath = isEdit
+      ? `${PATH}/update/${formData.setting_id}/`
+      : `${PATH}/create/`;
+ 
+    const result = isEdit
+      ? await updateItem(actionPath, formData)
+      : await createItem(actionPath, formData);
+ 
     if (result.success) {
       showModal(`Setting ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
+      refresh();
     } else {
-      showModal(result.error || "Operation failed.", "error");
+      showModal(result.error || "Operation failed!", "error");
     }
   };
-
+ 
   const handleDelete = async () => {
-    if (!selectedSetting || !window.confirm("Delete this setting?")) return;
-    const result = await deleteItem(`settings/delete/${selectedSetting.setting_id}/`);
+    if (!selectedRow) return;
+ 
+    const result = await deleteItem(
+      `${PATH}/delete/${selectedRow.setting_id}/`
+    );
+ 
     if (result.success) {
-      showModal("Deleted successfully!");
-      setSelectedSetting(null);
+      showModal("Setting deleted successfully!");
+      setSelectedRow(null);
+      refresh();
+    } else {
+      showModal(result.error || "Delete failed!", "error");
     }
   };
-
-  if (loading) return (
-    <div className="vh-100 d-flex justify-content-center align-items-center bg-surface">
-      <Spinner animation="border" variant="success" />
-    </div>
-  );
-
+ 
+  if (loading)
+    return (
+      <div className="loading-overlay">
+        <div className="loading-spinner-container text-center">
+          <div className="loading-spinner mx-auto mb-4"></div>
+          <p className="text-emerald-700 font-bold">
+            Synchronizing Settings...
+          </p>
+        </div>
+      </div>
+    );
+ 
   return (
-    <div className="container-fluid py-4 px-4 bg-surface min-vh-100">
-      {/* MODAL */}
+    <div className="app-container">
+ 
+      {/* ================= MODAL ================= */}
       {modal.visible && (
-        <div className="modal fade show d-block" style={{ background: "rgba(0,0,0,.8)", zIndex: 1050 }}>
-          <div className="modal-dialog modal-dialog-centered modal-sm">
-            <div className="modal-content shadow border-0 text-center p-4">
-              <div className={`mb-3 ${modal.type === "success" ? "text-success" : "text-danger"}`}>
-                <i className={`bi ${modal.type === "success" ? "bi-check-circle-fill" : "bi-x-circle-fill"}`} style={{ fontSize: "3rem" }}></i>
+        <div className="modal-overlay">
+          <div className="modal-container">
+            <div className="modal-body text-center p-6">
+              <div className="mb-4">
+                {modal.type === "success" ? (
+                  <FaCheckCircle size={50} className="text-emerald-500 mx-auto" />
+                ) : (
+                  <FaTimesCircle size={50} className="text-red-500 mx-auto" />
+                )}
               </div>
-              <h5 className="fw-bold">{modal.type === "success" ? "Success" : "Error"}</h5>
-              <p className="text-muted small">{modal.message}</p>
-              <button className="btn btn-success w-100 rounded-pill" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
+ 
+              <h3
+                className={`text-xl font-bold mb-2 ${
+                  modal.type === "success"
+                    ? "text-emerald-700"
+                    : "text-red-700"
+                }`}
+              >
+                {modal.type === "success" ? "Success" : "Error"}
+              </h3>
+ 
+              <p className="text-gray-600 mb-6">{modal.message}</p>
+ 
+              <button
+                className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-2.5 rounded-lg font-semibold"
+                onClick={() => setModal({ ...modal, visible: false })}
+              >
+                OK
+              </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* HEADER - Updated to navy-matched bg-surface */}
-      <div className="d-flex justify-content-between align-items-center mb-4 bg-surface p-3 rounded shadow-sm border-start border-success border-4">
+ 
+      {/* ================= HEADER ================= */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
         <div>
-          <h4 className="fw-bold mb-0 text-success">System Configuration</h4>
+          <h4 className="text-xl font-bold text-gray-800">
+            Settings Master
+          </h4>
         </div>
+ 
         {!showForm && (
-          <div className="d-flex gap-2">
-            <Button variant="success" size="sm" onClick={() => setShowForm(true)}>+ Add New</Button>
-            {selectedSetting && (
-              <>
-                <Button variant="warning" size="sm" onClick={() => { setFormData(selectedSetting); setIsEdit(true); setShowForm(true); }}>Edit</Button>
-                <Button variant="danger" size="sm" onClick={handleDelete}>Delete</Button>
-              </>
+          <div className="flex gap-2">
+            <button
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md shadow-emerald-100"
+              onClick={() => setShowForm(true)}
+            >
+              <FaPlus size={14} /> Add New
+            </button>
+ 
+            {selectedRow && (
+              <div className="flex gap-2 animate-in slide-in-from-right-5">
+                <button
+                  className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md"
+                  onClick={() => {
+                    setFormData({
+                      setting_id: selectedRow.setting_id,
+                      setting_name: selectedRow.setting_name || "",
+                      module_code: selectedRow.module_code || "",
+                      submodule_code: selectedRow.submodule_code || "",
+                      activity_code: selectedRow.activity_code || "",
+                      setting_value: selectedRow.setting_value || "",
+                      setting_value2: selectedRow.setting_value2 || "",
+                      used_for: selectedRow.used_for || ""
+                    });
+                    setIsEdit(true);
+                    setShowForm(true);
+                  }}
+                >
+                  <FaEdit size={14} /> Edit
+                </button>
+ 
+                <button
+                  className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md"
+                  onClick={handleDelete}
+                >
+                  <FaTrash size={14} /> Delete
+                </button>
+              </div>
             )}
           </div>
         )}
       </div>
-
-      {/* FORM SECTION */}
+ 
+      {/* ================= FORM ================= */}
       {showForm && (
-        <Card className="border-0 shadow-sm mb-4 bg-surface">
-          <Card.Body className="p-4">
-            <h6 className="fw-bold mb-4 text-success">{isEdit ? "EDIT SETTING" : "ADD NEW SETTING"}</h6>
-            <Form onSubmit={handleSubmit}>
-              <Row className="g-3">
-                <Col md={6}>
-                  <Form.Label className="small fw-bold text-muted">Setting Name</Form.Label>
-                  <Form.Control size="sm" value={formData.setting_name} required onChange={e => setFormData({ ...formData, setting_name: e.target.value })} />
-                </Col>
-                <Col md={6}>
-                  <Form.Label className="small fw-bold text-muted">Used For</Form.Label>
-                  <Form.Control size="sm" value={formData.used_for} required onChange={e => setFormData({ ...formData, used_for: e.target.value })} />
-                </Col>
-                <Col md={6}>
-                  <Form.Label className="small fw-bold text-muted">Setting Value</Form.Label>
-                  <Form.Control size="sm" value={formData.setting_value} required onChange={e => setFormData({ ...formData, setting_value: e.target.value })} />
-                </Col>
-                <Col md={6}>
-                  <Form.Label className="small fw-bold text-muted">Value 2 (Optional)</Form.Label>
-                  <Form.Control size="sm" value={formData.setting_value2} onChange={e => setFormData({ ...formData, setting_value2: e.target.value })} />
-                </Col>
-                
-                <Col md={6}>
-                  <Form.Label className="small fw-bold text-muted">Module</Form.Label>
-                  <Form.Select size="sm" value={formData.module_code} required onChange={e => setFormData({ ...formData, module_code: e.target.value, submodule_code: "", activity_code: "" })}>
-                    <option value="">Select Module</option>
-                    {modules.map(m => <option key={m.module_code} value={m.module_code}>{m.module_name}</option>)}
-                  </Form.Select>
-                </Col>
-                <Col md={6}>
-                  <Form.Label className="small fw-bold text-muted">Submodule</Form.Label>
-                  <Form.Select size="sm" value={formData.submodule_code} disabled={!formData.module_code} onChange={e => setFormData({ ...formData, submodule_code: e.target.value, activity_code: "" })}>
-                    <option value="">Select Submodule</option>
-                    {filteredSubmodules.map(sm => <option key={sm.submodule_code} value={sm.submodule_code}>{sm.submodule_name}</option>)}
-                  </Form.Select>
-                </Col>
-                <Col md={6}>
-                  <Form.Label className="small fw-bold text-muted">Activity</Form.Label>
-                  <Form.Select size="sm" value={formData.activity_code} disabled={!formData.submodule_code} onChange={e => setFormData({ ...formData, activity_code: e.target.value })}>
-                    <option value="">Select Activity</option>
-                    {filteredActivities.map(act => <option key={act.activity_code} value={act.activity_code}>{act.activity_name}</option>)}
-                  </Form.Select>
-                </Col>
-              </Row>
-              <div className="text-end mt-4 pt-3 border-top border-secondary">
-                <Button variant="success" size="sm" type="submit" className="me-2 px-4">{isEdit ? "UPDATE" : "SAVE"}</Button>
-                <Button variant="secondary" size="sm" onClick={resetForm}>CANCEL</Button>
-              </div>
-            </Form>
-          </Card.Body>
-        </Card>
+        <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100 animate-in zoom-in-95 duration-200">
+ 
+          <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">
+            {isEdit ? "Update Setting" : "Create Setting"}
+          </h6>
+ 
+          <form
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            onSubmit={handleSubmit}
+          >
+ 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Setting ID
+              </label>
+              <input
+                type="number"
+                disabled={isEdit}
+                required
+                className={`w-full px-4 py-3 rounded-lg border border-gray-200 ${
+                  isEdit ? "bg-gray-50 text-gray-400" : ""
+                }`}
+                value={formData.setting_id}
+                onChange={(e) =>
+                  setFormData({ ...formData, setting_id: e.target.value })
+                }
+              />
+            </div>
+ 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Setting Name
+              </label>
+              <input
+                required
+                className="w-full px-4 py-3 rounded-lg border border-gray-200"
+                value={formData.setting_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, setting_name: e.target.value })
+                }
+              />
+            </div>
+ 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Module
+              </label>
+              <select
+                required
+                className="w-full px-4 py-3 rounded-lg border border-gray-200"
+                value={formData.module_code}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    module_code: e.target.value,
+                    submodule_code: "",
+                    activity_code: ""
+                  })
+                }
+              >
+                <option value="">Select</option>
+                {modules.map(m => (
+                  <option key={m.module_code} value={m.module_code}>
+                    {m.module_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+ 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Submodule
+              </label>
+              <select
+                className="w-full px-4 py-3 rounded-lg border border-gray-200"
+                disabled={!formData.module_code}
+                value={formData.submodule_code}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    submodule_code: e.target.value,
+                    activity_code: ""
+                  })
+                }
+              >
+                <option value="">Select</option>
+                {filteredSubmodules.map(sm => (
+                  <option
+                    key={sm.submodule_code}
+                    value={sm.submodule_code}
+                  >
+                    {sm.submodule_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+ 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Activity
+              </label>
+              <select
+                className="w-full px-4 py-3 rounded-lg border border-gray-200"
+                disabled={!formData.submodule_code}
+                value={formData.activity_code}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    activity_code: e.target.value
+                  })
+                }
+              >
+                <option value="">Select</option>
+                {filteredActivities.map(a => (
+                  <option key={a.activity_code} value={a.activity_code}>
+                    {a.activity_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+ 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Value
+              </label>
+              <input
+                className="w-full px-4 py-3 rounded-lg border border-gray-200"
+                value={formData.setting_value}
+                onChange={(e) =>
+                  setFormData({ ...formData, setting_value: e.target.value })
+                }
+              />
+            </div>
+ 
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Value 2
+              </label>
+              <input
+                className="w-full px-4 py-3 rounded-lg border border-gray-200"
+                value={formData.setting_value2}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    setting_value2: e.target.value
+                  })
+                }
+              />
+            </div>
+ 
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                Used For
+              </label>
+              <input
+                className="w-full px-4 py-3 rounded-lg border border-gray-200"
+                value={formData.used_for}
+                onChange={(e) =>
+                  setFormData({ ...formData, used_for: e.target.value })
+                }
+              />
+            </div>
+ 
+            <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
+              <button
+                type="submit"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-emerald-100"
+              >
+                {isEdit ? "Update" : "Save"}
+              </button>
+ 
+              <button
+                type="button"
+                className="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-700"
+                onClick={resetForm}
+              >
+                Cancel
+              </button>
+            </div>
+ 
+          </form>
+        </div>
       )}
-
-      {/* TABLE SECTION */}
+ 
+      {/* ================= TABLE ================= */}
       {!showForm && (
-        <Card className="border-0 shadow-sm bg-surface">
-          <TableToolbar 
-            itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} 
-            search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} 
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+ 
+          <TableToolbar
+            itemsPerPage={itemsPerPage}
+            setItemsPerPage={setItemsPerPage}
+            search={search}
+            setSearch={setSearch}
+            setCurrentPage={setCurrentPage}
           />
-          <div className="table-responsive">
-            <Table hover align="middle" className="mb-0 text-nowrap">
-              <thead className="small fw-bold text-uppercase">
-                <tr>
-                  <th width="50" className="ps-4"></th>
-                  <th>ID</th>
-                  <th>Name</th>
-                  <th>Value</th>
-                  <th>Used For</th>
-                  <th>Module</th>
+ 
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="table-header-row">
+                  <th className="table-th w-16"></th>
+                  <th className="table-th">ID</th>
+                  <th className="table-th">Name</th>
+                  <th className="table-th">Value</th>
+                  <th className="table-th">Used For</th>
+                  <th className="table-th">Module</th>
                 </tr>
               </thead>
-              <tbody>
-                {paginatedData.length > 0 ? (
-                  paginatedData.map((s) => (
-                    <tr 
-                      key={s.setting_id} 
-                      onClick={() => setSelectedSetting(selectedSetting?.setting_id === s.setting_id ? null : s)} 
-                      className={selectedSetting?.setting_id === s.setting_id ? "table-primary-light" : ""} 
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <td className="ps-4">
-                        <Form.Check checked={selectedSetting?.setting_id === s.setting_id} readOnly />
-                      </td>
-                      <td>{s.setting_id}</td>
-                      <td>{s.setting_name}</td>
-                      <td>{s.setting_value}</td>
-                      <td>{s.used_for}</td>
-                      <td>{s.module_code}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="text-center py-5 text-muted">No records found.</td>
+ 
+              <tbody className="divide-y divide-gray-50">
+                {paginatedData.map((row) => (
+                  <tr
+                    key={row.setting_id}
+                    onClick={() =>
+                      setSelectedRow(
+                        selectedRow?.setting_id === row.setting_id
+                          ? null
+                          : row
+                      )
+                    }
+                    className={`group cursor-pointer transition-colors duration-150 ${
+                      selectedRow?.setting_id === row.setting_id
+                        ? "bg-emerald-50/40"
+                        : "hover:bg-gray-50/50"
+                    }`}
+                  >
+                    <td className="px-6 py-4">
+                      <div
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                          selectedRow?.setting_id === row.setting_id
+                            ? "border-emerald-500 bg-emerald-500"
+                            : "border-gray-200 group-hover:border-emerald-300"
+                        }`}
+                      >
+                        {selectedRow?.setting_id === row.setting_id && (
+                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                        )}
+                      </div>
+                    </td>
+ 
+                    <td className="table-td">{row.setting_id}</td>
+                    <td className="table-td">{row.setting_name}</td>
+                    <td className="table-td">{row.setting_value}</td>
+                    <td className="table-td">{row.used_for}</td>
+                    <td className="table-td">{row.module_code}</td>
                   </tr>
-                )}
+                ))}
               </tbody>
-            </Table>
+            </table>
           </div>
-          <BootstrapPagination 
-            totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} 
-            currentPage={currentPage} setCurrentPage={setCurrentPage} 
-          />
-        </Card>
+ 
+          <div className="bg-white border-t border-gray-50 p-6">
+            <Pagination
+              totalEntries={filteredData.length}
+              itemsPerPage={effectiveItemsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
+            />
+          </div>
+ 
+        </div>
       )}
+ 
     </div>
   );
 };
-
+ 
 export default Settings;
+ 
+ 

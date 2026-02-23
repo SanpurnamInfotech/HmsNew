@@ -1,30 +1,30 @@
 import React, { useState } from "react";
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
 import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-
+ 
 const HallucinationMaster = () => {
-
+ 
   const BASE_PATH = "hallucination-master";
   const { data, loading, refresh, createItem, updateItem, deleteItem } =
     useCrud(`${BASE_PATH}/`);
-
+ 
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-
+ 
   const [formData, setFormData] = useState({
     hallucination_code: "",
     hallucination_name: "",
     sort_order: "",
     status: 1
   });
-
+ 
   const [modal, setModal] = useState({
     message: "",
     visible: false,
     type: "success"
   });
-
+ 
   const {
     search, setSearch,
     currentPage, setCurrentPage,
@@ -34,7 +34,7 @@ const HallucinationMaster = () => {
     filteredData,
     totalPages
   } = useTable(data);
-
+ 
   const resetForm = () => {
     setShowForm(false);
     setIsEdit(false);
@@ -46,23 +46,23 @@ const HallucinationMaster = () => {
       status: 1
     });
   };
-
+ 
   const showModal = (message, type = "success") =>
     setModal({ message, visible: true, type });
-
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+ 
     const actionPath = isEdit
       ? `${BASE_PATH}/update/${formData.hallucination_code}/`
       : `${BASE_PATH}/create/`;
-
+ 
    const payload = { ...formData };
-
+ 
 if (payload.sort_order === "" || payload.sort_order === null) {
   delete payload.sort_order;
 }
-
+ 
 const result = isEdit
   ? await updateItem(actionPath, payload)
   : await createItem(actionPath, payload);
@@ -74,16 +74,16 @@ const result = isEdit
       showModal(result.error || "Operation failed!", "error");
     }
   };
-
+ 
   const handleDelete = async () => {
     if (!selectedItem) return;
-
+ 
     // if (!window.confirm("Are you sure you want to delete this record?")) return;
-
+ 
     const result = await deleteItem(
       `${BASE_PATH}/delete/${selectedItem.hallucination_code}/`
     );
-
+ 
     if (result.success) {
       showModal("Hallucination deleted successfully!");
       setSelectedItem(null);
@@ -92,7 +92,7 @@ const result = isEdit
       showModal(result.error || "Delete failed!", "error");
     }
   };
-
+ 
   if (loading) return (
     <div className="loading-overlay">
       <div className="loading-spinner-container text-center">
@@ -101,10 +101,10 @@ const result = isEdit
       </div>
     </div>
   );
-
+ 
   return (
     <div className="app-container">
-
+ 
       {/* MODAL */}
       {modal.visible && (
         <div className="modal-overlay">
@@ -131,15 +131,15 @@ const result = isEdit
           </div>
         </div>
       )}
-
+ 
       {/* HEADER */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
         <div>
-          <h4 className="text-xl font-bold text-gray-800">
+          <h4 className="text-2xl font-black text-gray-800 tracking-tight">
             Hallucination Master
           </h4>
         </div>
-
+ 
         {!showForm && (
           <div className="flex gap-2">
             <button
@@ -148,7 +148,7 @@ const result = isEdit
             >
               <FaPlus size={14} /> Add New
             </button>
-
+ 
             {selectedItem && (
               <div className="flex gap-2">
                 <button
@@ -161,7 +161,7 @@ const result = isEdit
                 >
                   <FaEdit size={14} /> Edit
                 </button>
-
+ 
                 <button
                   className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold"
                   onClick={handleDelete}
@@ -173,14 +173,14 @@ const result = isEdit
           </div>
         )}
       </div>
-
+ 
       {/* FORM */}
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100">
           <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">
             {isEdit ? "Update Hallucination" : "Create Hallucination"}
           </h6>
-
+ 
           <form
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
             onSubmit={handleSubmit}
@@ -204,7 +204,7 @@ const result = isEdit
                 }
               />
             </div>
-
+ 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase">
                 Hallucination Name
@@ -221,7 +221,7 @@ const result = isEdit
                 }
               />
             </div>
-
+ 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase">
                 Sort Order
@@ -238,7 +238,7 @@ const result = isEdit
                 }
               />
             </div>
-
+ 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase">
                 Status
@@ -257,12 +257,12 @@ const result = isEdit
                 <option value={0}>Inactive</option>
               </select>
             </div>
-
+ 
             <div className="md:col-span-2 flex justify-end gap-3 pt-6">
               <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-10 py-2.5 rounded-lg text-sm font-bold">
                 {isEdit ? "Update" : "Save"}
               </button>
-
+ 
               <button
                 type="button"
                 className="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-700"
@@ -274,11 +274,11 @@ const result = isEdit
           </form>
         </div>
       )}
-
+ 
       {/* TABLE */}
       {!showForm && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-
+ 
           <TableToolbar
             itemsPerPage={itemsPerPage}
             setItemsPerPage={setItemsPerPage}
@@ -286,19 +286,19 @@ const result = isEdit
             setSearch={setSearch}
             setCurrentPage={setCurrentPage}
           />
-
+ 
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-gray-50 border-b">
                   <th className="px-6 py-4 w-16"></th>
-                  <th className="text-admin-th">Code</th>
-                  <th className="text-admin-th">Name</th>
-                  <th className="text-admin-th">Sort</th>
-                  <th className="text-admin-th">Status</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Code</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase">Name</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Sort</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-400 uppercase text-center">Status</th>
                 </tr>
               </thead>
-
+ 
               <tbody className="divide-y divide-gray-50">
                 {[...paginatedData]
   .sort((a, b) => {
@@ -330,20 +330,20 @@ const result = isEdit
                           : "border-gray-200"
                       }`} />
                     </td>
-
-                    <td className="text-admin-td">
+ 
+                    <td className="px-6 py-4 font-bold text-gray-800">
                       {h.hallucination_code}
                     </td>
-
-                    <td className="text-admin-td">
+ 
+                    <td className="px-6 py-4 font-semibold text-gray-700">
                       {h.hallucination_name}
                     </td>
-
-                    <td className="text-admin-td">
+ 
+                    <td className="px-6 py-4 text-center text-sm">
                       {h.sort_order}
                     </td>
-
-                    <td className="text-admin-td">
+ 
+                    <td className="px-6 py-4 text-center">
                       <span
                         className={`inline-flex px-3 py-1 rounded-full text-[10px] font-bold ${
                           h.status === 1
@@ -359,8 +359,8 @@ const result = isEdit
               </tbody>
             </table>
           </div>
-
-          <div className="bg-white border-t p-6">
+ 
+          <div className="">
             <Pagination
               totalEntries={filteredData.length}
               itemsPerPage={effectiveItemsPerPage}
@@ -374,5 +374,5 @@ const result = isEdit
     </div>
   );
 };
-
+ 
 export default HallucinationMaster;
