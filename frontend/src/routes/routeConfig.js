@@ -15,6 +15,15 @@ import DsmMaster from "../pages/masters/DsmMaster";
 import PremorbidPersonalityMst from "../pages/masters/PremorbidPersonalityMst";
 import PossessionMaster from "../pages/masters/PossessionMaster";
 import PrescriptionReport from "../pages/PrescriptionReport";
+import States from "../pages/masters/States";
+import Districts from "../pages/masters/Districts";
+import Cities from "../pages/masters/Cities";
+import MoodHistoryMaster from "../pages/masters/MoodHistoryMaster";
+// import ExpenseMaster from "../pages/masters/ExpenseMaster";
+import ThoughtContentMaster from "../pages/masters/ThoughtContentMaster";
+import ComplaintMaster from "../pages/masters/ComplaintMaster";
+import MseMaster from "../pages/masters/MseMaster";
+import Noticeboard from "../pages/masters/Noticeboard";
 
 
 export const adminRoutes = [
@@ -35,6 +44,17 @@ export const adminRoutes = [
   { path: "premorbid_personality_master", label: "Premorbid Personality Master", component: PremorbidPersonalityMst },
   { path: "possession_master", label: "Possession Master", component: PossessionMaster },
   { path: "prescription", label: "Prescription", component: PrescriptionReport },
+  { path: "States", label: "States", component: States },
+  { path: "Districts", label: "Districts", component: Districts },
+  { path: "Cities", label: "Cities", component: Cities },
+  { path: "MoodHistoryMaster", label: "Mood History Master", component: MoodHistoryMaster },
+  
+  // { path: "ExpenseMaster", label: "Expense Master", component: ExpenseMaster },
+  { path: "ThoughtContentMaster", label: "Thought Content Master", component: ThoughtContentMaster },
+  { path: "ComplaintMaster", label: "Complaint Master", component: ComplaintMaster },
+  { path: "MseMaster", label: "MseMaster", component: MseMaster },
+  { path: "Noticeboard", label: "Noticeboard", component: Noticeboard },
+
 
  
   

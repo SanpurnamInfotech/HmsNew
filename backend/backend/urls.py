@@ -124,6 +124,47 @@ urlpatterns = [
 
     # This is the specific endpoint used by your PrescriptionReport.jsx
     path('api/prescription-report/<str:prescription_code>/',PrescriptionDetailView.as_view(), name='prescription-report-data'),
+    
+    
+    
+    path('api/cities/', CitiesListView.as_view(), name='cities-list'),
+    path('api/cities/create/', CitiesCreateView.as_view(), name='cities-create'),
+    path('api/cities/update/<str:city_code>/', CitiesUpdateView.as_view(), name='cities-update'),
+    path('api/cities/delete/<str:city_code>/', CitiesDeleteView.as_view(), name='cities-delete'),
+
+    path('api/states/', StatesListView.as_view(), name='states-list'),
+    path('api/states/create/', StatesCreateView.as_view(), name='states-create'),
+    path('api/states/update/<str:state_code>/', StatesUpdateView.as_view(), name='states-update'),
+    path('api/states/delete/<str:state_code>/', StatesDeleteView.as_view(), name='states-delete'),
+
+    path('api/districts/', DistrictsListView.as_view(), name='districts-list'),
+    path('api/districts/create/', DistrictsCreateView.as_view(), name='districts-create'),
+    path('api/districts/update/<str:district_code>/', DistrictsUpdateView.as_view(), name='districts-update'),
+    path('api/districts/delete/<str:district_code>/', DistrictsDeleteView.as_view(), name='districts-delete'),
+    
+    path('api/mood-history/', MoodHistoryListView.as_view(), name='moodhistory-list'),
+    path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='moodhistory-create'),
+    path('api/mood-history/<str:mood_history_code>/', MoodHistoryDetailView.as_view(), name='moodhistory-detail'),
+    path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='moodhistory-update'),
+    path('api/mood-history/delete/<str:mood_history_code>/', MoodHistoryDeleteView.as_view(), name='moodhistory-delete'),
+    
+        path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
+    path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
+    path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),
+    path('api/expenses/delete/<str:expenses_code>/', ExpensesDeleteView.as_view(), name='expenses-delete'),
+    
+    # Thought Content Master CRUD
+    path('api/thought_content_master/', ThoughtContentListView.as_view(), name='thoughtcontent-list'),
+    path('api/thought_content_master/create/', ThoughtContentListView.as_view(), name='thoughtcontent-create'),
+    path('api/thought_content_master/update/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-update'),
+    path('api/thought_content_master/delete/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-delete'),
+    
+    
+    path('api/complaints/', ComplaintListView.as_view(), name='complaint-list'),
+    path('api/complaints/create/', ComplaintCreateView.as_view(), name='complaint-create'),
+    path('api/complaints/update/<str:complaint_code>/', ComplaintUpdateView.as_view(), name='complaint-update'),
+    path('api/complaints/delete/<str:complaint_code>/', ComplaintDeleteView.as_view(), name='complaint-delete'),
+
 
 ]
 

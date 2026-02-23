@@ -629,3 +629,152 @@ class PrescriptionItems(models.Model):
     class Meta:
         managed = False
         db_table = 'prescription_items'
+        
+        
+
+
+class ExpensesMaster(models.Model):
+    expenses_code = models.CharField(unique=True, max_length=25)
+    expenses_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'expenses_master'
+
+
+from django.db import models
+
+class ExpensesMaster(models.Model):
+    expenses_code = models.CharField(unique=True, max_length=25)
+    expenses_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'expenses_master'
+class ComplaintMaster(models.Model):
+    complaint_code = models.CharField(unique=True, max_length=45)
+    complaint_name = models.CharField(max_length=225)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    created_on = models.DateTimeField(blank=True, null=True)
+    created_by = models.IntegerField(blank=True, null=True)
+    updated_on = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'complaint_master'
+
+class MseMaster(models.Model):
+    mse_code = models.CharField(unique=True, max_length=25)
+    mse_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'mse_master'
+
+from django.db import models
+
+
+class ThoughtContentMaster(models.Model):
+    thought_content_code = models.CharField(unique=True, max_length=25)
+    thought_content_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'thought_content_master'
+
+
+
+class MoodHistoryMaster(models.Model):
+    mood_history_code = models.CharField(unique=True, max_length=25)
+    mood_history_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'mood_history_master'
+
+
+
+class Noticeboard(models.Model):
+    notice_code = models.CharField(unique=True, max_length=45)
+    notice_name = models.CharField(max_length=255)
+    notice_description = models.TextField()
+    notice_srart_date = models.DateField(blank=True, null=True)
+    notice_expiry_date = models.DateField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'noticeboard'
+
+
+from django.db import models
+
+
+class HospitalDetails(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    hospital_code = models.CharField(unique=True, max_length=45, blank=True, null=True)
+    hospital_name = models.CharField(max_length=225)
+    hospital_reg_number = models.CharField(max_length=50, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    city_code = models.CharField(max_length=45, blank=True, null=True)
+    district_code = models.CharField(max_length=45, blank=True, null=True)
+    state_code = models.CharField(max_length=45, blank=True, null=True)
+    country_code = models.CharField(max_length=45, blank=True, null=True)
+    pincode = models.CharField(max_length=15, blank=True, null=True)
+    cst_no = models.CharField(max_length=50, blank=True, null=True)
+    lunch_timing = models.CharField(max_length=100, blank=True, null=True)
+    weeklyoff_day = models.CharField(max_length=20, blank=True, null=True)
+    logo_path = models.CharField(max_length=255, blank=True, null=True)
+    developed_by = models.CharField(max_length=100, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'hospital_details'
