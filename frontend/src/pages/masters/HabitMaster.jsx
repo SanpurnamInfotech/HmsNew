@@ -60,11 +60,15 @@ const HabitMaster = () => {
     const path = isEdit
       ? `${HABIT_PATH}/update/${formData.habit_code}/`
       : `${HABIT_PATH}/create/`;
+const payload = { ...formData };
 
-    const result = isEdit
-      ? await updateItem(path, formData)
-      : await createItem(path, formData);
+if (payload.sort_order === "" || payload.sort_order === null) {
+  delete payload.sort_order;
+}
 
+const result = isEdit
+  ? await updateItem(path, payload)
+  : await createItem(path, payload);
     if (result.success) {
       showModal(`Habit ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
@@ -287,19 +291,27 @@ const HabitMaster = () => {
               </thead>
 
               <tbody className="divide-y divide-gray-50">
-                {paginatedData.map((h) => (
-                  <tr
-                    key={h.habit_code}
-                    onClick={() =>
-                      setSelectedHabit(
-                        selectedHabit?.habit_code === h.habit_code ? null : h
-                      )
-                    }
-                    className={`group cursor-pointer transition-colors duration-150
-                      ${selectedHabit?.habit_code === h.habit_code
-                        ? "bg-emerald-50/40"
-                        : "hover:bg-gray-50/50"
-                      }`}
+               {[...paginatedData]
+  .sort((a, b) => {
+    const sa = Number(a.sort_order ?? 999999);
+    const sb = Number(b.sort_order ?? 999999);
+    return sa - sb;
+  })
+  .map(h => (
+    <tr
+      key={h.habit_code}
+      onClick={() =>
+        setSelectedHabit(
+          selectedHabit?.habit_code === h.habit_code ? null : h
+        )
+      }
+      className={`group cursor-pointer transition-colors duration-150
+        ${
+          selectedHabit?.habit_code === h.habit_code
+            ? "bg-emerald-50/40"
+            : "hover:bg-gray-50/50"
+        }`}
+    
                   >
                     <td className="px-6 py-4">
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all

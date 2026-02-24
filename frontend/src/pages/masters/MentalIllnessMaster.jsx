@@ -78,9 +78,15 @@ const MentalIllnessMaster = () => {
       ? `${PATH}/update/${formData.mental_illness_code}/`
       : `${PATH}/create/`;
 
-    const result = isEdit
-      ? await updateItem(actionPath, formData)
-      : await createItem(actionPath, formData);
+    const payload = { ...formData };
+ 
+if (payload.sort_order === "" || payload.sort_order === null) {
+  delete payload.sort_order;
+}
+ 
+const result = isEdit
+  ? await updateItem(actionPath, payload)
+  : await createItem(actionPath, payload);
 
     if (result.success) {
       showModal(

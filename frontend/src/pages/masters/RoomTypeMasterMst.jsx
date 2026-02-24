@@ -16,7 +16,7 @@ const RoomTypeMasterMst = () => {
   const [formData, setFormData] = useState({
     room_type_code: "",
     room_type_name: "",
-    base_charges: "",
+    bed_charges: "",
     status: 1,
     sort_order: ""
   });
@@ -31,7 +31,7 @@ const RoomTypeMasterMst = () => {
     setShowForm(false);
     setIsEdit(false);
     setSelectedRow(null);
-    setFormData({ room_type_code: "", room_type_name: "", base_charges: "", status: 1, sort_order: "" });
+    setFormData({ room_type_code: "", room_type_name: "", bed_charges: "", status: 1, sort_order: "" });
   };
 
   const showModal = (message, type = "success") => setModal({ message, visible: true, type });
@@ -40,7 +40,15 @@ const RoomTypeMasterMst = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const actionPath = isEdit ? `${PATH}/update/${formData.room_type_code}/` : `${PATH}/create/`;
-    const result = isEdit ? await updateItem(actionPath, formData) : await createItem(actionPath, formData);
+    const payload = { ...formData };
+ 
+if (payload.sort_order === "" || payload.sort_order === null) {
+  delete payload.sort_order;
+}
+ 
+const result = isEdit
+  ? await updateItem(actionPath, payload)
+  : await createItem(actionPath, payload);
 
     if (result.success) {
       showModal(`Room Type ${isEdit ? "updated" : "created"} successfully!`);
@@ -132,8 +140,8 @@ const RoomTypeMasterMst = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase">Base Charges</label>
-              <input type="number" step="0.01" className="w-full px-4 py-3 rounded-lg border border-gray-200" value={formData.base_charges} onChange={(e) => setFormData({ ...formData, base_charges: e.target.value })} />
+              <label className="text-xs font-bold text-gray-500 uppercase">Bed Charges</label>
+              <input type="number" step="0.01" className="w-full px-4 py-3 rounded-lg border border-gray-200" value={formData.bed_charges} onChange={(e) => setFormData({ ...formData, bed_charges: e.target.value })} />
             </div>
 
             <div className="space-y-1.5">
@@ -184,7 +192,7 @@ const RoomTypeMasterMst = () => {
                     </td>
                     <td className="px-6 py-4 font-bold text-gray-800">{row.room_type_code}</td>
                     <td className="px-6 py-4 text-gray-700">{row.room_type_name}</td>
-                    <td className="px-6 py-4 text-center font-mono text-xs">{row.base_charges}</td>
+                    <td className="px-6 py-4 text-center font-mono text-xs">{row.bed_charges}</td>
                     <td className="px-6 py-4 text-center">
                       <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${row.status === 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
                         {row.status === 1 ? 'Active' : 'Inactive'}
@@ -195,7 +203,7 @@ const RoomTypeMasterMst = () => {
               </tbody>
             </table>
           </div>
-          <div className="bg-white border-t border-gray-50 p-6">
+          <div className="">
             <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
           </div>
         </div>

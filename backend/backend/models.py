@@ -104,23 +104,23 @@ class EngineActivity(models.Model):
         db_table = 'engine_activity'
         
         
-class Settings(models.Model):
-    setting_id = models.IntegerField(unique=True)
-    setting_name = models.CharField(max_length=100, blank=True, null=True)
-    module_code = models.CharField(max_length=25, blank=True, null=True)
-    submodule_code = models.CharField(max_length=25, blank=True, null=True)
-    activity_code = models.CharField(max_length=25, blank=True, null=True)
-    setting_value = models.CharField(max_length=255, blank=True, null=True)
-    setting_value2 = models.CharField(max_length=255, blank=True, null=True)
-    used_for = models.CharField(max_length=100, blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
+# class Settings(models.Model):
+#     setting_id = models.IntegerField(unique=True)
+#     setting_name = models.CharField(max_length=100, blank=True, null=True)
+#     module_code = models.CharField(max_length=25, blank=True, null=True)
+#     submodule_code = models.CharField(max_length=25, blank=True, null=True)
+#     activity_code = models.CharField(max_length=25, blank=True, null=True)
+#     setting_value = models.CharField(max_length=255, blank=True, null=True)
+#     setting_value2 = models.CharField(max_length=255, blank=True, null=True)
+#     used_for = models.CharField(max_length=100, blank=True, null=True)
+#     createdon = models.DateTimeField(blank=True, null=True)
+#     createdby = models.IntegerField(blank=True, null=True)
+#     updatedon = models.DateTimeField(blank=True, null=True)
+#     updatedby = models.IntegerField(blank=True, null=True)
 
-    class Meta:
-        managed = False
-        db_table = 'settings'
+#     class Meta:
+#         managed = False
+#         db_table = 'settings'
         
 class Permissions(models.Model):
     usertype_code = models.CharField(max_length=45)
@@ -273,7 +273,7 @@ class IcdMaster(models.Model):
 class RoomTypeMaster(models.Model):
     room_type_code = models.CharField(unique=True, max_length=20)
     room_type_name = models.CharField(max_length=100)
-    base_charges = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
+    bed_charges = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
     status = models.IntegerField(blank=True, null=True)
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -412,3 +412,64 @@ class PossessionMaster(models.Model):
     class Meta:
         managed = False
         db_table = 'possession_master'
+
+
+
+class Settings(models.Model):
+    setting_id = models.IntegerField(unique=True)
+    setting_name = models.CharField(max_length=100, blank=True, null=True)
+    module_code = models.CharField(max_length=25, blank=True, null=True)
+    submodule_code = models.CharField(max_length=25, blank=True, null=True)
+    activity_code = models.CharField(max_length=25, blank=True, null=True)
+    setting_value = models.CharField(max_length=255, blank=True, null=True)
+    setting_value2 = models.CharField(max_length=255, blank=True, null=True)
+    used_for = models.CharField(max_length=100, blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'settings'
+        
+        
+
+class MedicineCategory(models.Model):
+    medicine_cat_code = models.CharField(unique=True, max_length=45)
+    medicine_cat_name = models.CharField(max_length=225)
+    description = models.TextField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'medicine_category'        
+        
+        
+
+
+
+class Medicine(models.Model):
+    medicine_code = models.CharField(unique=True, max_length=45)
+    medicine_cat_code = models.ForeignKey('MedicineCategory', models.DO_NOTHING, db_column='medicine_cat_code', to_field='medicine_cat_code')
+    medicine_name = models.CharField(max_length=225)
+    generic_name = models.CharField(max_length=225, blank=True, null=True)
+    qty = models.IntegerField(blank=True, null=True)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    prescription_required = models.IntegerField(blank=True, null=True, db_comment='1=Yes, 0=No')        
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'medicine'
+        
