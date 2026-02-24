@@ -281,7 +281,7 @@ const ModuleMst = () => {
 
                       return (
                         <tr key={uCode} className="hover:bg-white transition-colors">
-                          <td className="text-admin-td">{utype.usertype_name}</td>
+                          <td className="text-admin-td">{utype.usertype_code}</td>
                           <td className="px-4 py-4 text-center">
                             <input 
                               type="checkbox" 
