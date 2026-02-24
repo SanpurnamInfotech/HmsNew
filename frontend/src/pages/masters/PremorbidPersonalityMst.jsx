@@ -63,9 +63,15 @@ const PremorbidPersonalityMst = () => {
       ? `${API_PATH}/update/${formData.premorbid_personality_code}/`
       : `${API_PATH}/create/`;
 
-    const result = isEdit
-      ? await updateItem(actionPath, formData)
-      : await createItem(actionPath, formData);
+    const payload = { ...formData };
+ 
+if (payload.sort_order === "" || payload.sort_order === null) {
+  delete payload.sort_order;
+}
+ 
+const result = isEdit
+  ? await updateItem(actionPath, payload)
+  : await createItem(actionPath, payload);
 
     if (result.success) {
       showModal(`Premorbid personality ${isEdit ? "updated" : "created"} successfully`);

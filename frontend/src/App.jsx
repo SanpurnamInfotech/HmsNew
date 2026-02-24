@@ -69,7 +69,7 @@ function App() {
           <Route path='advice_master' element={<AdviceMaster />} />
           <Route path="icd-master" element={<IcdMasterMst />} />
           <Route path="room-type-master" element={<RoomTypeMasterMst />} />
-           <Route path="bed-master" element={<BedMaster />} />
+           <Route path="bed" element={<BedMaster />} />
            <Route path="habit-master" element={<HabitMaster />} />
            <Route path="hallucination-master" element={<HallucinationMaster />} />
            <Route path="history-master" element={<HistoryMaster />} />

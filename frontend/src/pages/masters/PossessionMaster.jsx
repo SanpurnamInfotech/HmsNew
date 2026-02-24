@@ -359,7 +359,7 @@ const PossessionMaster = () => {
             </table>
           </div>
 
-          <div className="bg-white border-t p-6">
+          <div className="">
             <Pagination
               totalEntries={filteredData.length}
               itemsPerPage={effectiveItemsPerPage}

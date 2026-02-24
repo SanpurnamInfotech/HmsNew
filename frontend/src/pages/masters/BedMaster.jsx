@@ -5,7 +5,7 @@ import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle } from "react-ico
 
 const BedMaster = () => {
 
-  const BED_PATH = "bed-master";
+  const BED_PATH = "bed";
   const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${BED_PATH}/`);
 
   const [showForm, setShowForm] = useState(false);

@@ -273,7 +273,7 @@ class IcdMaster(models.Model):
 class RoomTypeMaster(models.Model):
     room_type_code = models.CharField(unique=True, max_length=20)
     room_type_name = models.CharField(max_length=100)
-    base_charges = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
+    bed_charges = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
     status = models.IntegerField(blank=True, null=True)
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
