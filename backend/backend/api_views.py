@@ -458,8 +458,8 @@ class EngineModuleCreateView(APIView):
                 if serializer.is_valid():
                     # Save the module and capture the instance
                     module_instance = serializer.save(
-                        created_by=request.user.id,
-                        created_on=timezone.now(),
+                        createdby=request.user.id,
+                        createdon=timezone.now(),
                     )
                     
                     # 2. Handle Permissions
@@ -522,8 +522,8 @@ class EngineModuleUpdateView(APIView):
                 
                 if serializer.is_valid():
                     module_instance = serializer.save(
-                        updated_by=request.user.id,
-                        updated_on=timezone.now()
+                        updatedby=request.user.id,
+                        updatedon=timezone.now()
                     )
 
                     user_types = UsertypeMaster.objects.all()
@@ -1370,10 +1370,10 @@ class ComplaintCreateView(APIView):
 
             if serializer.is_valid():
                 serializer.save(
-                    created_on=timezone.now(),
-                    created_by=1,
-                    updated_on=timezone.now(),
-                    updated_by=1
+                    createdon=timezone.now(),
+                    createdby=1,
+                    updatedon=timezone.now(),
+                    updatedby=1
                 )
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -1394,8 +1394,8 @@ class ComplaintUpdateView(APIView):
 
             if serializer.is_valid():
                 serializer.save(
-                    updated_on=timezone.now(),
-                    updated_by=1
+                    updatedon=timezone.now(),
+                    updatedby=1
                 )
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
