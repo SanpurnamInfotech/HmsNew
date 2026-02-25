@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 import threading
 from django.db.models import Max
 from django.contrib.auth import authenticate
-
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
@@ -76,30 +76,57 @@ class CredentialsProvidedPermission(permissions.BasePermission):
         password = request.data.get("password")
         return bool(username and password)
 
-
+from django.contrib.sessions.backends.db import SessionStore
 class LoginView(APIView):
-    permission_classes = [CredentialsProvidedPermission]
+    permission_classes = [AllowAny] 
 
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
 
         try:
-            # Match your custom Users model
             user = Users.objects.get(username=username, status=1)
         except Users.DoesNotExist:
-            return Response({"error": "User not found or inactive"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": "User not found or inactive"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
         if not check_password(password, user.password):
-            return Response({"error": "Invalid password"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response(
+                {"error": "Invalid password"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
 
+        # 🔹 Get usertype_name from UsertypeMaster
+        usertype_name = None
+        if user.usertype_code:
+            try:
+                usertype = UsertypeMaster.objects.get(
+                    usertype_code=user.usertype_code
+                )
+                usertype_name = usertype.usertype_name
+            except UsertypeMaster.DoesNotExist:
+                usertype_name = None
+
+        # 🔹 Save data into session
+        request.session['user_id'] = user.user_id
+        request.session['username'] = user.username
+        request.session['usertype_name'] = usertype_name
+        request.session['login_time'] = str(timezone.now())
+
+        request.session.save()
+
+        # 🔹 JWT Token
         refresh = RefreshToken.for_user(user)
+
         return Response({
             "access": str(refresh.access_token),
             "refresh": str(refresh),
             "username": user.username,
+            "user_id": user.user_id,
+            "usertype_name": usertype_name,
         }, status=status.HTTP_200_OK)
-
 
 
 from django.contrib.auth.hashers import make_password

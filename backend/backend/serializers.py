@@ -201,8 +201,6 @@ class MedicineSerializer(serializers.ModelSerializer):
         fields = "__all__"
         
 
-
-
 class MedicineCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
