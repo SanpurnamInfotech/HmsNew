@@ -473,3 +473,23 @@ class Medicine(models.Model):
         managed = False
         db_table = 'medicine'
         
+
+class IpdRegistration(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    ipd_registeration_code = models.CharField(max_length=50, blank=True, null=True)
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code', blank=True, null=True)
+    ipd_number = models.CharField(unique=True, max_length=150)
+    admission_date = models.DateTimeField()
+    discharge_date = models.DateTimeField(blank=True, null=True)
+    doctor_code = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctor_code', to_field='doctor_code', blank=True, null=True)
+    bed_id = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    remarks = models.CharField(max_length=255, blank=True, null=True)
+    created_on = models.DateTimeField(blank=True, null=True)
+    created_by = models.IntegerField(blank=True, null=True)
+    updated_on = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'ipd_registration'
