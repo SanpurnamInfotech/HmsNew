@@ -130,7 +130,7 @@ const ModuleMst = () => {
 
   const handleDelete = async () => {
     if (!selectedModule) return;
-    if (!window.confirm("Are you sure you want to delete this module?")) return;
+    // if (!window.confirm("Are you sure you want to delete this module?")) return;
     
     const result = await deleteItem(`${MODULE_PATH}/delete/${selectedModule.module_code}/`);
     if (result.success) {
@@ -143,7 +143,7 @@ const ModuleMst = () => {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-[400px]">
+    <div className="flex items-center justify-center min-h-100">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
     </div>
   );
@@ -356,7 +356,7 @@ const ModuleMst = () => {
                     <td className="text-admin-td">{m.module_name}</td>
                     <td className="text-admin-td">{m.url || 'N/A'}</td>
                     {/* <td className="text-admin-td ">{m.sequence || '-'}</td> */}
-                    <td className="px-6 py-4">
+                    <td className="text-admin-td">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${m.status === 1 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
                         {m.status === 1 ? 'Active' : 'Inactive'}
                       </span>

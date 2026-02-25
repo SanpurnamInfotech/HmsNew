@@ -1,9 +1,102 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react"; // Added useRef
 import api from "../../utils/domain"; 
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
 import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaRunning, FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
 // Import your central route config
 import { adminRoutes } from "../../routes/routeConfig"; 
+
+/* ==========================================================
+   REUSABLE SEARCHABLE SELECT (Defined locally to fix ReferenceError)
+   ========================================================== */
+const SearchableSelect = ({
+  value,
+  onChange,
+  options = [],
+  placeholder = "Select",
+  disabled = false,
+  className = "w-full px-4 py-3 rounded-lg border border-gray-200 outline-none transition-all",
+}) => {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const wrapRef = useRef(null);
+
+  const selectedLabel = useMemo(() => {
+    const found = options.find((o) => String(o.value) === String(value));
+    return found ? found.label : "";
+  }, [options, value]);
+
+  const filtered = useMemo(() => {
+    const query = (q || "").toLowerCase().trim();
+    if (!query) return options;
+    return options.filter(
+      (o) =>
+        (o.label || "").toLowerCase().includes(query) ||
+        String(o.value || "").toLowerCase().includes(query)
+    );
+  }, [options, q]);
+
+  useEffect(() => {
+    const onDoc = (e) => {
+      if (!wrapRef.current?.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  return (
+    <div className="relative" ref={wrapRef}>
+      <button
+        type="button"
+        className={`${className} text-left flex items-center justify-between ${
+          disabled ? "bg-gray-50 cursor-not-allowed" : "bg-white"
+        } ${open ? "ring-2 ring-green-500/20 border-green-500" : ""}`}
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((s) => !s)}
+      >
+        <span className={`${selectedLabel ? "text-gray-900" : "text-gray-400"}`}>
+          {selectedLabel || placeholder}
+        </span>
+        <span className="ml-3 text-gray-500">{open ? <FaChevronUp size={10}/> : <FaChevronDown size={10}/>}</span>
+      </button>
+
+      {open && !disabled && (
+        <div className="absolute z-50 mt-1 w-full rounded-xl border border-gray-100 bg-white shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+          <div className="p-2 border-b bg-gray-50 flex items-center gap-2">
+            <FaSearch className="text-gray-400" size={12} />
+            <input
+              autoFocus
+              className="w-full bg-transparent text-sm outline-none"
+              placeholder="Search..."
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <div className="max-h-60 overflow-y-auto">
+            {filtered.length > 0 ? (
+              filtered.map((o) => (
+                <div
+                  key={String(o.value)}
+                  className={`px-4 py-3 text-sm cursor-pointer transition-colors ${
+                    String(o.value) === String(value) ? "bg-green-50 text-green-700 font-bold" : "hover:bg-green-50 text-gray-700"
+                  }`}
+                  onClick={() => {
+                    onChange(o.value);
+                    setOpen(false);
+                    setQ("");
+                  }}
+                >
+                  {o.label}
+                </div>
+              ))
+            ) : (
+              <div className="px-4 py-6 text-sm text-gray-400 text-center">No results found</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Activities = () => {
   /* ================= DATA FETCHING ================= */
@@ -34,7 +127,6 @@ const Activities = () => {
   });
   const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
 
-  /* ================= SORTING LOGIC ================= */
   // Sorting by sequence number (ascending)
   const sortedData = useMemo(() => {
     if (!data) return [];
@@ -62,7 +154,6 @@ const Activities = () => {
     fetchSubmodules();
     fetchUserTypes();
     
-    // Process local routes into dropdown options
     const formattedRoutes = adminRoutes.map(route => ({
       label: route.label,
       value: `/admin/${route.path}`
@@ -91,6 +182,19 @@ const Activities = () => {
     } catch (err) { console.error(err); }
   };
 
+  // Transformation for SearchableSelect
+  const moduleOptions = useMemo(() => 
+    modules.map(m => ({ value: m.module_code, label: m.module_name })), 
+  [modules]);
+
+  // Filters submodules based on selected module for the dropdown
+  const filteredSubmoduleOptions = useMemo(() => {
+    const list = formData.module_code 
+      ? submodules.filter(sm => sm.module_code === formData.module_code)
+      : submodules;
+    return list.map(sm => ({ value: sm.submodule_code, label: sm.submodule_name }));
+  }, [submodules, formData.module_code]);
+
   const fetchUserTypes = async () => {
     try {
       const response = await api.get("usertypes/"); 
@@ -115,12 +219,10 @@ const Activities = () => {
     setPermissionsData({});
     setUrlSearchTerm("");
     setShowUrlDropdown(false);
-    setFormData({ module_code: "", submodule_code: "", activity_code: "", activity_name: "", url: "",sequence: "", status: 1 });
+    setFormData({ module_code: "", submodule_code: "", activity_code: "", activity_name: "", url: "", sequence: "", status: 1 });
   };
 
   const showModal = (message, type = "success") => setModal({ message, visible: true, type });
-
-  const availableSubmodules = submodules.filter(sm => sm.module_code === formData.module_code);
 
   /* ================= CRUD OPERATIONS ================= */
   const handleSubmit = async (e) => {
@@ -148,7 +250,7 @@ const Activities = () => {
 
   const handleDelete = async () => {
     if (!selectedActivity) return;
-    if (!window.confirm("Are you sure you want to delete this activity?")) return;
+    // if (!window.confirm("Are you sure you want to delete this activity?")) return;
     const result = await deleteItem(`${ACTIVITY_PATH}/delete/${selectedActivity.activity_code}/`);
     if (result.success) {
       showModal("Activity deleted successfully!");
@@ -159,11 +261,10 @@ const Activities = () => {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center min-h-[400px]"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div></div>;
+  if (loading) return <div className="flex items-center justify-center min-h-100"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div></div>;
 
   return (
     <div className="app-container p-6">
-      {/* NOTIFICATION MODAL */}
       {modal.visible && (
         <div className="modal-overlay fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in-95">
@@ -174,13 +275,12 @@ const Activities = () => {
                {modal.type === "success" ? "Success" : "Error"}
              </h3>
              <p className="text-gray-600 mb-6">{modal.message}</p>
-             <button className="bg-green-600 hover:bg-green-700 text-white w-full py-2.5 rounded-lg font-bold" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
+             <button className="bg-emerald-600 text-white w-full py-2.5 rounded-lg font-semibold" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
           </div>
         </div>
       )}
 
-      {/* HEADER SECTION */}
-      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border-l-4 border-green-500">
+      <div className="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border-l-4 border-emerald-500">
         <h4 className="text-xl font-bold text-gray-800">Activity Master</h4>
         {!showForm && (
           <div className="flex gap-2">
@@ -219,18 +319,22 @@ const Activities = () => {
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase">Parent Module</label>
-              <select className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none" value={formData.module_code} required onChange={e => setFormData({ ...formData, module_code: e.target.value, submodule_code: "" })}>
-                <option value="" disabled>Select Module</option>
-                {modules.map(m => <option key={m.module_code} value={m.module_code}>{m.module_name}</option>)}
-              </select>
+              <SearchableSelect 
+                value={formData.module_code} 
+                options={moduleOptions} 
+                placeholder="Select Module"
+                onChange={(val) => setFormData({...formData, module_code: val, submodule_code: ""})} // Reset submodule on module change
+              />
             </div>
 
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase">Submodule</label>
-              <select className="w-full px-4 py-3 rounded-lg border border-gray-200 outline-none disabled:bg-gray-50" value={formData.submodule_code} required disabled={!formData.module_code} onChange={e => setFormData({ ...formData, submodule_code: e.target.value })}>
-                <option value="" disabled>Select Submodule</option>
-                {availableSubmodules.map(sm => <option key={sm.submodule_code} value={sm.submodule_code}>{sm.submodule_name}</option>)}
-              </select>
+              <SearchableSelect 
+                value={formData.submodule_code} 
+                options={filteredSubmoduleOptions} 
+                placeholder="Select Submodule"
+                onChange={(val) => setFormData({...formData, submodule_code: val})} 
+              />
             </div>
 
             <div className="space-y-1.5 relative">
@@ -268,9 +372,8 @@ const Activities = () => {
               </select>
             </div>
 
-            {/* PERMISSIONS MATRIX */}
             <div className="md:col-span-2 mt-4">
-              <h6 className="text-sm font-bold text-green-700 mb-3 uppercase tracking-wider">Role-Based Access Control</h6>
+              <h6 className="text-sm font-bold text-emerald-700 mb-3 uppercase tracking-wider">Role-Based Access Control</h6>
               <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm bg-gray-50/50">
                 <table className="w-full text-sm text-left">
                   <thead className="bg-gray-100 text-gray-600 uppercase text-[10px] font-black">
@@ -290,7 +393,7 @@ const Activities = () => {
                         <tr key={uId} className="hover:bg-white transition-colors">
                           <td className="px-4 py-4 font-bold text-gray-700">{utype.usertype_name}</td>
                           <td className="px-4 py-4 text-center">
-                            <input type="checkbox" className="w-4 h-4 rounded text-green-600 cursor-pointer" checked={isAll}
+                            <input type="checkbox cursor-pointer" className="w-4 h-4 rounded text-emerald-600" checked={isAll}
                               onChange={(e) => {
                                 const val = e.target.checked ? "Yes" : "No";
                                 setPermissionsData(p => ({...p, [`readPermission${uId}`]: val, [`writePermission${uId}`]: val, [`updatePermission${uId}`]: val }));
@@ -299,7 +402,7 @@ const Activities = () => {
                           </td>
                           {['read', 'write', 'update'].map(type => (
                             <td key={type} className="px-4 py-4 text-center">
-                              <input type="checkbox" className="w-4 h-4 rounded text-green-600 cursor-pointer" checked={permissionsData[`${type}Permission${uId}`] === "Yes"}
+                              <input type="checkbox" className="w-4 h-4 rounded text-emerald-600 cursor-pointer" checked={permissionsData[`${type}Permission${uId}`] === "Yes"}
                                 onChange={(e) => setPermissionsData(p => ({...p, [`${type}Permission${uId}`]: e.target.checked ? "Yes" : "No"}))}
                               />
                             </td>
@@ -313,14 +416,13 @@ const Activities = () => {
             </div>
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-               <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-12 py-2.5 rounded-lg text-sm font-bold shadow-lg transition-all">{isEdit ? "Update Activity" : "Save Activity"}</button>
+              <button type="submit" className="bg-emerald-600 text-white px-12 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-emerald-100">{isEdit ? "Update" : "Save"}</button>
                <button type="button" className="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-700 transition-colors" onClick={resetForm}>Cancel</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* TABLE SECTION */}
       {!showForm && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <TableToolbar itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} />
@@ -332,7 +434,6 @@ const Activities = () => {
                   <th className="text-admin-th">Code</th>
                   <th className="text-admin-th">Activity Name</th>
                   <th className="text-admin-th">Hierarchy (Sub / Mod)</th>
-                  {/* <th className="text-admin-th text-center">Sequence</th> */}
                   <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
@@ -353,7 +454,6 @@ const Activities = () => {
                     <td className="text-admin-td">
                         {a.submodule_code} <span className="text-admin-td">/</span> {a.module_code}
                     </td>
-                    {/* <td className="text-admin-td">{a.sequence || '-'}</td> */}
                     <td className="text-admin-td">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${a.status === 1 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
                         {a.status === 1 ? 'Active' : 'Inactive'}
