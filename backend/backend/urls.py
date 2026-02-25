@@ -158,6 +158,13 @@ urlpatterns = [
     path('api/medicine-category/update/<str:medicine_cat_code>/', medicine_category_update, name='medicine-category-update'),
     path('api/medicine-category/delete/<str:medicine_cat_code>/', medicine_category_delete, name='medicine-category-delete'),
 
+    path('api/ipd-registration/create/', IpdRegistrationCreateView.as_view()),
+    path('api/ipd-registration/list/', IpdRegistrationListView.as_view()),
+    path('api/ipd-registration/<str:ipd_registeration_code>/', IpdRegistrationDetailView.as_view()),
+    path('api/ipd-registration/update/<str:ipd_registeration_code>/', IpdRegistrationUpdateView.as_view()),
+    path('api/ipd-registration/delete/<str:ipd_registeration_code>/', IpdRegistrationDeleteView.as_view()),
+
+
 ]
 
 
