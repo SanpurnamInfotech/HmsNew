@@ -664,3 +664,17 @@ class PossessionMasterSerializer(serializers.ModelSerializer):
         instance.updatedon = timezone.now()
 
         return super().update(instance, validated_data)
+
+
+class IpdRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IpdRegistration
+        fields = '__all__'
+        read_only_fields = (
+            'ipd_registeration_code',
+            'ipd_number',
+            'created_on',
+            'updated_on',
+            'created_by',
+            'updated_by',
+        )

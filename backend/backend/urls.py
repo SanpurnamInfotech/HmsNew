@@ -125,7 +125,12 @@ urlpatterns = [
     path('api/possession-master/create/', possession_master_create,name='possession-master-create'),
     path('api/possession-master/update/<str:possession_code>/',possession_master_update,name='possession-master-update'),
     path('api/possession-master/delete/<str:possession_code>/',possession_master_delete,name='possession-master-delete'),
-
+   
+    path('api/ipd-registration/create/', IpdRegistrationCreateView.as_view()),
+    path('api/ipd-registration/list/', IpdRegistrationListView.as_view()),
+    path('api/ipd-registration/<str:ipd_registeration_code>/', IpdRegistrationDetailView.as_view()),
+    path('api/ipd-registration/update/<str:ipd_registeration_code>/', IpdRegistrationUpdateView.as_view()),
+    path('api/ipd-registration/delete/<str:ipd_registeration_code>/', IpdRegistrationDeleteView.as_view()),
 
 
 

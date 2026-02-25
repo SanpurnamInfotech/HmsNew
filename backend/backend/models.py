@@ -9,9 +9,9 @@ class Users(models.Model):
     activkey = models.CharField(max_length=128, blank=True, null=True)
     superuser = models.IntegerField()
     status = models.IntegerField()
-    usertype_code = models.ForeignKey('UsertypeMaster', models.DO_NOTHING, db_column='usertype_code', to_field='usertype_code', blank=True, null=True)
-    employee_code = models.ForeignKey('EmployeeMaster', models.DO_NOTHING, db_column='employee_code', to_field='employee_code', blank=True, null=True)
-    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
+    usertype_code = models.CharField(max_length=128, blank=True, null=True)
+    employee_code = models.CharField(max_length=128, blank=True, null=True)
+    company_code = models.CharField(max_length=128, blank=True, null=True)
     candidate_id = models.IntegerField(blank=True, null=True)
     lastvisiton = models.DateTimeField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -26,8 +26,8 @@ class Users(models.Model):
 class UsertypeMaster(models.Model):
     usertype_code = models.CharField(unique=True, max_length=45)
     usertype_name = models.CharField(max_length=100)
-    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
-    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
+    financialyear_code = models.CharField(max_length=128, blank=True, null=True)
+    company_code = models.CharField(max_length=128, blank=True, null=True)
     status = models.IntegerField()
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
@@ -412,3 +412,23 @@ class PossessionMaster(models.Model):
     class Meta:
         managed = False
         db_table = 'possession_master'
+
+
+class IpdRegistration(models.Model):
+    ipd_registeration_code = models.CharField(max_length=50, blank=True, null=True)
+    patient_code = models.CharField(max_length=50, blank=True, null=True)
+    ipd_number = models.CharField(unique=True, max_length=50)
+    admission_date = models.DateTimeField()
+    discharge_date = models.DateTimeField(blank=True, null=True)
+    doctor_code = models.CharField(max_length=50, blank=True, null=True)
+    bed_id = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    remarks = models.CharField(max_length=255, blank=True, null=True)
+    created_on = models.DateTimeField()
+    created_by = models.IntegerField()
+    updated_on = models.DateTimeField()
+    updated_by = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'ipd_registration'
