@@ -2488,6 +2488,7 @@ def medicine_category_delete(request, medicine_cat_code):
 class IpdRegistrationCreateView(APIView):
     authentication_classes = [CustomJWTAuthentication]
     permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         try:
             serializer = IpdRegistrationSerializer(data=request.data)
@@ -2497,14 +2498,12 @@ class IpdRegistrationCreateView(APIView):
                     now = timezone.now()
                     year = now.year
 
-                    # 🔹 IPD Registration Code → IPD001
                     last_id = IpdRegistration.objects.aggregate(
-                        max_id=Max('id')
-                    )['max_id'] or 0
+                        max_id=Max("id")
+                    )["max_id"] or 0
 
                     ipd_registration_code = f"IPD{last_id + 1:03d}"
 
-                    # 🔹 IPD Number → IPD-2026-01
                     year_count = (
                         IpdRegistration.objects
                         .filter(admission_date__year=year)
@@ -2513,18 +2512,16 @@ class IpdRegistrationCreateView(APIView):
 
                     ipd_number = f"IPD-{year}-{year_count:02d}"
 
-                    user_id = request.session.get('user_id')
-
-                    if not user_id:
-                        return Response({"error": "Unauthorized"}, status=401)
+                    # ✅ JWT user id (integer)
+                    user_id = request.user.id
 
                     serializer.save(
                         ipd_registeration_code=ipd_registration_code,
                         ipd_number=ipd_number,
-                        created_on=now,
                         created_by=user_id,
-                        updated_on=now,
-                        updated_by=user_id
+                        updated_by=user_id,
+                        created_on=now,
+                        updated_on=now
                     )
 
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -2553,8 +2550,7 @@ class IpdRegistrationListView(APIView):
             )
         
 class IpdRegistrationDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [AllowAny] 
 
     def get(self, request, ipd_registeration_code):
         try:
@@ -2572,8 +2568,7 @@ class IpdRegistrationDetailView(APIView):
             )
 
 class IpdRegistrationUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [AllowAny] 
 
     def put(self, request, ipd_registeration_code):
         try:
@@ -2605,8 +2600,7 @@ class IpdRegistrationUpdateView(APIView):
         
 
 class IpdRegistrationDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [AllowAny] 
 
     def delete(self, request, ipd_registeration_code):
         try:
@@ -2618,6 +2612,154 @@ class IpdRegistrationDeleteView(APIView):
 
             return Response(
                 {"message": "IPD Registration deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class DoctorListView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        try:
+            doctors = Doctor.objects.all().order_by('-doctor_code')
+            serializer = DoctorSerializer(doctors, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class PatientListView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        try:
+            patients = Patient.objects.all().order_by('-patient_code')
+            serializer = PatientSerializer(patients, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class IpdServicesCreateView(APIView):
+    authentication_classes = [CustomJWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            serializer = IpdServicesSerializer(data=request.data)
+
+            if serializer.is_valid():
+                with transaction.atomic():
+                    now = timezone.now()
+                    user_id = request.user.id
+                    last_service = (
+                        IpdServices.objects
+                        .exclude(service_id__isnull=True)
+                        .order_by("-service_id")
+                        .first()
+                    )
+                    if last_service and last_service.service_id:
+                        last_number = int(last_service.service_id.replace("S", ""))
+                        new_number = last_number + 1
+                    else:
+                        new_number = 1
+                    service_id = f"S{new_number:02d}"  # S01, S02, S10
+                    serializer.save(
+                        service_id=service_id,
+                        created_on=now,
+                        updated_on=now,
+                        created_by=user_id,
+                        updated_by=user_id
+                    )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class IpdServicesListView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        try:
+            data = IpdServices.objects.all().order_by("-created_on")
+            serializer = IpdServicesSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+from django.shortcuts import get_object_or_404
+
+class IpdServicesDetailView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, service_id):
+        try:
+            obj = get_object_or_404(IpdServices, service_id=service_id)
+            serializer = IpdServicesSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+class IpdServicesUpdateView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def put(self, request, service_id):
+        try:
+            obj = get_object_or_404(IpdServices, service_id=service_id)
+
+            serializer = IpdServicesSerializer(
+                obj,
+                data=request.data,
+                partial=True
+            )
+
+            if serializer.is_valid():
+                serializer.save(
+                    updated_on=timezone.now(),
+                    updated_by=request.user.id
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class IpdServicesDeleteView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def delete(self, request, service_id):
+        try:
+            obj = get_object_or_404(IpdServices, service_id=service_id)
+            obj.delete()
+
+            return Response(
+                {"message": "IPD Service deleted successfully"},
                 status=status.HTTP_204_NO_CONTENT
             )
 

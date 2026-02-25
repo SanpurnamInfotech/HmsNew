@@ -25,6 +25,8 @@ import FinancialYearMst from "./pages/masters/FinancialYearMst";
 import SettingsMst from "./pages/masters/SettingsMst";
 import MedicineCategory from './pages/masters/MedicineCategory';
 import MedicineMst from './pages/masters/MedicineMst';
+import Ipdregister from './pages/IPD/Ipdregister';
+import Ipdservice from './pages/IPD/Ipdservice'; 
 
 
 
@@ -69,31 +71,22 @@ function App() {
           <Route path='advice_master' element={<AdviceMaster />} />
           <Route path="icd-master" element={<IcdMasterMst />} />
           <Route path="room-type-master" element={<RoomTypeMasterMst />} />
-           <Route path="bed" element={<BedMaster />} />
-           <Route path="habit-master" element={<HabitMaster />} />
-           <Route path="hallucination-master" element={<HallucinationMaster />} />
-           <Route path="history-master" element={<HistoryMaster />} />
-           <Route path="mental-illness-master" element={<MentalIllnessMaster />} />
-           <Route path="dsm-master" element={<DsmMaster />} />
-           <Route path="premorbid-personality-master"element={<PremorbidPersonalityMst />}/>
-           <Route path="possession-master"element={<PossessionMaster />}/>
-           <Route path="financialyear-master"element={<FinancialYearMst />}/>
-           <Route path="settings"element={<SettingsMst />}/>
-           <Route path="medicine-category" element={<MedicineCategory/>}/>
-           <Route path="medicine" element={<MedicineMst/>}/>
-           
-
-
-          
-            
-           
-
-
-
-
-
+          <Route path="bed" element={<BedMaster />} />
+          <Route path="habit-master" element={<HabitMaster />} />
+          <Route path="hallucination-master" element={<HallucinationMaster />} />
+          <Route path="history-master" element={<HistoryMaster />} />
+          <Route path="mental-illness-master" element={<MentalIllnessMaster />} />
+          <Route path="dsm-master" element={<DsmMaster />} />
+          <Route path="premorbid-personality-master"element={<PremorbidPersonalityMst />}/>
+          <Route path="possession-master"element={<PossessionMaster />}/>
+          <Route path="financialyear-master"element={<FinancialYearMst />}/>
+          <Route path="settings"element={<SettingsMst />}/>
+          <Route path="medicine-category" element={<MedicineCategory/>}/>
+          <Route path="medicine" element={<MedicineMst/>}/>
+          <Route path="ipd-register" element={<Ipdregister/>}/>
+          <Route path="ipd-service" element={<Ipdservice/>}/>
+    
         </Route>
-
         {/* Redirect root to login or dashboard */}
         <Route path="/" element={<Navigate to="/admin/login" replace />} />
       </Routes>

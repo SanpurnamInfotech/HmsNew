@@ -219,3 +219,26 @@ class IpdRegistrationSerializer(serializers.ModelSerializer):
             'created_by',
             'updated_by',
         )
+
+class DoctorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Doctor
+        fields = '__all__'
+
+class PatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = '__all__'
+
+class IpdServicesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IpdServices
+        fields = "__all__"
+        read_only_fields = (
+            'service_id',
+            'ipd_number',
+            'created_on',
+            'updated_on',
+            'created_by',
+            'updated_by',
+        )

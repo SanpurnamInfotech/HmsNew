@@ -140,7 +140,6 @@ urlpatterns = [
     path('api/financialyear-master/delete/<str:financialyear_code>/',FinancialyearMasterDeleteView.as_view(),name='financialyear-master-delete'),
     path('api/financialyear-master/<str:financialyear_code>/',FinancialyearMasterDetailView.as_view(),name='financialyear-master-detail'),
     
-    
     path('api/settings/', SettingsListView.as_view(), name='settings-list'),
     path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
     path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
@@ -152,18 +151,24 @@ urlpatterns = [
     path('api/medicine/update/<str:medicine_code>/', medicine_update, name='medicine-update'),
     path('api/medicine/delete/<str:medicine_code>/', medicine_delete, name='medicine-delete'),
     
-    
     path('api/medicine-category/', medicine_category_list, name='medicine-category-list'),
     path('api/medicine-category/create/', medicine_category_create, name='medicine-category-create'),
     path('api/medicine-category/update/<str:medicine_cat_code>/', medicine_category_update, name='medicine-category-update'),
     path('api/medicine-category/delete/<str:medicine_cat_code>/', medicine_category_delete, name='medicine-category-delete'),
 
     path('api/ipd-registration/create/', IpdRegistrationCreateView.as_view()),
-    path('api/ipd-registration/list/', IpdRegistrationListView.as_view()),
+    path('api/ipd-registration/', IpdRegistrationListView.as_view()),
     path('api/ipd-registration/<str:ipd_registeration_code>/', IpdRegistrationDetailView.as_view()),
     path('api/ipd-registration/update/<str:ipd_registeration_code>/', IpdRegistrationUpdateView.as_view()),
     path('api/ipd-registration/delete/<str:ipd_registeration_code>/', IpdRegistrationDeleteView.as_view()),
+    path('api/doctors/', DoctorListView.as_view(), name='doctor-list'),
+    path('api/patients/', PatientListView.as_view(), name='patient-list'),
 
+    path("api/ipd-services/create/", IpdServicesCreateView.as_view()),
+    path("api/ipd-services/", IpdServicesListView.as_view()),
+    path("api/ipd-services/<str:service_id>/", IpdServicesDetailView.as_view()),
+    path("api/ipd-services/update/<str:service_id>/", IpdServicesUpdateView.as_view()),
+    path("api/ipd-services/delete/<str:service_id>/", IpdServicesDeleteView.as_view()),
 
 ]
 

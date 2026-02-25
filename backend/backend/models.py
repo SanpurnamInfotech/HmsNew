@@ -477,11 +477,11 @@ class Medicine(models.Model):
 class IpdRegistration(models.Model):
     id = models.BigAutoField(primary_key=True)
     ipd_registeration_code = models.CharField(max_length=50, blank=True, null=True)
-    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code', blank=True, null=True)
+    patient_code = models.CharField(max_length=50, blank=True, null=True)
     ipd_number = models.CharField(unique=True, max_length=150)
     admission_date = models.DateTimeField()
     discharge_date = models.DateTimeField(blank=True, null=True)
-    doctor_code = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctor_code', to_field='doctor_code', blank=True, null=True)
+    doctor_code = models.CharField(max_length=50, blank=True, null=True)
     bed_id = models.CharField(max_length=50, blank=True, null=True)
     status = models.CharField(max_length=20, blank=True, null=True)
     remarks = models.CharField(max_length=255, blank=True, null=True)
@@ -493,3 +493,94 @@ class IpdRegistration(models.Model):
     class Meta:
         managed = False
         db_table = 'ipd_registration'
+
+class Doctor(models.Model):
+    doctor_code = models.CharField( max_length=45, blank=True, null=True)
+    doctor_name = models.CharField(max_length=100, blank=True, null=True)
+    department_code = models.CharField(max_length=50, blank=True, null=True)
+    qualification = models.CharField(max_length=150, blank=True, null=True)
+    total_experience = models.CharField(max_length=100, blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=20, blank=True, null=True)
+    marital_status_code = models.CharField(max_length=50, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    city_code = models.CharField(max_length=55, blank=True, null=True)
+    district_code = models.CharField(max_length=255, blank=True, null=True)
+    state_code = models.CharField(max_length=255, blank=True, null=True)
+    country_code = models.CharField(max_length=255, blank=True, null=True)
+    pincode = models.CharField(max_length=15, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'doctor'
+
+class Patient(models.Model):
+    patient_code = models.CharField( max_length=45)
+    hospital_code = models.CharField(max_length=45)
+    patient_first_name = models.CharField(max_length=100)
+    patient_middle_name = models.CharField(max_length=100, blank=True, null=True)
+    patient_last_name = models.CharField(max_length=100)
+    dob = models.DateField(blank=True, null=True)
+    age = models.IntegerField(blank=True, null=True)
+    gender = models.IntegerField(blank=True, null=True)
+    marital_status_code = models.CharField(max_length=45, blank=True, null=True)
+    blood_group_code = models.CharField(max_length=10, blank=True, null=True)
+    occupation = models.CharField(max_length=100, blank=True, null=True)
+    aadhar_no = models.CharField(max_length=20, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    city_code = models.CharField(max_length=45, blank=True, null=True)
+    district_code = models.CharField(max_length=45, blank=True, null=True)
+    state_code = models.CharField(max_length=45, blank=True, null=True)
+    country_code = models.CharField(max_length=45, blank=True, null=True)
+    pincode = models.CharField(max_length=15, blank=True, null=True)
+    weight_kg = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    informant = models.CharField(max_length=100, blank=True, null=True)
+    relation_code = models.CharField(max_length=45, blank=True, null=True)
+    reliability = models.CharField(max_length=45, blank=True, null=True)
+    referred_by_dr = models.CharField(max_length=100, blank=True, null=True)
+    emergency_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    emergency_contact_relation = models.CharField(max_length=45, blank=True, null=True)
+    patient_photo_path = models.CharField(max_length=255, blank=True, null=True)
+    renew_date = models.DateField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'patient'
+
+class IpdServices(models.Model):
+    service_id = models.CharField(max_length=50)
+    service = models.CharField(max_length=50)
+    description = models.CharField(max_length=255)
+    per_quantity = models.IntegerField()
+    amount = models.CharField(max_length=50, blank=True, null=True)
+    is_billable = models.CharField(max_length=15, blank=True, null=True)
+    created_on = models.DateTimeField()
+    created_by = models.BigIntegerField()
+    updated_on = models.DateTimeField()
+    updated_by = models.BigIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'ipd_services'
