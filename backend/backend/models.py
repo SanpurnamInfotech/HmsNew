@@ -161,6 +161,7 @@ class CompanyMaster(models.Model):
     timezone = models.CharField(max_length=100, blank=True, null=True)
     company_logo = models.CharField(max_length=255, blank=True, null=True)
     status = models.IntegerField()
+    sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)
@@ -202,6 +203,7 @@ class EmployeeMaster(models.Model):
     district_code = models.CharField(max_length=45, blank=True, null=True)
     city_code = models.CharField(max_length=45, blank=True, null=True)
     pincode = models.CharField(max_length=15, blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)
@@ -355,4 +357,64 @@ class Bankdetails(models.Model):
         managed = False
         db_table = 'bankdetails'
 
+class BedAllotment(models.Model):
+    bed_code = models.CharField(max_length=45, blank=True, null=True)
+    patient_code = models.CharField(max_length=45, blank=True, null=True)
+    allotment_timestamp = models.DateTimeField(blank=True, null=True)
+    discharge_timestamp = models.DateTimeField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "bed_allotment"
+
+
+class Patient(models.Model):
+    patient_code = models.CharField(unique=True, max_length=45)
+    hospital_code = models.CharField(max_length=45, null=True, blank=True)
+    patient_first_name = models.CharField(max_length=100)
+    patient_middle_name = models.CharField(max_length=100, blank=True, null=True)
+    patient_last_name = models.CharField(max_length=100)
+    dob = models.DateField(blank=True, null=True)
+    age = models.IntegerField(blank=True, null=True)
+    gender = models.IntegerField(blank=True, null=True)  # 1=Male,2=Female,3=Other
+    marital_status_code = models.CharField(max_length=45, blank=True, null=True)
+    blood_group_code = models.CharField(max_length=10, blank=True, null=True)
+    occupation = models.CharField(max_length=100, blank=True, null=True)
+    aadhar_no = models.CharField(max_length=20, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    city_code = models.CharField(max_length=45, blank=True, null=True)
+    district_code = models.CharField(max_length=45, blank=True, null=True)
+    state_code = models.CharField(max_length=45, blank=True, null=True)
+    country_code = models.CharField(max_length=45, blank=True, null=True)
+    pincode = models.CharField(max_length=15, blank=True, null=True)
+    weight_kg = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    informant = models.CharField(max_length=100, blank=True, null=True)
+    relation_code = models.CharField(max_length=45, blank=True, null=True)
+    reliability = models.CharField(max_length=45, blank=True, null=True)
+    referred_by_dr = models.CharField(max_length=100, blank=True, null=True)
+    emergency_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    emergency_contact_relation = models.CharField(max_length=45, blank=True, null=True)
+    patient_photo_path = models.CharField(max_length=255, blank=True, null=True)
+    renew_date = models.DateField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)  # 1=Active,0=Inactive
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'patient'        
 

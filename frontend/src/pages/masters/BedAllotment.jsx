@@ -5,17 +5,18 @@ import {
   Pagination,
   TableToolbar,
 } from "../../components/common/BaseCRUD";
+
 import {
   FaPlus,
   FaEdit,
   FaTrash,
   FaCheckCircle,
   FaTimesCircle,
-  FaBuilding,
 } from "react-icons/fa";
 
 /* =========================
    Reusable Searchable Select
+   (same like EmployeeMaster)
    ========================= */
 const SearchableSelect = ({
   value,
@@ -94,7 +95,7 @@ const SearchableSelect = ({
                 <button
                   key={String(o.value)}
                   type="button"
-                   className={`group w-full text-left px-4 py-3 flex items-center justify-between
+                  className={`group w-full text-left px-4 py-3 flex items-center justify-between
                     hover:bg-blue-900 hover:text-white
                     ${String(o.value) === String(value) ? "bg-emerald-50" : ""}
                   `}
@@ -106,8 +107,11 @@ const SearchableSelect = ({
                   <span className="text-gray-800 group-hover:text-white">
                     {o.label}
                   </span>
+
                   {String(o.value) === String(value) && (
-                    <span className="text-emerald-600 font-semibold">✓</span>
+                    <span className="text-emerald-600 font-semibold group-hover:text-white">
+                      ✓
+                    </span>
                   )}
                 </button>
               ))
@@ -123,70 +127,38 @@ const SearchableSelect = ({
   );
 };
 
-const Departments = () => {
+const BedAllotment = () => {
+  const PATH = "bed_allotment";
+
   const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud("departments/");
+    useCrud(`${PATH}/`);
 
-  // ✅ Financial Year dropdown (supports array / results / data)
-  const { data: financialYearsDataRaw } = useCrud("financialyear_master/");
-  const financialYearsList = useMemo(() => {
-    if (Array.isArray(financialYearsDataRaw)) return financialYearsDataRaw;
-    return (
-      financialYearsDataRaw?.results ||
-      financialYearsDataRaw?.data ||
-      []
-    );
-  }, [financialYearsDataRaw]);
-
-  const { data: companiesData } = useCrud("company_master/");
+  // dropdown data
+  const { data: bedsData } = useCrud("bed/");
+  const { data: patientsData } = useCrud("patient/");
 
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   const [formData, setFormData] = useState({
-    department_code: "",
-    department_name: "",
-    financialyear_code: "", // ✅ optional
-    company_code: "",
+    id: null,
+    bed_code: "",
+    patient_code: "",
+    allotment_timestamp: "",
+    discharge_timestamp: "",
     status: 1,
     sort_order: "",
   });
 
   const [modal, setModal] = useState({
-    message: "",
     visible: false,
+    message: "",
     type: "success",
   });
 
-  const showModal = (message, type = "success") =>
-    setModal({ message, visible: true, type });
-
-  /* ============================
-     ✅ Department code generator
-     DEP00001, DEP00002, ...
-     ============================ */
-  const nextDepartmentCode = useMemo(() => {
-    const list = Array.isArray(data) ? data : [];
-    const codes = list
-      .map((x) => (x?.department_code || "").toString())
-      .filter((c) => c.startsWith("DEP"));
-
-    let maxNum = 0;
-    for (const code of codes) {
-      const num = parseInt(code.replace("DEP", ""), 10);
-      if (!isNaN(num) && num > maxNum) maxNum = num;
-    }
-
-    const next = maxNum + 1;
-    return `DEP${String(next).padStart(5, "0")}`;
-  }, [data]);
-
-  /* ============================
-     ✅ Sort like EmployeeMaster
-     by sort_order asc, blank last
-     ============================ */
-  const sortedDepartments = useMemo(() => {
+  /* ================= SORT ORDER like EmployeeMaster ================= */
+  const sortedBedAllotments = useMemo(() => {
     const list = Array.isArray(data) ? [...data] : [];
 
     const getOrder = (row) => {
@@ -200,8 +172,8 @@ const Departments = () => {
       const bo = getOrder(b);
       if (ao !== bo) return ao - bo;
 
-      const ac = (a?.department_code || "").toString();
-      const bc = (b?.department_code || "").toString();
+      const ac = (a?.bed_code || "").toString();
+      const bc = (b?.bed_code || "").toString();
       return ac.localeCompare(bc);
     });
 
@@ -219,24 +191,57 @@ const Departments = () => {
     effectiveItemsPerPage,
     filteredData,
     totalPages,
-  } = useTable(sortedDepartments);
+  } = useTable(sortedBedAllotments);
 
   const resetForm = () => {
     setShowForm(false);
     setIsEdit(false);
-    setSelected(null);
+    setSelectedRow(null);
     setFormData({
-      department_code: "",
-      department_name: "",
-      financialyear_code: "", // ✅ optional
-      company_code: "",
+      id: null,
+      bed_code: "",
+      patient_code: "",
+      allotment_timestamp: "",
+      discharge_timestamp: "",
       status: 1,
       sort_order: "",
     });
   };
 
+  const showModal = (message, type = "success") =>
+    setModal({ visible: true, message, type });
+
+  /* ===== options for searchable dropdowns ===== */
+  const bedOptions = useMemo(
+    () =>
+      (bedsData || []).map((c) => ({
+        value: c.bed_code,
+        label: c.bed_name,
+      })),
+    [bedsData]
+  );
+
+  /* ===== Patient options with name + surname ===== */
+  const patientOptions = useMemo(() => {
+    return (patientsData || []).map((p) => {
+      const fullName = [p.patient_first_name, p.patient_last_name]
+        .filter(Boolean)
+        .join(" ");
+      return {
+        // ✅ FIX: add value so selection works
+        value: p.patient_code,
+        // NOTE: keeping your same label format
+        label: `${fullName ? `  ${fullName}` : ""}`,
+      };
+    });
+  }, [patientsData]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const actionPath = isEdit
+      ? `${PATH}/update/${formData.id}/`
+      : `${PATH}/create/`;
 
     const payload = {
       ...formData,
@@ -247,43 +252,43 @@ const Departments = () => {
         formData.sort_order === undefined
           ? null
           : Number(formData.sort_order),
-
-      // ✅ IMPORTANT: if not selected, send null (not required)
-      financialyear_code:
-        formData.financialyear_code === "" ||
-        formData.financialyear_code === null ||
-        formData.financialyear_code === undefined
-          ? null
-          : formData.financialyear_code,
     };
 
+    if (payload.bed_code === "") payload.bed_code = null;
+    if (payload.patient_code === "") payload.patient_code = null;
+    if (payload.allotment_timestamp === "") payload.allotment_timestamp = null;
+    if (payload.discharge_timestamp === "") payload.discharge_timestamp = null;
+
+    if (payload.sort_order === "" || payload.sort_order === null) {
+      delete payload.sort_order;
+    }
+
+    if (!isEdit) delete payload.id;
+
     const result = isEdit
-      ? await updateItem(
-          `departments/update/${formData.department_code}/`,
-          payload
-        )
-      : await createItem(`departments/create/`, payload);
+      ? await updateItem(actionPath, payload)
+      : await createItem(actionPath, payload);
 
     if (result.success) {
-      showModal(`Department ${isEdit ? "updated" : "created"} successfully!`);
+      showModal(`Bed Allotment ${isEdit ? "updated" : "created"} successfully`);
       resetForm();
       refresh();
     } else {
-      showModal(result.error || "Operation failed!", "error");
+      showModal(result.error || "Operation failed", "error");
     }
   };
 
   const handleDelete = async () => {
-    if (!selected) return;
-    const result = await deleteItem(
-      `departments/delete/${selected.department_code}/`
-    );
+    if (!selectedRow) return;
+
+    const result = await deleteItem(`${PATH}/delete/${selectedRow.id}/`);
+
     if (result.success) {
-      showModal("Department deleted successfully!");
-      setSelected(null);
+      showModal("Record deleted successfully");
+      setSelectedRow(null);
       refresh();
     } else {
-      showModal(result.error || "Delete failed!", "error");
+      showModal(result.error || "Delete failed", "error");
     }
   };
 
@@ -292,9 +297,7 @@ const Departments = () => {
     return (
       <span
         className={`px-3 py-1 rounded-full text-xs font-semibold ${
-          isActive
-            ? "bg-green-100 text-green-700"
-            : "bg-red-100 text-red-700"
+          isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
         }`}
       >
         {isActive ? "Active" : "Inactive"}
@@ -302,39 +305,16 @@ const Departments = () => {
     );
   };
 
-  /* ===== options for searchable dropdowns ===== */
-  const companyOptions = useMemo(
-    () =>
-      (companiesData || []).map((c) => ({
-        value: c.company_code,
-        label: c.company_name,
-      })),
-    [companiesData]
-  );
-
-  const fyOptions = useMemo(() => {
-    const list = Array.isArray(financialYearsList) ? financialYearsList : [];
-    return list.map((fy) => {
-      const code = fy.financialyear_code;
-      const label =
-        fy.financialyear_name ||
-        (fy.start_year && fy.end_year
-          ? `${code} (${fy.start_year}-${fy.end_year})`
-          : code);
-
-      return { value: code, label };
-    });
-  }, [financialYearsList]);
-
-  if (loading)
+  if (loading) {
     return (
       <div className="loading-overlay">
-        <div className="loading-spinner-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Loading Departments Data...</p>
+        <div className="loading-spinner-container text-center">
+          <div className="loading-spinner mx-auto mb-4"></div>
+          <p className="loading-text">Loading Bed Allotment...</p>
         </div>
       </div>
     );
+  }
 
   return (
     <div className="app-container">
@@ -374,8 +354,9 @@ const Departments = () => {
         </div>
       )}
 
+      {/* HEADER (same like EmployeeMaster) */}
       <div className="section-header">
-        <h4 className="text-xl font-bold text-gray-800">Departments</h4>
+        <h4 className="text-xl font-bold text-gray-800">Bed Allotment</h4>
 
         {!showForm && (
           <div className="flex items-center gap-2">
@@ -383,35 +364,39 @@ const Departments = () => {
               className="btn-primary"
               onClick={() => {
                 setIsEdit(false);
-                setSelected(null);
-
-                setFormData({
-                  department_code: nextDepartmentCode,
-                  department_name: "",
-                  financialyear_code: "", // ✅ optional
-                  company_code: "",
-                  status: 1,
-                  sort_order: "",
-                });
-
+                setSelectedRow(null);
+                resetForm();
                 setShowForm(true);
               }}
             >
               <FaPlus size={14} /> Add New
             </button>
 
-            {selected && (
+            {selectedRow && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
                 <button
                   className="btn-warning"
                   onClick={() => {
-                    setFormData({ ...selected });
+                    setFormData({
+                      id: selectedRow.id,
+                      bed_code: selectedRow.bed_code || "",
+                      patient_code: selectedRow.patient_code || "",
+                      allotment_timestamp: selectedRow.allotment_timestamp
+                        ? selectedRow.allotment_timestamp.replace("Z", "").slice(0, 16)
+                        : "",
+                      discharge_timestamp: selectedRow.discharge_timestamp
+                        ? selectedRow.discharge_timestamp.replace("Z", "").slice(0, 16)
+                        : "",
+                      status: selectedRow.status ?? 1,
+                      sort_order: selectedRow.sort_order ?? "",
+                    });
                     setIsEdit(true);
                     setShowForm(true);
                   }}
                 >
                   <FaEdit size={14} /> Edit
                 </button>
+
                 <button className="btn-danger" onClick={handleDelete}>
                   <FaTrash size={14} /> Delete
                 </button>
@@ -421,73 +406,87 @@ const Departments = () => {
         )}
       </div>
 
+      {/* FORM (EmployeeMaster style: sections + 2 columns) */}   
       {showForm && (
         <div className="form-container">
           <div className="mb-8 border-b border-gray-50 pb-5">
             <h6 className="text-lg font-bold text-gray-800">
-              {isEdit ? "Update Department" : "Add New Department"}
+              {isEdit ? "Update Bed Allotment" : "Create Bed Allotment"}
             </h6>
             <div className="border-b border-gray-200 mt-3 mb-6"></div>
           </div>
 
           <form className="grid grid-cols-1 gap-y-10" onSubmit={handleSubmit}>
+            {/* SECTION 1 */}
             <div>
-              
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                {/* Bed (Searchable + show name) */}
                 <div className="space-y-1.5">
-                  <label className="form-label">Department Code</label>
-                  <input
-                    className="form-input form-input-disabled"
-                    value={formData.department_code}
-                    disabled
-                    placeholder="Eg. DEP00001"
+                  <label className="form-label">Bed</label>
+                  <SearchableSelect
+                    className="form-input"
+                    value={formData.bed_code || ""}
+                    disabled={!!formData.bed_code}
+                    placeholder="Select Bed"
+                    options={bedOptions}
+                    onChange={(val) =>
+                      setFormData({ ...formData, bed_code: val })
+                    }
                   />
                 </div>
 
+                {/* Patient (Searchable + show name) */}
                 <div className="space-y-1.5">
-                  <label className="form-label">Department Name</label>
-                  <input
+                  <label className="form-label">Patient</label>
+                  <SearchableSelect
                     className="form-input"
-                    value={formData.department_name}
-                    required
-                    maxLength={100}
+                    value={formData.patient_code || ""}
+                    disabled={!!formData.patient_code}
+                    placeholder="Select Patient"
+                    options={patientOptions}
+                    onChange={(val) =>
+                      setFormData({ ...formData, patient_code: val })
+                    }
+                  />
+                </div>
+
+                {/* Allotment Timestamp */}
+                <div className="space-y-1.5">
+                  <label className="form-label">Allotment DateTime</label>
+                  <input
+                    type="datetime-local"
+                    className={`form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 ${
+                      !formData.allotment_timestamp ? "text-gray-400" : "text-gray-900"
+                    }`}
+                    value={formData.allotment_timestamp}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        department_name: e.target.value,
+                        allotment_timestamp: e.target.value,
                       })
                     }
                   />
                 </div>
 
-                {/* ✅ Financial Year (NOT required) */}
+                {/* Discharge Timestamp */}
                 <div className="space-y-1.5">
-                  <label className="form-label">Financial Year</label>
-                  <SearchableSelect
-                    value={formData.financialyear_code || ""}
-                    disabled={!!formData.financialyear_code}
-                    options={fyOptions}
-                    placeholder="-- Select --"
-                    onChange={(val) =>
-                      setFormData({ ...formData, financialyear_code: val })
+                  <label className="form-label">Discharge DateTime</label>
+                  <input
+                    type="datetime-local"
+                    className={`form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 ${
+                      !formData.discharge_timestamp ? "text-gray-400" : "text-gray-900"
+                    }`}
+                    value={formData.discharge_timestamp}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        discharge_timestamp: e.target.value,
+                      })
                     }
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="form-label">Company</label>
-                  <SearchableSelect
-                    value={formData.company_code || ""}
-                    disabled={!!formData.company_code}
-                    options={companyOptions}
-                    placeholder="-- Select --"
-                    onChange={(val) =>
-                      setFormData({ ...formData, company_code: val })
-                    }
-                  />
-                </div>
-
+                {/* Sort Order */}
                 <div className="space-y-1.5">
                   <label className="form-label">Sort Order</label>
                   <input
@@ -500,6 +499,7 @@ const Departments = () => {
                   />
                 </div>
 
+                {/* Status */}
                 <div className="space-y-1.5">
                   <label className="form-label">Status</label>
                   <select
@@ -519,7 +519,8 @@ const Departments = () => {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
+            {/* Buttons */}
+            <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
               <button className="btn-primary px-10">
                 {isEdit ? "Update" : "Save"}
               </button>
@@ -531,6 +532,7 @@ const Departments = () => {
         </div>
       )}
 
+      {/* TABLE (EmployeeMaster style) */}
       {!showForm && (
         <div className="data-table-container">
           <TableToolbar
@@ -545,27 +547,25 @@ const Departments = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="table-header-row">
-                  <th className="table-admin-th w-16"></th>
-                  <th className="table-admin-th">Department Code</th>
-                  <th className="table-admin-th">Department Name</th>
-                  <th className="table-admin-th">Status</th>
+                  <th className="text-admin-th w-16"></th>
+                  <th className="text-admin-th">Bed</th>
+                  <th className="text-admin-th">Patient</th>
+                  <th className="text-admin-th">Allotment</th>
+                  <th className="text-admin-th">Discharge</th>
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-50">
                 {paginatedData.length > 0 ? (
-                  paginatedData.map((d) => (
+                  paginatedData.map((m) => (
                     <tr
-                      key={d.department_code}
+                      key={m.id}
                       onClick={() =>
-                        setSelected(
-                          selected?.department_code === d.department_code
-                            ? null
-                            : d
-                        )
+                        setSelectedRow(selectedRow?.id === m.id ? null : m)
                       }
                       className={`table-row ${
-                        selected?.department_code === d.department_code
+                        selectedRow?.id === m.id
                           ? "table-row-active"
                           : "table-row-hover"
                       }`}
@@ -573,28 +573,30 @@ const Departments = () => {
                       <td className="text-admin-td">
                         <div
                           className={`selection-indicator rounded-full ${
-                            selected?.department_code === d.department_code
+                            selectedRow?.id === m.id
                               ? "selection-indicator-active"
                               : "selection-indicator-inactive"
                           }`}
                         >
-                          {selected?.department_code === d.department_code && (
+                          {selectedRow?.id === m.id && (
                             <div className="selection-dot rounded-full" />
                           )}
                         </div>
                       </td>
-                      <td className="text-admin-td">{d.department_code}</td>
-                      <td className="text-admin-td">{d.department_name}</td>
-                      <td className="text-admin-td">{statusBadge(d.status)}</td>
+
+                      <td className="text-admin-td">{m.bed_code || "-"}</td>
+                      <td className="text-admin-td">{m.patient_code || "-"}</td>
+                      <td className="text-admin-td">{m.allotment_timestamp || "-"}</td>
+                      <td className="text-admin-td">{m.discharge_timestamp || "-"}</td>
+                      <td className="text-admin-td">{statusBadge(m.status)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
                     <td colSpan="7" className="table-td py-20 text-center">
                       <div className="empty-state-container">
-                        <FaBuilding size={48} className="mb-4 text-gray-400" />
                         <p className="text-xl font-bold text-gray-500">
-                          No departments found
+                          No bed allotments found
                         </p>
                       </div>
                     </td>
@@ -617,4 +619,4 @@ const Departments = () => {
   );
 };
 
-export default Departments;
+export default BedAllotment;

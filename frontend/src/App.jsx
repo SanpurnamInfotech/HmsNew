@@ -19,6 +19,8 @@ import Departments from './pages/masters/Departments';
 import BloodGroupMaster from './pages/masters/BloodGroupMaster';
 import BloodDonor from './pages/masters/BloodDonor';
 import BankDetails from "./pages/masters/BankDetails";
+import BedAllotment from "./pages/masters/BedAllotment";
+import Patient from "./pages/masters/Patient";
 
 
 
@@ -56,6 +58,8 @@ function App() {
           <Route path="blood_group_master" element={<BloodGroupMaster />} />
           <Route path="blood_donor" element={<BloodDonor />} />
           <Route path="bankdetails" element={<BankDetails />} />
+          <Route path="bed_allotment" element={<BedAllotment />} />
+          <Route path="patient" element={<Patient />} />
 
 
 

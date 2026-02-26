@@ -102,5 +102,17 @@ urlpatterns = [
     path('api/bankdetails/update/<str:bank_code>/', BankdetailsUpdateView.as_view(), name='bankdetails-update'),
     path('api/bankdetails/delete/<str:bank_code>/', BankdetailsDeleteView.as_view(), name='bankdetails-delete'),
 
+    path("api/bed_allotment/", BedAllotmentListView.as_view(), name="bed-allotment-list"),
+    path("api/bed_allotment/detail/<int:id>/", BedAllotmentDetailView.as_view(), name="bed-allotment-detail"),
+    path("api/bed_allotment/create/", BedAllotmentCreateView.as_view(), name="bed-allotment-create"),
+    path("api/bed_allotment/update/<int:id>/", BedAllotmentUpdateView.as_view(), name="bed-allotment-update"),
+    path("api/bed_allotment/delete/<int:id>/", BedAllotmentDeleteView.as_view(), name="bed-allotment-delete"),
+
+    path('api/patient/', PatientListView.as_view(), name='patient-list'),
+    path('api/patient/detail/<str:patient_code>/', PatientDetailView.as_view(), name='patient-detail'),
+    path('api/patient/create/', PatientCreateView.as_view(), name='patient-create'),
+    path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
+    path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
+    
 
 ]

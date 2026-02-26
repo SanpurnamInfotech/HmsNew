@@ -1459,5 +1459,173 @@ class BankdetailsDeleteView(APIView):
             obj.delete()
             return Response({"message": "Bank deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+        
+# bed_allotment
+
+class BedAllotmentListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            data = BedAllotment.objects.all().order_by("id")
+            serializer = BedAllotmentSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class BedAllotmentDetailView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, id):
+        try:
+            obj = get_object_or_404(BedAllotment, id=id)
+            serializer = BedAllotmentSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class BedAllotmentCreateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            data = request.data.copy()
+
+            # ✅ convert "" to None so DB accepts NULL
+            for k in ["bed_code", "patient_code", "allotment_timestamp", "discharge_timestamp", "sort_order"]:
+                if k in data and (data[k] == "" or data[k] is None):
+                    data[k] = None
+
+            serializer = BedAllotmentSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class BedAllotmentUpdateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, id):
+        try:
+            obj = get_object_or_404(BedAllotment, id=id)
+            data = request.data.copy()
+
+            for k in ["bed_code", "patient_code", "allotment_timestamp", "discharge_timestamp", "sort_order"]:
+                if k in data and (data[k] == "" or data[k] is None):
+                    data[k] = None
+
+            serializer = BedAllotmentSerializer(obj, data=data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class BedAllotmentDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, id):
+        try:
+            obj = get_object_or_404(BedAllotment, id=id)
+            obj.delete()
+            return Response({"message": "Deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+# patient
+
+class PatientListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            data = Patient.objects.all().order_by("patient_first_name")
+            serializer = PatientSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PatientDetailView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, patient_code):
+        try:
+            obj = get_object_or_404(Patient, patient_code=patient_code)
+            serializer = PatientSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PatientCreateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            serializer = PatientSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PatientUpdateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, patient_code):
+        try:
+            obj = get_object_or_404(Patient, patient_code=patient_code)
+            serializer = PatientSerializer(obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class PatientDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, patient_code):
+        try:
+            obj = get_object_or_404(Patient, patient_code=patient_code)
+            obj.delete()
+            return Response({"message": "Patient deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)        

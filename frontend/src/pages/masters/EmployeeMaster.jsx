@@ -1,12 +1,135 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
-import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaUserTie } from "react-icons/fa";
+import {
+  useCrud,
+  useTable,
+  Pagination,
+  TableToolbar,
+} from "../../components/common/BaseCRUD";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaUserTie,
+} from "react-icons/fa";
 import { get_domain } from "../../utils/domain";
 
-const EmployeeMaster = () => {
-  const { data, loading, refresh, deleteItem } = useCrud("employee_master/");
+/* =========================
+   Reusable Searchable Select
+   ========================= */
+const SearchableSelect = ({
+  value,
+  onChange,
+  options = [],
+  placeholder = "Select",
+  disabled = false,
+  className = "form-input",
+  panelWidth = "w-full",
+}) => {
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const wrapRef = useRef(null);
 
+  const selectedLabel = useMemo(() => {
+    const found = options.find((o) => String(o.value) === String(value));
+    return found ? found.label : "";
+  }, [options, value]);
+
+  const filtered = useMemo(() => {
+    const query = (q || "").toLowerCase().trim();
+    if (!query) return options;
+    return options.filter(
+      (o) =>
+        (o.label || "").toLowerCase().includes(query) ||
+        String(o.value || "").toLowerCase().includes(query)
+    );
+  }, [options, q]);
+
+  useEffect(() => {
+    const onDoc = (e) => {
+      if (!wrapRef.current) return;
+      if (!wrapRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
+
+  useEffect(() => {
+    if (!open) setQ("");
+  }, [open]);
+
+  return (
+    <div className="relative" ref={wrapRef}>
+      <button
+        type="button"
+        className={`${className} text-left flex items-center justify-between ${
+          disabled ? "opacity-70 cursor-not-allowed" : ""
+        }`}
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((s) => !s)}
+      >
+        <span className={`${selectedLabel ? "text-gray-900" : "text-gray-400"}`}>
+          {selectedLabel || placeholder}
+        </span>
+        <span className="ml-3 text-gray-500">▾</span>
+      </button>
+
+      {open && !disabled && (
+        <div
+          className={`absolute z-50 mt-2 ${panelWidth} rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden`}
+        >
+          <div className="p-3 border-b border-gray-100">
+            <input
+              autoFocus
+              className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              placeholder="Search..."
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+
+          <div className="max-h-64 overflow-y-auto">
+            {filtered.length > 0 ? (
+              filtered.map((o) => (
+                <button
+                  key={String(o.value)}
+                  type="button"
+                  className={`group w-full text-left px-4 py-3 flex items-center justify-between
+                    hover:bg-blue-900 hover:text-white
+                    ${String(o.value) === String(value) ? "bg-emerald-50" : ""}
+                  `}
+                  onClick={() => {
+                    onChange(o.value);
+                    setOpen(false);
+                  }}
+                >
+                  <span className="text-gray-800 group-hover:text-white">
+                    {o.label}
+                  </span>
+
+                  {String(o.value) === String(value) && (
+                    <span className="text-emerald-600 font-semibold">✓</span>
+                  )}
+                </button>
+              ))
+            ) : (
+              <div className="px-4 py-6 text-sm text-gray-500">
+                No results found
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const EmployeeMaster = () => {
+  const { data, loading, refresh } = useCrud("employee_master/");
 
   const { data: companiesData } = useCrud("company_master/");
   const { data: financialYearsData } = useCrud("financialyear_master/");
@@ -22,7 +145,14 @@ const EmployeeMaster = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [selected, setSelected] = useState(null);
 
+  // ✅ keep file UI, but backend expects STRING -> we will send only file name
   const [photoFile, setPhotoFile] = useState(null);
+
+  const [districtIsOther, setDistrictIsOther] = useState(false);
+  const [cityIsOther, setCityIsOther] = useState(false);
+
+  const [otherDistrictText, setOtherDistrictText] = useState("");
+  const [otherCityText, setOtherCityText] = useState("");
 
   const [formData, setFormData] = useState({
     employee_code: "",
@@ -36,12 +166,12 @@ const EmployeeMaster = () => {
     employee_middlename: "",
     employee_lastname: "",
     dob: "",
-    gender: "",
-    photo: "",
+    gender: "", // ✅ will store 1/2/3 now (integer)
+    photo: "",  // ✅ string only (filename)
     joining_date: "",
     qualification: "",
     total_experience: "",
-    status: 1, // 1 Existing, 2 Resigned, 3 Terminated
+    status: 1,
     termination_date: "",
     termination_reason: "",
     email: "",
@@ -55,26 +185,55 @@ const EmployeeMaster = () => {
     district_code: "",
     city_code: "",
     pincode: "",
+    sort_order: "",
   });
 
-  const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
+  const [modal, setModal] = useState({
+    message: "",
+    visible: false,
+    type: "success",
+  });
+
+  const sortedEmployees = useMemo(() => {
+    const list = Array.isArray(data) ? [...data] : [];
+    const getOrder = (row) => {
+      const raw = row?.sort_order;
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
+    };
+
+    list.sort((a, b) => {
+      const ao = getOrder(a);
+      const bo = getOrder(b);
+      if (ao !== bo) return ao - bo;
+
+      const ac = (a?.employee_code || "").toString();
+      const bc = (b?.employee_code || "").toString();
+      return ac.localeCompare(bc);
+    });
+
+    return list;
+  }, [data]);
 
   const {
-    search, setSearch,
-    currentPage, setCurrentPage,
-    itemsPerPage, setItemsPerPage,
+    search,
+    setSearch,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
     paginatedData,
     effectiveItemsPerPage,
     filteredData,
-    totalPages
-  } = useTable(data);
+    totalPages,
+  } = useTable(sortedEmployees);
 
   const token = localStorage.getItem("token");
   const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
 
-  const showModal = (message, type = "success") => setModal({ message, visible: true, type });
+  const showModalMsg = (message, type = "success") =>
+    setModal({ message, visible: true, type });
 
-  // ✅ employee_code generator like EMP00001 (same logic as Company)
   const nextEmployeeCode = useMemo(() => {
     const list = Array.isArray(data) ? data : [];
     const codes = list
@@ -96,6 +255,13 @@ const EmployeeMaster = () => {
     setIsEdit(false);
     setSelected(null);
     setPhotoFile(null);
+
+    setDistrictIsOther(false);
+    setCityIsOther(false);
+
+    setOtherDistrictText("");
+    setOtherCityText("");
+
     setFormData({
       employee_code: "",
       company_code: "",
@@ -127,20 +293,58 @@ const EmployeeMaster = () => {
       district_code: "",
       city_code: "",
       pincode: "",
+      sort_order: "",
     });
   };
 
   const handleDelete = async () => {
     if (!selected) return;
-    const result = await deleteItem(`employee_master/delete/${selected.employee_code}/`);
-    if (result.success) {
-      showModal("Employee deleted successfully!");
+    const ok = window.confirm(`Delete Employee ${selected.employee_code}?`);
+    if (!ok) return;
+
+    try {
+      const urlBase = `${get_domain()}/api/`;
+      await axios.delete(
+        `${urlBase}employee_master/delete/${selected.employee_code}/`,
+        { headers: { ...authHeader } }
+      );
+      showModalMsg("Employee deleted successfully!");
       setSelected(null);
       refresh();
-    } else {
-      showModal(result.error || "Delete failed!", "error");
+    } catch (err) {
+      const msg =
+        err?.response?.data?.error ||
+        err?.response?.data?.detail ||
+        "Delete failed!";
+      showModalMsg(msg, "error");
     }
   };
+
+  useEffect(() => {
+    const dExists = (districtsData || []).some(
+      (d) => d.district_code === formData.district_code
+    );
+    if (formData.district_code && !dExists) {
+      setDistrictIsOther(true);
+      setOtherDistrictText(formData.district_code);
+    } else if (!districtIsOther) {
+      setOtherDistrictText("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.district_code, districtsData]);
+
+  useEffect(() => {
+    const ciExists = (citiesData || []).some(
+      (c) => c.city_code === formData.city_code
+    );
+    if (formData.city_code && !ciExists) {
+      setCityIsOther(true);
+      setOtherCityText(formData.city_code);
+    } else if (!cityIsOther) {
+      setOtherCityText("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.city_code, citiesData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -149,46 +353,57 @@ const EmployeeMaster = () => {
       const urlBase = `${get_domain()}/api/`;
       const fd = new FormData();
 
-      // append all fields (send empty "" also ok)
-      Object.keys(formData).forEach((k) => {
-        if (formData[k] !== null && formData[k] !== undefined) {
-          fd.append(k, formData[k]);
+      // ✅ backend expects gender int and photo string, so ensure correct types
+      const normalized = {
+        ...formData,
+        gender: formData.gender === "" ? "" : Number(formData.gender),
+        status: Number(formData.status),
+      };
+
+      // ✅ do NOT send file object for photo (backend expects string)
+      Object.keys(normalized).forEach((k) => {
+        if (k === "photo") return; // handle separately
+        if (normalized[k] !== null && normalized[k] !== undefined) {
+          fd.append(k, normalized[k]);
         }
       });
 
-      // file upload photo
+      // ✅ send only the file name as string
       if (photoFile) {
-        fd.set("photo", photoFile);
+        fd.append("photo", photoFile.name);
+      } else if (normalized.photo) {
+        fd.append("photo", normalized.photo);
       }
 
       let res;
       if (isEdit) {
         res = await axios.put(
-          `${urlBase}employee_master/update/${formData.employee_code}/`,
+          `${urlBase}employee_master/update/${normalized.employee_code}/`,
           fd,
-          { headers: { ...authHeader, "Content-Type": "multipart/form-data" } }
+          { headers: { ...authHeader } }
         );
       } else {
-        res = await axios.post(
-          `${urlBase}employee_master/create/`,
-          fd,
-          { headers: { ...authHeader, "Content-Type": "multipart/form-data" } }
-        );
+        res = await axios.post(`${urlBase}employee_master/create/`, fd, {
+          headers: { ...authHeader },
+        });
       }
 
       if (res?.status === 200 || res?.status === 201) {
-        showModal(`Employee ${isEdit ? "updated" : "created"} successfully!`);
+        showModalMsg(
+          `Employee ${isEdit ? "updated" : "created"} successfully!`
+        );
         resetForm();
         refresh();
       } else {
-        showModal("Operation failed!", "error");
+        showModalMsg("Operation failed!", "error");
       }
     } catch (err) {
       const msg =
         err?.response?.data?.error ||
         err?.response?.data?.detail ||
+        JSON.stringify(err?.response?.data || {}) ||
         "Operation failed!";
-      showModal(msg, "error");
+      showModalMsg(msg, "error");
     }
   };
 
@@ -196,9 +411,11 @@ const EmployeeMaster = () => {
     const n = Number(s);
     const text = n === 1 ? "Existing" : n === 2 ? "Resigned" : "Terminated";
     const cls =
-      n === 1 ? "bg-green-100 text-green-700"
-      : n === 2 ? "bg-yellow-100 text-yellow-700"
-      : "bg-red-100 text-red-700";
+      n === 1
+        ? "bg-green-100 text-green-700"
+        : n === 2
+        ? "bg-yellow-100 text-yellow-700"
+        : "bg-red-100 text-red-700";
 
     return (
       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${cls}`}>
@@ -207,14 +424,105 @@ const EmployeeMaster = () => {
     );
   };
 
-  if (loading) return (
-    <div className="loading-overlay">
-      <div className="loading-spinner-container">
-        <div className="loading-spinner"></div>
-        <p className="loading-text">Loading Employee Data...</p>
-      </div>
-    </div>
+  /* ===== options for searchable dropdowns ===== */
+  const companyOptions = useMemo(
+    () =>
+      (companiesData || []).map((c) => ({
+        value: c.company_code,
+        label: c.company_name,
+      })),
+    [companiesData]
   );
+
+  const fyOptions = useMemo(
+    () =>
+      (financialYearsData || []).map((fy) => ({
+        value: fy.financialyear_code,
+        label: fy.financialyear_name || fy.financialyear_code,
+      })),
+    [financialYearsData]
+  );
+
+  const deptOptions = useMemo(
+    () =>
+      (departmentData || []).map((d) => ({
+        value: d.department_code,
+        label: d.department_name,
+      })),
+    [departmentData]
+  );
+
+  const userTypeOptions = useMemo(
+    () =>
+      (userTypesData || []).map((u) => ({
+        value: u.usertype_code,
+        label: u.usertype_name,
+      })),
+    [userTypesData]
+  );
+
+  const countryOptions = useMemo(
+    () =>
+      (countriesData || []).map((c) => ({
+        value: c.country_code,
+        label: c.country_name,
+      })),
+    [countriesData]
+  );
+
+  const stateOptions = useMemo(
+    () =>
+      (statesData || []).map((s) => ({
+        value: s.state_code,
+        label: s.state_name,
+      })),
+    [statesData]
+  );
+
+  const districtOptions = useMemo(() => {
+    const base = (districtsData || []).map((d) => ({
+      value: d.district_code,
+      label: d.district_name,
+    }));
+    return [{ value: "OTHER", label: "Other" }, ...base];
+  }, [districtsData]);
+
+  const cityOptions = useMemo(() => {
+    const base = (citiesData || []).map((c) => ({
+      value: c.city_code,
+      label: c.city_name,
+    }));
+    return [{ value: "OTHER", label: "Other" }, ...base];
+  }, [citiesData]);
+
+  // ✅ FIX 1: gender values are INTEGERS now
+  const genderOptions = useMemo(
+    () => [
+      { value: 1, label: "Male" },
+      { value: 2, label: "Female" },
+      { value: 3, label: "Other" },
+    ],
+    []
+  );
+
+  const statusOptions = useMemo(
+    () => [
+      { value: 1, label: "Existing" },
+      { value: 2, label: "Resigned" },
+      { value: 3, label: "Terminated" },
+    ],
+    []
+  );
+
+  if (loading)
+    return (
+      <div className="loading-overlay">
+        <div className="loading-spinner-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading Employee Data...</p>
+        </div>
+      </div>
+    );
 
   return (
     <div className="app-container">
@@ -223,16 +531,32 @@ const EmployeeMaster = () => {
           <div className="modal-container">
             <div className="modal-body">
               <div className="modal-icon-container">
-                {modal.type === "success"
-                  ? <div className="modal-icon-success"><FaCheckCircle /></div>
-                  : <div className="modal-icon-error"><FaTimesCircle /></div>
-                }
+                {modal.type === "success" ? (
+                  <div className="modal-icon-success">
+                    <FaCheckCircle />
+                  </div>
+                ) : (
+                  <div className="modal-icon-error">
+                    <FaTimesCircle />
+                  </div>
+                )}
               </div>
-              <h3 className={`modal-title ${modal.type === "success" ? "modal-title-success" : "modal-title-error"}`}>
+              <h3
+                className={`modal-title ${
+                  modal.type === "success"
+                    ? "modal-title-success"
+                    : "modal-title-error"
+                }`}
+              >
                 {modal.type === "success" ? "Success" : "Error"}
               </h3>
               <p className="modal-message mb-6">{modal.message}</p>
-              <button className="btn-primary w-full" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
+              <button
+                className="btn-primary w-full"
+                onClick={() => setModal({ ...modal, visible: false })}
+              >
+                OK
+              </button>
             </div>
           </div>
         </div>
@@ -243,13 +567,17 @@ const EmployeeMaster = () => {
 
         {!showForm && (
           <div className="flex items-center gap-2">
-            {/* ✅ Add New */}
             <button
               className="btn-primary"
               onClick={() => {
                 setIsEdit(false);
                 setSelected(null);
                 setPhotoFile(null);
+
+                setDistrictIsOther(false);
+                setCityIsOther(false);
+                setOtherDistrictText("");
+                setOtherCityText("");
 
                 setFormData({
                   employee_code: nextEmployeeCode,
@@ -282,6 +610,7 @@ const EmployeeMaster = () => {
                   district_code: "",
                   city_code: "",
                   pincode: "",
+                  sort_order: "",
                 });
 
                 setShowForm(true);
@@ -312,303 +641,505 @@ const EmployeeMaster = () => {
         )}
       </div>
 
-      {/* ✅ FORM */}
       {showForm && (
         <div className="form-container">
-          <div className="mb-8 border-b border-gray-50 pb-5">
-            <h6 className="text-lg font-bold text-gray-800">
-              {isEdit ? "Update Employee Info" : "Add New Employee"}
-            </h6>
-          </div>
+          <h6 className="text-lg font-bold text-gray-800">
+            {isEdit ? "Update Employee Info" : "Add New Employee"}
+          </h6>
+
+          <div className="border-b border-gray-200 mt-3 mb-6"></div>
 
           <form className="grid grid-cols-1 gap-y-10" onSubmit={handleSubmit}>
-
-            {/* ✅ Section 1: Basic + Job */}
+            {/* ================= SECTION 1: BASIC ================= */}
             <div>
-              <h6 className="text-md font-bold text-gray-700 mb-4">Basic & Job Details</h6>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
+              <h6 className="text-md font-bold text-green-700 mb-4">
+                Information
+              </h6>
+              <div className="border-b border-gray-200 mt-3 mb-6"></div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 <div className="space-y-1.5">
                   <label className="form-label">Employee Code</label>
-                  <input className="form-input form-input-disabled" value={formData.employee_code} disabled placeholder="Eg. EMP00001" />
+                  <input
+                    className="form-input form-input-disabled"
+                    value={formData.employee_code}
+                    disabled
+                    placeholder="Eg. EMP00001"
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="form-label">Company</label>
-                  <select className="form-input" value={formData.company_code || ""} onChange={(e) => setFormData({ ...formData, company_code: e.target.value })}>
-                    <option value="">-- Select --</option>
-                    {(companiesData || []).map((c) => (
-                      <option key={c.company_code} value={c.company_code}>
-                        {c.company_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Financial Year</label>
-                  <select
-                    className="form-input"
-                    value={formData.financialyear_code || ""}
-                    onChange={(e) => setFormData({ ...formData, financialyear_code: e.target.value })}
-                  >
-                    <option value="">-- Select --</option>
-                    {(financialYearsData || []).map((fy) => (
-                      <option key={fy.financialyear_code} value={fy.financialyear_code}>
-                        {fy.financialyear_name || fy.financialyear_code}
-                      </option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    value={formData.company_code || ""}
+                    disabled={!!formData.company_code}
+                    options={companyOptions}
+                    placeholder="Select Company"
+                    onChange={(val) =>
+                      setFormData({ ...formData, company_code: val })
+                    }
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="form-label">First Name</label>
-                  <input className="form-input" value={formData.employee_firstname || ""} required onChange={(e) => setFormData({ ...formData, employee_firstname: e.target.value })} />
+                  <input
+                    className="form-input"
+                    value={formData.employee_firstname || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        employee_firstname: e.target.value,
+                      })
+                    }
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="form-label">Middle Name</label>
-                  <input className="form-input" value={formData.employee_middlename || ""} onChange={(e) => setFormData({ ...formData, employee_middlename: e.target.value })} />
+                  <input
+                    className="form-input"
+                    value={formData.employee_middlename || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        employee_middlename: e.target.value,
+                      })
+                    }
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="form-label">Last Name</label>
-                  <input className="form-input" value={formData.employee_lastname || ""} required onChange={(e) => setFormData({ ...formData, employee_lastname: e.target.value })} />
-                </div>
-
-                {/* ✅ Date picker for DOB */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Date of Birth</label>
                   <input
-                    type="date"
                     className="form-input"
-                    value={formData.dob || ""}
-                    onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                    value={formData.employee_lastname || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        employee_lastname: e.target.value,
+                      })
+                    }
                   />
                 </div>
 
-                {/* ✅ Gender dropdown */}
                 <div className="space-y-1.5">
-                  <label className="form-label">Gender</label>
-                  <select
-                    className="form-input"
-                    value={formData.gender === null || formData.gender === undefined ? "" : String(formData.gender)}
-                    onChange={(e) => setFormData({ ...formData, gender: e.target.value === "" ? "" : Number(e.target.value) })}
-                  >
-                    <option value="">-- Select --</option>
-                    <option value="1">Male</option>
-                    <option value="2">Female</option>
-                    <option value="3">Other</option>
-                  </select>
-                </div>
-
-                {/* ✅ Joining Date */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Joining Date</label>
+                  <label className="form-label">DOB</label>
                   <input
                     type="date"
+                    className={`form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 ${
+                      !formData.dob ? "text-gray-400" : "text-gray-900"
+                    }`}
+                    value={formData.dob || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, dob: e.target.value })
+                    }
+                  />
+                </div>
+
+                {/* ✅ FIX 2: Gender is now integer values */}
+                <div className="space-y-1.5">
+                  <label className="form-label">Gender</label>
+                  <SearchableSelect
+                    value={formData.gender || ""}
+                    options={genderOptions}
+                    placeholder="Select Gender"
+                    onChange={(val) =>
+                      setFormData({ ...formData, gender: Number(val) })
+                    }
+                  />
+                </div>
+
+                {/* ✅ FIX 3: Photo sends filename string */}
+                <div className="space-y-1.5">
+                  <label className="form-label">Photo</label>
+                  <input
+                    type="file"
+                    className={`form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 ${
+                      !formData.photo ? "text-gray-400" : "text-gray-900"
+                    }`}
+                    accept="image/*"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0] || null;
+                      setPhotoFile(f);
+                      setFormData({ ...formData, photo: f ? f.name : "" });
+                    }}
+                  />
+                  {formData.photo ? (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Selected Photo: {formData.photo}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+
+            {/* ================= SECTION 2: WORK ================= */}
+            <div>
+              <h6 className="text-md font-bold text-green-700 mb-4">
+                Work Information
+              </h6>
+              <div className="border-b border-gray-200 mt-3 mb-6"></div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div className="space-y-1.5">
+                  <label className="form-label">Financial Year</label>
+                  <SearchableSelect
+                    value={formData.financialyear_code || ""}
+                    options={fyOptions}
+                    placeholder="Select Financial Year"
+                    onChange={(val) =>
+                      setFormData({ ...formData, financialyear_code: val })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Department</label>
+                  <SearchableSelect
+                    value={formData.department_code || ""}
+                    options={deptOptions}
+                    placeholder="Select Department"
+                    onChange={(val) =>
+                      setFormData({ ...formData, department_code: val })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Designation Code</label>
+                  <input
                     className="form-input"
-                    value={formData.joining_date || ""}
-                    onChange={(e) => setFormData({ ...formData, joining_date: e.target.value })}
+                    value={formData.designation_code || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        designation_code: e.target.value,
+                      })
+                    }
                   />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="form-label">User Type</label>
-                  <select
-                    className="form-input"
+                  <SearchableSelect
                     value={formData.usertype_code || ""}
-                    onChange={(e) => setFormData({ ...formData, usertype_code: e.target.value })}
-                  >
-                    <option value="">-- Select --</option>
-                    {(userTypesData || []).map((u) => (
-                      <option key={u.usertype_code} value={u.usertype_code}>
-                        {u.usertype_name || u.usertype_code}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Department Code</label>
-                  <select
-                    className="form-input"
-                    value={formData.department_code || ""}
-                    onChange={(e) => setFormData({ ...formData, department_code: e.target.value })}
-                  >
-                    <option value="">-- Select --</option>
-                    {(departmentData || []).map((fy) => (
-                      <option key={fy.department_code} value={fy.department_code}>
-                        {fy.department_name || fy.department_code}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Designation Code</label>
-                  <input className="form-input" value={formData.designation_code || ""} onChange={(e) => setFormData({ ...formData, designation_code: e.target.value })} />
+                    options={userTypeOptions}
+                    placeholder="Select User Type"
+                    onChange={(val) =>
+                      setFormData({ ...formData, usertype_code: val })
+                    }
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="form-label">Division Code</label>
-                  <input className="form-input" value={formData.division_code || ""} onChange={(e) => setFormData({ ...formData, division_code: e.target.value })} />
+                  <input
+                    className="form-input"
+                    value={formData.division_code || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, division_code: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Joining Date</label>
+                  <input
+                    type="date"
+                    className={`form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 ${
+                      !formData.joining_date ? "text-gray-400" : "text-gray-900"
+                    }`}
+                    value={formData.joining_date || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, joining_date: e.target.value })
+                    }
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="form-label">Qualification</label>
-                  <input className="form-input" value={formData.qualification || ""} onChange={(e) => setFormData({ ...formData, qualification: e.target.value })} />
+                  <input
+                    className="form-input"
+                    value={formData.qualification || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, qualification: e.target.value })
+                    }
+                  />
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="form-label">Total Experience</label>
-                  <input className="form-input" value={formData.total_experience || ""} onChange={(e) => setFormData({ ...formData, total_experience: e.target.value })} />
-                </div>
-
-                {/* ✅ Photo upload */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Photo</label>
                   <input
-                    type="file"
                     className="form-input"
-                    accept="image/*"
-                    onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
+                    value={formData.total_experience || ""}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        total_experience: e.target.value,
+                      })
+                    }
                   />
                 </div>
-              </div>
-            </div>
 
-            {/* ✅ Section 2: Contact + Address */}
-            <div>
-              <h6 className="text-md font-bold text-gray-700 mb-4">Contact & Address</h6>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Email</label>
-                  <input className="form-input" value={formData.email || ""} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="form-label">Mobile</label>
-                  <input className="form-input" value={formData.mobile || ""} onChange={(e) => setFormData({ ...formData, mobile: e.target.value })} />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="form-label">Phone</label>
-                  <input className="form-input" value={formData.phone || ""} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Landmark</label>
-                  <input className="form-input" value={formData.landmark || ""} onChange={(e) => setFormData({ ...formData, landmark: e.target.value })} />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Pincode</label>
-                  <input className="form-input" value={formData.pincode || ""} onChange={(e) => setFormData({ ...formData, pincode: e.target.value })} />
-                </div>
-
-                <div className="space-y-1.5 md:col-span-3">
-                  <label className="form-label">Address 1</label>
-                  <input className="form-input" value={formData.address1 || ""} onChange={(e) => setFormData({ ...formData, address1: e.target.value })} />
-                </div>
-
-                <div className="space-y-1.5 md:col-span-3">
-                  <label className="form-label">Address 2</label>
-                  <input className="form-input" value={formData.address2 || ""} onChange={(e) => setFormData({ ...formData, address2: e.target.value })} />
-                </div>
-              </div>
-            </div>
-
-            {/* ✅ Section 3: Location + Status */}
-            <div>
-              <h6 className="text-md font-bold text-gray-700 mb-4">Location & Employment Status</h6>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Country</label>
-                  <select className="form-input" value={formData.country_code || ""} onChange={(e) => setFormData({ ...formData, country_code: e.target.value })}>
-                    <option value="">-- Select --</option>
-                    {(countriesData || []).map((c) => (
-                      <option key={c.country_code} value={c.country_code}>{c.country_name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">State</label>
-                  <select className="form-input" value={formData.state_code || ""} onChange={(e) => setFormData({ ...formData, state_code: e.target.value })}>
-                    <option value="">-- Select --</option>
-                    {(statesData || []).map((s) => (
-                      <option key={s.state_code} value={s.state_code}>{s.state_name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">District</label>
-                  <select className="form-input" value={formData.district_code || ""} onChange={(e) => setFormData({ ...formData, district_code: e.target.value })}>
-                    <option value="">-- Select --</option>
-                    {(districtsData || []).map((d) => (
-                      <option key={d.district_code} value={d.district_code}>{d.district_name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">City</label>
-                  <select className="form-input" value={formData.city_code || ""} onChange={(e) => setFormData({ ...formData, city_code: e.target.value })}>
-                    <option value="">-- Select --</option>
-                    {(citiesData || []).map((c) => (
-                      <option key={c.city_code} value={c.city_code}>{c.city_name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* ✅ Employment Status */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Status</label>
-                  <select
-                    className="form-input"
-                    value={Number(formData.status)}
-                    onChange={(e) => setFormData({ ...formData, status: Number(e.target.value) })}
-                  >
-                    <option value={1}>Existing</option>
-                    <option value={2}>Resigned</option>
-                    <option value={3}>Terminated</option>
-                  </select>
-                </div>
-
-                {/* ✅ Termination Date */}
                 <div className="space-y-1.5">
                   <label className="form-label">Termination Date</label>
                   <input
                     type="date"
-                    className="form-input"
+                    className={`form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 ${
+                      !formData.termination_date
+                        ? "text-gray-400"
+                        : "text-gray-900"
+                    }`}
                     value={formData.termination_date || ""}
-                    onChange={(e) => setFormData({ ...formData, termination_date: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        termination_date: e.target.value,
+                      })
+                    }
                   />
                 </div>
 
-                {/* ✅ Termination Reason */}
-                <div className="space-y-1.5 md:col-span-3">
+                <div className="space-y-1.5">
                   <label className="form-label">Termination Reason</label>
-                  <textarea
+                  <input
                     className="form-input"
-                    rows={3}
                     value={formData.termination_reason || ""}
-                    onChange={(e) => setFormData({ ...formData, termination_reason: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        termination_reason: e.target.value,
+                      })
+                    }
                   />
                 </div>
-
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button className="btn-primary px-10">{isEdit ? "Update" : "Save"}</button>
-              <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
+            {/* ================= SECTION 3: CONTACT ================= */}
+            <div>
+              <h6 className="text-md font-bold text-green-700 mb-4">Contact</h6>
+              <div className="border-b border-gray-200 mt-3 mb-6"></div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div className="space-y-1.5">
+                  <label className="form-label">Email</label>
+                  <input
+                    className="form-input"
+                    value={formData.email || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Mobile</label>
+                  <input
+                    className="form-input"
+                    value={formData.mobile || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, mobile: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Phone</label>
+                  <input
+                    className="form-input"
+                    value={formData.phone || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ================= SECTION 4: ADDRESS ================= */}
+            <div>
+              <h6 className="text-md font-bold text-green-700 mb-4">Address</h6>
+              <div className="border-b border-gray-200 mt-3 mb-6"></div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <div className="space-y-1.5">
+                  <label className="form-label">Landmark</label>
+                  <input
+                    className="form-input"
+                    value={formData.landmark || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, landmark: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Address 1</label>
+                  <input
+                    className="form-input"
+                    value={formData.address1 || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address1: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Address 2</label>
+                  <input
+                    className="form-input"
+                    value={formData.address2 || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, address2: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Country</label>
+                  <SearchableSelect
+                    value={formData.country_code || ""}
+                    disabled={!!formData.country_code}
+                    options={countryOptions}
+                    placeholder="Select Country"
+                    onChange={(val) =>
+                      setFormData({ ...formData, country_code: val })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">State</label>
+                  <SearchableSelect
+                    value={formData.state_code || ""}
+                    disabled={!!formData.state_code}
+                    options={stateOptions}
+                    placeholder="Select State"
+                    onChange={(val) =>
+                      setFormData({ ...formData, state_code: val })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">District</label>
+                  <SearchableSelect
+                    value={districtIsOther ? "OTHER" : formData.district_code || ""}
+                    disabled={!!formData.district_code}
+                    options={districtOptions}
+                    placeholder="Select District"
+                    onChange={(val) => {
+                      if (val === "OTHER") {
+                        setDistrictIsOther(true);
+                        setOtherDistrictText("");
+                        setFormData({ ...formData, district_code: "" });
+                      } else {
+                        setDistrictIsOther(false);
+                        setOtherDistrictText("");
+                        setFormData({ ...formData, district_code: val });
+                      }
+                    }}
+                  />
+
+                  {districtIsOther && (
+                    <input
+                      className="form-input mt-2"
+                      placeholder="Enter Other District"
+                      value={otherDistrictText}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setOtherDistrictText(v);
+                        setFormData({ ...formData, district_code: v });
+                      }}
+                    />
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">City</label>
+                  <SearchableSelect
+                    value={cityIsOther ? "OTHER" : formData.city_code || ""}
+                    disabled={!!formData.city_code}
+                    options={cityOptions}
+                    placeholder="Select City"
+                    onChange={(val) => {
+                      if (val === "OTHER") {
+                        setCityIsOther(true);
+                        setOtherCityText("");
+                        setFormData({ ...formData, city_code: "" });
+                      } else {
+                        setCityIsOther(false);
+                        setOtherCityText("");
+                        setFormData({ ...formData, city_code: val });
+                      }
+                    }}
+                  />
+
+                  {cityIsOther && (
+                    <input
+                      className="form-input mt-2"
+                      placeholder="Enter Other City"
+                      value={otherCityText}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        setOtherCityText(v);
+                        setFormData({ ...formData, city_code: v });
+                      }}
+                    />
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Pincode</label>
+                  <input
+                    className="form-input"
+                    value={formData.pincode || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, pincode: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Status</label>
+                  <SearchableSelect
+                    value={Number(formData.status)}
+                    options={statusOptions}
+                    placeholder="Select Status"
+                    onChange={(val) =>
+                      setFormData({ ...formData, status: Number(val) })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="form-label">Sort Order</label>
+                  <input
+                    className="form-input"
+                    type="number"
+                    value={formData.sort_order ?? ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, sort_order: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 border-t border-gray-50 pt-8">
+              <button className="btn-primary px-10">
+                {isEdit ? "Update" : "Save"}
+              </button>
+              <button type="button" className="btn-ghost" onClick={resetForm}>
+                Cancel
+              </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* ✅ TABLE */}
       {!showForm && (
         <div className="data-table-container">
           <TableToolbar
@@ -623,41 +1154,61 @@ const EmployeeMaster = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="table-header-row">
-                  <th className="table-th w-16"></th>
-                  <th className="table-th">Employee Code</th>
-                  <th className="table-th">Name</th>
-                  <th className="table-th">Email</th>
-                  <th className="table-th">Mobile</th>
-                  <th className="table-th">Status</th>
+                  <th className="table-admin-th w-16"></th>
+                  <th className="table-admin-th">Employee Code</th>
+                  <th className="table-admin-th">Name</th>
+                  <th className="table-admin-th">Email</th>
+                  <th className="table-admin-th">Status</th>
                 </tr>
               </thead>
 
               <tbody className="divide-y divide-gray-50">
-                {paginatedData.length > 0 ? paginatedData.map((e) => (
-                  <tr
-                    key={e.employee_code}
-                    onClick={() => setSelected(selected?.employee_code === e.employee_code ? null : e)}
-                    className={`table-row ${selected?.employee_code === e.employee_code ? "table-row-active" : "table-row-hover"}`}
-                  >
-                    <td className="table-td">
-                      <div className={`selection-indicator ${selected?.employee_code === e.employee_code ? "selection-indicator-active" : "selection-indicator-inactive"}`}>
-                        {selected?.employee_code === e.employee_code && <div className="selection-dot" />}
-                      </div>
-                    </td>
-                    <td className="table-td text-admin-id">{e.employee_code}</td>
-                    <td className="table-td">
-                      {`${e.employee_firstname || ""} ${e.employee_lastname || ""}`.trim() || "-"}
-                    </td>
-                    <td className="table-td">{e.email || "-"}</td>
-                    <td className="table-td">{e.mobile || "-"}</td>
-                    <td className="table-td">{employeeStatusBadge(e.status)}</td>
-                  </tr>
-                )) : (
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((e) => (
+                    <tr
+                      key={e.employee_code}
+                      onClick={() =>
+                        setSelected(
+                          selected?.employee_code === e.employee_code ? null : e
+                        )
+                      }
+                      className={`table-row ${
+                        selected?.employee_code === e.employee_code
+                          ? "table-row-active"
+                          : "table-row-hover"
+                      }`}
+                    >
+                      <td className="text-admin-td">
+                        <div
+                          className={`selection-indicator rounded-full ${
+                            selected?.employee_code === e.employee_code
+                              ? "selection-indicator-active"
+                              : "selection-indicator-inactive"
+                          }`}
+                        >
+                          {selected?.employee_code === e.employee_code && (
+                            <div className="selection-dot rounded-full" />
+                          )}
+                        </div>
+                      </td>
+                      <td className="text-admin-td">{e.employee_code}</td>
+                      <td className="text-admin-td">
+                        {`${e.employee_firstname || ""} ${
+                          e.employee_lastname || ""
+                        }`.trim() || "-"}
+                      </td>
+                      <td className="text-admin-td">{e.email || "-"}</td>
+                      <td className="text-admin-td">{employeeStatusBadge(e.status)}</td>
+                    </tr>
+                  ))
+                ) : (
                   <tr>
-                    <td colSpan="6" className="table-td py-20 text-center">
+                    <td colSpan="5" className="table-td py-20 text-center">
                       <div className="empty-state-container">
                         <FaUserTie size={48} className="mb-4 text-gray-400" />
-                        <p className="text-xl font-bold text-gray-500">No employees found</p>
+                        <p className="text-xl font-bold text-gray-500">
+                          No employees found
+                        </p>
                       </div>
                     </td>
                   </tr>

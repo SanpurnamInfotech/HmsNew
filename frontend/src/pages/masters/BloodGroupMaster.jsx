@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
 import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaTint } from "react-icons/fa";
 
@@ -13,11 +13,34 @@ const BloodGroupMaster = () => {
     blood_group_code: "",
     blood_group_name: "",
     description: "",
-    sort_order: 1000,
+    sort_order: "",
     status: 1,
   });
 
   const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
+
+    // ✅ Sort exactly like EmployeeMaster
+    const sortedBloodGroupies = useMemo(() => {
+      const list = Array.isArray(data) ? [...data] : [];
+  
+      const getOrder = (row) => {
+        const raw = row?.sort_order;
+        const n = Number(raw);
+        return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY; // blank goes to bottom
+      };
+  
+      list.sort((a, b) => {
+        const ao = getOrder(a);
+        const bo = getOrder(b);
+        if (ao !== bo) return ao - bo;
+  
+        const ac = (a?.blood_group_code || "").toString();
+        const bc = (b?.blood_group_code || "").toString();
+        return ac.localeCompare(bc);
+      });
+  
+      return list;
+    }, [data]);
 
   const {
     search, setSearch,
@@ -27,7 +50,7 @@ const BloodGroupMaster = () => {
     effectiveItemsPerPage,
     filteredData,
     totalPages
-  } = useTable(data);
+  } = useTable(sortedBloodGroupies);
 
   const resetForm = () => {
     setShowForm(false);
@@ -37,7 +60,7 @@ const BloodGroupMaster = () => {
       blood_group_code: "",
       blood_group_name: "",
       description: "",
-      sort_order: 1000,
+      sort_order: "",
       status: 1,
     });
   };
@@ -47,10 +70,14 @@ const BloodGroupMaster = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+       // ✅ ensure sort_order saved as number (or null)
     const payload = {
       ...formData,
-      sort_order: formData.sort_order === "" ? null : Number(formData.sort_order),
       status: Number(formData.status),
+      sort_order:
+        formData.sort_order === "" || formData.sort_order === null || formData.sort_order === undefined
+          ? null
+          : Number(formData.sort_order),
     };
 
     let result = isEdit
@@ -151,8 +178,10 @@ const BloodGroupMaster = () => {
         <div className="form-container">
           <div className="mb-8 border-b border-gray-50 pb-5">
             <h6 className="text-lg font-bold text-gray-800">
-              {isEdit ? "Update Blood Group Info" : "Add New Blood Group"}
-            </h6>
+  {isEdit ? "Update Blood Group Info" : "Add New Blood Group"}
+</h6>
+
+<div className="border-b border-gray-200 mt-3 mb-6"></div>
           </div>
 
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
@@ -181,23 +210,13 @@ const BloodGroupMaster = () => {
               />
             </div>
 
-            <div className="space-y-1.5 md:col-span-2">
+            <div className="space-y-1.5">
               <label className="form-label">Description</label>
               <input
                 className="form-input"
                 value={formData.description || ""}
                 maxLength={255}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="form-label">Sort Order</label>
-              <input
-                type="number"
-                className="form-input"
-                value={formData.sort_order ?? ""}
-                onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
               />
             </div>
 
@@ -212,6 +231,18 @@ const BloodGroupMaster = () => {
                 <option value={0}>Inactive</option>
               </select>
             </div>
+
+            {/* Sort Order */}
+            <div className="space-y-1.5">
+              <label className="form-label">Sort Order</label>
+              <input
+                className="form-input"
+                type="number"
+                value={formData.sort_order ?? ""}
+                onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
+              />
+            </div>
+
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
               <button className="btn-primary px-10">{isEdit ? "Update" : "Save"}</button>
@@ -235,12 +266,11 @@ const BloodGroupMaster = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="table-header-row">
-                  <th className="table-th w-16"></th>
-                  <th className="table-th">Code</th>
-                  <th className="table-th">Name</th>
-                  <th className="table-th">Description</th>
-                  <th className="table-th">Sort</th>
-                  <th className="table-th">Status</th>
+                  <th className="table-admin-th w-16"></th>
+                  <th className="table-admin-th">Code</th>
+                  <th className="table-admin-th">Name</th>
+                  <th className="table-admin-th">Description</th>
+                  <th className="table-admin-th">Status</th>
                 </tr>
               </thead>
 
@@ -251,16 +281,15 @@ const BloodGroupMaster = () => {
                     onClick={() => setSelected(selected?.blood_group_code === x.blood_group_code ? null : x)}
                     className={`table-row ${selected?.blood_group_code === x.blood_group_code ? "table-row-active" : "table-row-hover"}`}
                   >
-                    <td className="table-td">
-                      <div className={`selection-indicator ${selected?.blood_group_code === x.blood_group_code ? "selection-indicator-active" : "selection-indicator-inactive"}`}>
-                        {selected?.blood_group_code === x.blood_group_code && <div className="selection-dot" />}
+                    <td className="text-admin-td">
+                      <div className={`selection-indicator rounded-full ${selected?.blood_group_code === x.blood_group_code ? "selection-indicator-active" : "selection-indicator-inactive"}`}>
+                        {selected?.blood_group_code === x.blood_group_code && <div className="selection-dot rounded-full" />}
                       </div>
                     </td>
-                    <td className="table-td text-admin-id">{x.blood_group_code}</td>
-                    <td className="table-td text-admin-id">{x.blood_group_name}</td>
-                    <td className="table-td">{x.description || "-"}</td>
-                    <td className="table-td">{x.sort_order ?? "-"}</td>
-                    <td className="table-td">{statusBadge(x.status)}</td>
+                    <td className="text-admin-td">{x.blood_group_code}</td>
+                    <td className="text-admin-td">{x.blood_group_name}</td>
+                    <td className="text-admin-td">{x.description || "-"}</td>
+                    <td className="text-admin-td">{statusBadge(x.status)}</td>
                   </tr>
                 )) : (
                   <tr>

@@ -132,3 +132,15 @@ class BankdetailsSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ("createdon", "createdby", "updatedon", "updatedby")
 
+class BedAllotmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BedAllotment
+        fields = "__all__"        
+
+class PatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = "__all__"
+        extra_kwargs = {
+    "hospital_code": {"required": False, "allow_null": True},
+}

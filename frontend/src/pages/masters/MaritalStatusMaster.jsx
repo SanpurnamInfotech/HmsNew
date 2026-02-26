@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
 import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaRing } from "react-icons/fa";
 
@@ -13,10 +13,33 @@ const MaritalStatusMaster = () => {
     marital_status_code: "",
     marital_status_name: "",
     status: 1,
-    sort_order: 1000,
+    sort_order: "",
   });
 
   const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
+
+  // ✅ Sort exactly like EmployeeMaster
+  const sortedMaritalStatuses = useMemo(() => {
+    const list = Array.isArray(data) ? [...data] : [];
+
+    const getOrder = (row) => {
+      const raw = row?.sort_order;
+      const n = Number(raw);
+      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY; // blank goes to bottom
+    };
+
+    list.sort((a, b) => {
+      const ao = getOrder(a);
+      const bo = getOrder(b);
+      if (ao !== bo) return ao - bo;
+
+      const ac = (a?.marital_status_code || "").toString();
+      const bc = (b?.marital_status_code || "").toString();
+      return ac.localeCompare(bc);
+    });
+
+    return list;
+  }, [data]);
 
   const {
     search, setSearch,
@@ -26,9 +49,9 @@ const MaritalStatusMaster = () => {
     effectiveItemsPerPage,
     filteredData,
     totalPages
-  } = useTable(data);
+  } = useTable(sortedMaritalStatuses);
 
-  const showModal = (message, type = "success") => setModal({ message, visible: true, type });
+  const showModalMsg = (message, type = "success") => setModal({ message, visible: true, type });
 
   const resetForm = () => {
     setShowForm(false);
@@ -38,17 +61,21 @@ const MaritalStatusMaster = () => {
       marital_status_code: "",
       marital_status_name: "",
       status: 1,
-      sort_order: 1000,
+      sort_order: "",
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ ensure sort_order saved as number (or null)
     const payload = {
       ...formData,
       status: Number(formData.status),
-      sort_order: formData.sort_order === "" ? null : Number(formData.sort_order),
+      sort_order:
+        formData.sort_order === "" || formData.sort_order === null || formData.sort_order === undefined
+          ? null
+          : Number(formData.sort_order),
     };
 
     let result = isEdit
@@ -56,11 +83,11 @@ const MaritalStatusMaster = () => {
       : await createItem(`marital_status_master/create/`, payload);
 
     if (result.success) {
-      showModal(`Marital Status ${isEdit ? "updated" : "created"} successfully!`);
+      showModalMsg(`Marital Status ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
       refresh();
     } else {
-      showModal(result.error || "Operation failed!", "error");
+      showModalMsg(result.error || "Operation failed!", "error");
     }
   };
 
@@ -68,11 +95,11 @@ const MaritalStatusMaster = () => {
     if (!selected) return;
     const result = await deleteItem(`marital_status_master/delete/${selected.marital_status_code}/`);
     if (result.success) {
-      showModal("Marital Status deleted successfully!");
+      showModalMsg("Marital Status deleted successfully!");
       setSelected(null);
       refresh();
     } else {
-      showModal(result.error || "Delete failed!", "error");
+      showModalMsg(result.error || "Delete failed!", "error");
     }
   };
 
@@ -148,7 +175,11 @@ const MaritalStatusMaster = () => {
       {showForm && (
         <div className="form-container">
           <div className="mb-8 border-b border-gray-50 pb-5">
-            <h6 className="text-lg font-bold text-gray-800">{isEdit ? "Update Marital Status" : "Add New Marital Status"}</h6>
+            <h6 className="text-lg font-bold text-gray-800">
+  {isEdit ? "Update Marital Status" : "Add New Marital Status"}
+</h6>
+
+<div className="border-b border-gray-200 mt-3 mb-6"></div>
           </div>
 
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
@@ -161,7 +192,7 @@ const MaritalStatusMaster = () => {
                 required
                 maxLength={45}
                 onChange={(e) => setFormData({ ...formData, marital_status_code: e.target.value })}
-                placeholder="Eg. MAR00001"
+                placeholder="Eg. DIV"
               />
             </div>
 
@@ -173,10 +204,11 @@ const MaritalStatusMaster = () => {
                 required
                 maxLength={100}
                 onChange={(e) => setFormData({ ...formData, marital_status_name: e.target.value })}
-                placeholder="Eg. Single, Divorced"
+                placeholder="Eg. Divorced"
               />
             </div>
 
+            {/* Sort Order */}
             <div className="space-y-1.5">
               <label className="form-label">Sort Order</label>
               <input
@@ -221,11 +253,10 @@ const MaritalStatusMaster = () => {
             <table className="w-full text-left">
               <thead>
                 <tr className="table-header-row">
-                  <th className="table-th w-16"></th>
-                  <th className="table-th">Code</th>
-                  <th className="table-th">Name</th>
-                  <th className="table-th">Sort</th>
-                  <th className="table-th">Status</th>
+                  <th className="table-admin-th w-16"></th>
+                  <th className="table-admin-th">Code</th>
+                  <th className="table-admin-th">Name</th>
+                  <th className="table-admin-th">Status</th>
                 </tr>
               </thead>
 
@@ -236,15 +267,14 @@ const MaritalStatusMaster = () => {
                     onClick={() => setSelected(selected?.marital_status_code === m.marital_status_code ? null : m)}
                     className={`table-row ${selected?.marital_status_code === m.marital_status_code ? "table-row-active" : "table-row-hover"}`}
                   >
-                    <td className="table-td">
-                      <div className={`selection-indicator ${selected?.marital_status_code === m.marital_status_code ? "selection-indicator-active" : "selection-indicator-inactive"}`}>
-                        {selected?.marital_status_code === m.marital_status_code && <div className="selection-dot" />}
+                    <td className="text-admin-td">
+                      <div className={`selection-indicator rounded-full ${selected?.marital_status_code === m.marital_status_code ? "selection-indicator-active" : "selection-indicator-inactive"}`}>
+                        {selected?.marital_status_code === m.marital_status_code && <div className="selection-dot rounded-full" />}
                       </div>
                     </td>
-                    <td className="table-td text-admin-id">{m.marital_status_code}</td>
-                    <td className="table-td">{m.marital_status_name}</td>
-                    <td className="table-td">{m.sort_order ?? "-"}</td>
-                    <td className="table-td">{statusBadge(m.status)}</td>
+                    <td className="text-admin-td">{m.marital_status_code}</td>
+                    <td className="text-admin-td">{m.marital_status_name}</td>
+                    <td className="text-admin-td">{statusBadge(m.status)}</td>
                   </tr>
                 )) : (
                   <tr>
