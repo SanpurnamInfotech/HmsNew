@@ -50,7 +50,7 @@ const Login = () => {
         </div>
 
         {/* Compact Card Container */}
-        <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+        <div className="bg-white p-6 rounded-4xl shadow-xl shadow-slate-200/50 border border-slate-100">
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs font-bold animate-pulse text-center">
               {error}
