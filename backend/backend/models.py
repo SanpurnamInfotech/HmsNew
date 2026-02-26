@@ -645,6 +645,7 @@ class IpdServices(models.Model):
     class Meta:
         managed = False
         db_table = 'ipd_services'
+        
 class PrescriptionItems(models.Model):
     prescription_code = models.ForeignKey('PrescriptionHeader', models.DO_NOTHING, db_column='prescription_code', to_field='prescription_code')
     medicine_code = models.ForeignKey('Medicine', models.DO_NOTHING, db_column='medicine_code', to_field='medicine_code')
