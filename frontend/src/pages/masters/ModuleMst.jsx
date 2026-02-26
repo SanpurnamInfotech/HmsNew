@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import api from "../../utils/domain"; 
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
 import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
+import { adminRoutes } from "../../routes/routeConfig";  
 
 const ModuleMst = () => {
   /* ================= DATA FETCHING ================= */
@@ -29,6 +30,18 @@ const ModuleMst = () => {
   });
   const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
 
+  /* ================= SORTING LOGIC ================= */
+  // Senior Dev Tip: We sort the data here before passing it to useTable 
+  // to ensure 'sequence' is respected regardless of backend behavior.
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      const seqA = parseInt(a.sequence) || 999; // Default high number if empty
+      const seqB = parseInt(b.sequence) || 999;
+      return seqA - seqB;
+    });
+  }, [data]);
+
   /* ================= TABLE LOGIC ================= */
   const { 
     search, setSearch, 
@@ -38,13 +51,20 @@ const ModuleMst = () => {
     effectiveItemsPerPage, 
     filteredData,
     totalPages 
-  } = useTable(data);
+  } = useTable(sortedData);
 
   /* ================= EFFECTS ================= */
   useEffect(() => {
-    fetchUserTypes();
-    fetchAvailableUrls();
-  }, []);
+      fetchUserTypes();
+
+      const formattedRoutes = adminRoutes.map(route => ({
+        label: route.label,
+        value: `/admin/${route.path}` 
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+
+      setUrlOptions(formattedRoutes);
+    }, []);
 
   useEffect(() => {
     if (isEdit && formData.module_code) {
@@ -53,15 +73,6 @@ const ModuleMst = () => {
   }, [isEdit, formData.module_code]);
 
   /* ================= API CALLS ================= */
-  const fetchAvailableUrls = async () => {
-    try {
-      const response = await api.get("available_urls/"); 
-      setUrlOptions(response.data || []);
-    } catch (error) {
-      console.error("Error fetching system routes:", error);
-    }
-  };
-
   const fetchUserTypes = async () => {
     try {
       const response = await api.get("usertypes/"); 
@@ -74,7 +85,6 @@ const ModuleMst = () => {
 
   const fetchModulePermissions = async () => {
     try {
-      // Using Universal Permissions View filtered by Module only
       const response = await api.get(`universal-permissions/?module=${formData.module_code}`);
       setPermissionsData(response.data || {});
     } catch (error) {
@@ -98,11 +108,8 @@ const ModuleMst = () => {
   /* ================= CRUD OPERATIONS ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.url) {
-        showModal("Navigation URL is required", "error");
-        return;
-    }
-
+    
+    // Removed the "URL is required" check to make it optional as requested
     const finalPayload = { ...formData, ...permissionsData };
     const actionPath = isEdit 
       ? `${MODULE_PATH}/update/${formData.module_code}/` 
@@ -123,7 +130,7 @@ const ModuleMst = () => {
 
   const handleDelete = async () => {
     if (!selectedModule) return;
-    if (!window.confirm("Are you sure you want to delete this module?")) return;
+    // if (!window.confirm("Are you sure you want to delete this module?")) return;
     
     const result = await deleteItem(`${MODULE_PATH}/delete/${selectedModule.module_code}/`);
     if (result.success) {
@@ -136,7 +143,7 @@ const ModuleMst = () => {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-[400px]">
+    <div className="flex items-center justify-center min-h-100">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
     </div>
   );
@@ -206,11 +213,15 @@ const ModuleMst = () => {
               <input className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" value={formData.module_name} required onChange={e => setFormData({ ...formData, module_name: e.target.value })} placeholder="E.G. Human Resources" />
             </div>
 
+            {/* URL SELECTOR - Optional */}
             <div className="space-y-1.5 relative">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">URL Path</label>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">URL Path (Optional)</label>
               <div className="w-full px-4 py-3 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer bg-white" onClick={() => setShowUrlDropdown(!showUrlDropdown)}>
                 <span className={formData.url ? "text-gray-800" : "text-gray-400"}>{formData.url || "Select Navigation Path"}</span>
-                {showUrlDropdown ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
+                <div className="flex items-center gap-2">
+                   {formData.url && <FaTimesCircle className="text-gray-300 hover:text-red-400" onClick={(e) => { e.stopPropagation(); setFormData({...formData, url: ""}); }} />}
+                   {showUrlDropdown ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
+                </div>
               </div>
               {showUrlDropdown && (
                 <div className="absolute z-20 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
@@ -235,8 +246,8 @@ const ModuleMst = () => {
               <input className="w-full px-4 py-3 rounded-lg border border-gray-200" value={formData.icon} placeholder="bi bi-list" onChange={e => setFormData({ ...formData, icon: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Sequence</label>
-              <input className="w-full px-4 py-3 rounded-lg border border-gray-200" type="number" value={formData.sequence} onChange={e => setFormData({ ...formData, sequence: e.target.value })} />
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Sequence (Optional)</label>
+              <input className="w-full px-4 py-3 rounded-lg border border-gray-200" type="number" value={formData.sequence} placeholder="E.G. 1" onChange={e => setFormData({ ...formData, sequence: e.target.value })} />
             </div>
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Status</label>
@@ -270,7 +281,7 @@ const ModuleMst = () => {
 
                       return (
                         <tr key={uCode} className="hover:bg-white transition-colors">
-                          <td className="px-6 py-4 font-bold text-gray-700">{utype.usertype_name}</td>
+                          <td className="text-admin-td">{utype.usertype_code}</td>
                           <td className="px-4 py-4 text-center">
                             <input 
                               type="checkbox" 
@@ -310,7 +321,7 @@ const ModuleMst = () => {
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
               <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-2.5 rounded-lg text-sm font-bold shadow-lg">{isEdit ? "Update" : "Save"}</button>
-              <button type="button" className="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-700" onClick={resetForm}>Cancel</button>
+              <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
         </div>
@@ -325,10 +336,11 @@ const ModuleMst = () => {
               <thead>
                 <tr className="bg-gray-50/50">
                   <th className="px-6 py-4 w-16"></th>
-                  <th className="px-6 py-4 text-[10px] uppercase font-black text-gray-400">Code</th>
-                  <th className="px-6 py-4 text-[10px] uppercase font-black text-gray-400">Module Name</th>
-                  <th className="px-6 py-4 text-[10px] uppercase font-black text-gray-400">Endpoint</th>
-                  <th className="px-6 py-4 text-[10px] uppercase font-black text-gray-400 text-center">Status</th>
+                  <th className="text-admin-th">Code</th>
+                  <th className="text-admin-th">Module Name</th>
+                  <th className="text-admin-th">Endpoint</th>
+                  {/* <th className="text-admin-th text-center">Sequence</th> */}
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
@@ -340,10 +352,11 @@ const ModuleMst = () => {
                             {selectedModule?.module_code === m.module_code && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-emerald-600 font-bold">{m.module_code}</td>
-                    <td className="px-6 py-4 font-bold text-gray-700">{m.module_name}</td>
-                    <td className="px-6 py-4 text-gray-400 text-xs italic">{m.url || 'N/A'}</td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="text-admin-td">{m.module_code}</td>
+                    <td className="text-admin-td">{m.module_name}</td>
+                    <td className="text-admin-td">{m.url || 'N/A'}</td>
+                    {/* <td className="text-admin-td ">{m.sequence || '-'}</td> */}
+                    <td className="text-admin-td">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${m.status === 1 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
                         {m.status === 1 ? 'Active' : 'Inactive'}
                       </span>
