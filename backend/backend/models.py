@@ -337,12 +337,6 @@ class IcdMaster(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'advicemaster'
-
-class MaritalStatusMaster(models.Model):
-    marital_status_code = models.CharField(unique=True, max_length=45)
-    marital_status_name = models.CharField(max_length=100)
-    status = models.IntegerField(blank=True, null=True)        # 1=Active, 0=Inactive
         db_table = 'icd_master'
 
 
@@ -366,11 +360,6 @@ class RoomTypeMaster(models.Model):
         managed = False
         db_table = 'marital_status_master'
 
-class RelationMaster(models.Model):
-    relation_code  = models.CharField(unique=True, max_length=45)
-    relation_name = models.CharField(max_length=100)
-    status = models.IntegerField(blank=True, null=True)        # 1=Active, 0=Inactive
-        db_table = 'room_type_master'
 
 
 class Bed(models.Model):
@@ -389,16 +378,6 @@ class Bed(models.Model):
         managed = False
         db_table = 'relation_master'        
 
-class Departments(models.Model):
-    department_code = models.CharField(unique=True, max_length=25)
-    department_name = models.CharField(max_length=100)
-    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
-    company_code  = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)     # 1=Active, 0=Inactive
-        db_table = 'bed'
-
-
-
 
 class HabitMaster(models.Model):
     habit_code = models.CharField(unique=True, max_length=25)
@@ -414,16 +393,7 @@ class HabitMaster(models.Model):
         managed = False
         db_table = 'departments'
 
-class BloodGroupMaster(models.Model):
-    blood_group_code = models.CharField(unique=True, max_length=10)
-    blood_group_name = models.CharField(unique=True, max_length=20)
-    description = models.CharField(max_length=255, blank=True, null=True)
-    sort_order = models.IntegerField(blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField()
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField()
-        db_table = 'habit_master'
+
 
 
 class HallucinationMaster(models.Model):
@@ -440,21 +410,6 @@ class HallucinationMaster(models.Model):
         managed = False
         db_table = 'blood_group_master'
 
-class BloodDonor(models.Model):
-    donor_firstname = models.CharField(max_length=255)
-    donor_middlename = models.CharField(max_length=255, blank=True, null=True)
-    donor_lastname = models.CharField(max_length=255)
-    blood_group_code = models.CharField(max_length=10)
-    gender = models.CharField(max_length=45, blank=True, null=True)
-    age = models.IntegerField(blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    email = models.CharField(max_length=100, blank=True, null=True)
-    address1 = models.TextField(blank=True, null=True)
-    address2 = models.TextField(blank=True, null=True)
-    last_donation_date = models.DateTimeField(blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True, default=1)
-    sort_order = models.IntegerField(blank=True, null=True, default=1000)
-        db_table = 'hallucination_master'
 
 
 class HistoryMaster(models.Model):
@@ -471,20 +426,7 @@ class HistoryMaster(models.Model):
         managed = False
         db_table = "blood_donor"
 
-class Bankdetails(models.Model):
-    bank_code = models.CharField(unique=True, max_length=45)
-    bank_name = models.CharField(max_length=100)
-    employee_code = models.CharField(max_length=45, blank=True, null=True)
-    bank_address = models.CharField(max_length=255, blank=True, null=True)
-    bank_phone = models.CharField(max_length=45, blank=True, null=True)
-    bank_branch = models.CharField(max_length=100, blank=True, null=True)
-    bank_ifsc = models.CharField(max_length=45, blank=True, null=True)
-    bank_accountno = models.CharField(max_length=45, blank=True, null=True)
-    bank_ddpayableaddress = models.CharField(max_length=255, blank=True, null=True)
-    financialyear_code = models.CharField(max_length=45, blank=True, null=True)
-    company_code = models.CharField(max_length=45, blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)
-        db_table = 'history_master'
+
 
 
 
@@ -500,15 +442,8 @@ class MentalIllnessMaster(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'bankdetails'
-
-class BedAllotment(models.Model):
-    bed_code = models.CharField(max_length=45, blank=True, null=True)
-    patient_code = models.CharField(max_length=45, blank=True, null=True)
-    allotment_timestamp = models.DateTimeField(blank=True, null=True)
-    discharge_timestamp = models.DateTimeField(blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)
         db_table = 'mental_illness_master'
+
 
 
 
@@ -581,29 +516,8 @@ class Settings(models.Model):
         
 
         
-        
-class MedicineCategory(models.Model):
-    medicine_cat_code = models.CharField(unique=True, max_length=45)
-    medicine_cat_name = models.CharField(max_length=225)
-    description = models.TextField(blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = "bed_allotment"
 
 
-class Patient(models.Model):
-    patient_code = models.CharField(unique=True, max_length=45)
-    hospital_code = models.CharField(max_length=45, null=True, blank=True)
-        db_table = 'medicine_category'        
-        
-        
 
 
 
@@ -626,6 +540,22 @@ class Medicine(models.Model):
         managed = False
         db_table = 'medicine'
         
+class Departments(models.Model):
+    department_code = models.CharField(unique=True, max_length=25)
+    department_name = models.CharField(max_length=100)
+    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code')
+    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code')
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'departments'
+        
 class Doctor(models.Model):
     doctor_code = models.CharField(unique=True, max_length=45)
     doctor_name = models.CharField(max_length=100)
@@ -634,19 +564,13 @@ class Doctor(models.Model):
     total_experience = models.CharField(max_length=100, blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
     gender = models.CharField(max_length=20, blank=True, null=True)
-    marital_status_code = models.CharField(max_length=50, blank=True, null=True)
+    marital_status_code = models.ForeignKey('MaritalStatusMaster', models.DO_NOTHING, db_column='marital_status_code', to_field='marital_status_code', blank=True, null=True)
     email = models.CharField(max_length=100, blank=True, null=True)
     mobile = models.CharField(max_length=20, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
     landmark = models.CharField(max_length=100, blank=True, null=True)
     address1 = models.CharField(max_length=255, blank=True, null=True)
     address2 = models.CharField(max_length=255, blank=True, null=True)
-    city_code = models.CharField(max_length=55, blank=True, null=True)
-    district_code = models.CharField(max_length=255, blank=True, null=True)
-    state_code = models.CharField(max_length=255, blank=True, null=True)
-    country_code = models.CharField(max_length=255, blank=True, null=True)
-    pincode = models.CharField(max_length=15, blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)
     city_code = models.ForeignKey('Cities', models.DO_NOTHING, db_column='city_code', to_field='city_code', blank=True, null=True)
     district_code = models.ForeignKey('Districts', models.DO_NOTHING, db_column='district_code', to_field='district_code', blank=True, null=True)
     state_code = models.ForeignKey('States', models.DO_NOTHING, db_column='state_code', to_field='state_code', blank=True, null=True)
@@ -662,7 +586,6 @@ class Doctor(models.Model):
     class Meta:
         managed = False
         db_table = 'doctor'
-
 class Patient(models.Model):
     uhid = models.CharField(max_length=14)
     patient_code = models.CharField(unique=True, max_length=45)
@@ -898,7 +821,159 @@ class Noticeboard(models.Model):
         managed = False
         db_table = 'noticeboard'
 
-        
-        
+class BedAllotment(models.Model):
+    bed_code = models.ForeignKey('Bed', models.DO_NOTHING, db_column='bed_code', to_field='bed_code')
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+    allotment_timestamp = models.DateTimeField()
+    discharge_timestamp = models.DateTimeField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
 
+    class Meta:
+        managed = False
+        db_table = 'bed_allotment'
         
+class MedicineCategory(models.Model):
+    medicine_cat_code = models.CharField(unique=True, max_length=45)
+    medicine_cat_name = models.CharField(max_length=225)
+    description = models.TextField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'medicine_category'
+        
+class RelationMaster(models.Model):
+    relation_code = models.CharField(unique=True, max_length=25)
+    relation_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'relation_master'
+
+
+
+class BloodGroupMaster(models.Model):
+    blood_group_code = models.CharField(unique=True, max_length=10)
+    blood_group_name = models.CharField(unique=True, max_length=20)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    sort_order = models.PositiveIntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    createdon = models.DateTimeField()
+    createdby = models.PositiveIntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField()
+    updatedby = models.PositiveIntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'blood_group_master'
+
+class BloodDonor(models.Model):
+    blood_donor_code = models.CharField(unique=True, max_length=45)
+    donor_firstname = models.CharField(max_length=255)
+    donor_middlename = models.CharField(max_length=255, blank=True, null=True)
+    donor_lastname = models.CharField(max_length=255)
+    blood_group_code = models.ForeignKey('BloodGroupMaster', models.DO_NOTHING, db_column='blood_group_code', to_field='blood_group_code')
+    gender = models.CharField(max_length=45, blank=True, null=True)
+    age = models.IntegerField(blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.TextField(blank=True, null=True)
+    address2 = models.TextField(blank=True, null=True)
+    last_donation_date = models.DateTimeField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'blood_donor'
+        
+class Bankdetails(models.Model):
+    bank_code = models.CharField(unique=True, max_length=45)
+    bank_name = models.CharField(max_length=100)
+    employee_code = models.CharField(max_length=45, blank=True, null=True)
+    bank_address = models.CharField(max_length=255, blank=True, null=True)
+    bank_phone = models.CharField(max_length=45, blank=True, null=True)
+    bank_branch = models.CharField(max_length=100, blank=True, null=True)
+    bank_ifsc = models.CharField(max_length=45, blank=True, null=True)
+    bank_accountno = models.CharField(max_length=45, blank=True, null=True)
+    bank_ddpayableaddress = models.CharField(max_length=255, blank=True, null=True)
+    financialyear_code = models.CharField(max_length=45)
+    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code')
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'bankdetails'
+
+class HospitalDetails(models.Model):
+    hospital_code = models.CharField(unique=True, max_length=45)
+    hospital_name = models.CharField(max_length=225)
+    hospital_reg_number = models.CharField(max_length=100, blank=True, null=True)
+    hospital_cst_number = models.CharField(max_length=100, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    landmark = models.CharField(max_length=100, blank=True, null=True)
+    address1 = models.CharField(max_length=255, blank=True, null=True)
+    address2 = models.CharField(max_length=255, blank=True, null=True)
+    city_code = models.CharField(max_length=45, blank=True, null=True)
+    district_code = models.CharField(max_length=45, blank=True, null=True)
+    state_code = models.CharField(max_length=45, blank=True, null=True)
+    country_code = models.CharField(max_length=45, blank=True, null=True)
+    pincode = models.CharField(max_length=15, blank=True, null=True)
+    lunch_timing = models.CharField(max_length=100, blank=True, null=True)
+    weeklyoff_day = models.CharField(max_length=20, blank=True, null=True)
+    logo_path = models.CharField(max_length=255, blank=True, null=True)
+    developed_by = models.CharField(max_length=100, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'hospital_details'
+
+
+
+class AadhaarVerificationRequests(models.Model):
+    client_code = models.CharField(unique=True, max_length=100, db_comment='Surepass Client ID')
+    patient_code = models.CharField(max_length=45, blank=True, null=True)
+    hospital_code = models.ForeignKey('HospitalDetails', models.DO_NOTHING, db_column='hospital_code', to_field='hospital_code')
+    status = models.CharField(max_length=8, blank=True, null=True)
+    remark = models.CharField(max_length=255, blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'aadhaar_verification_requests'

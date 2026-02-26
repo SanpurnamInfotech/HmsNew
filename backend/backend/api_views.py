@@ -883,6 +883,73 @@ class AdvicemasterDeleteView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import permissions
+from rest_framework.authentication import SessionAuthentication
+# Assuming CustomJWTAuthentication is in your custom_auth.py
+# from .custom_auth import CustomJWTAuthentication 
+import requests
+
+class AadhaarOTPRequestView(APIView):
+    # authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        aadhaar_number = request.data.get('aadhaar_number')
+        hospital_code = request.data.get('hospital_code')
+        patient_code = request.data.get('patient_code') # Optional reference
+
+        # 1. Call Surepass API
+        url = "https://sandbox.surepass.io/api/v1/aadhaar-v2/generate-otp"
+        headers = {"Authorization": "Bearer YOUR_SUREPASS_TOKEN"}
+        payload = {"id_number": aadhaar_number}
+        
+        response = requests.post(url, json=payload, headers=headers)
+        res_json = response.json()
+
+        # 2. Senior Logic: Save to your MySQL table if successful
+        if response.status_code == 200 and res_json.get('success'):
+            AadhaarVerificationRequest.objects.create(
+                client_code=res_json['data']['client_id'], # Store Surepass ID
+                patient_code=patient_code,
+                hospital_code=hospital_code,
+                status='pending',
+                createdby=request.user.id # From JWT
+            )
+        
+        return Response(res_json)
+        
+class AadhaarVerifyView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        client_id = request.data.get('client_id') 
+        otp = request.data.get('otp')
+        
+        # 1. Call Surepass API
+        url = "https://sandbox.surepass.io/api/v1/aadhaar-v2/submit-otp"
+        payload = {"client_id": client_id, "otp": otp}
+        headers = {"Authorization": "Bearer YOUR_SUREPASS_TOKEN"}
+
+        response = requests.post(url, json=payload, headers=headers)
+        res_json = response.json()
+
+        # 2. Senior Logic: Update your MySQL table based on result
+        try:
+            log_entry = AadhaarVerificationRequest.objects.get(client_code=client_id)
+            if response.status_code == 200 and res_json.get('success'):
+                log_entry.status = 'verified'
+            else:
+                log_entry.status = 'failed'
+                log_entry.remark = res_json.get('message', 'OTP Verification Failed')
+            
+            log_entry.updatedby = request.user.id
+            log_entry.save()
+        except AadhaarVerificationRequest.DoesNotExist:
+            pass # Or log an error that this request wasn't found
+
+        return Response(res_json)
         
 # company_master
 

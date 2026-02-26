@@ -125,8 +125,6 @@ urlpatterns = [
     path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
     
 
-]
-
 
 
     
@@ -138,56 +136,58 @@ urlpatterns = [
     
   
 
-    path('api/ipd-registration/create/', IpdRegistrationCreateView.as_view()),
-    path('api/ipd-registration/', IpdRegistrationListView.as_view()),
-    path('api/ipd-registration/<str:ipd_registeration_code>/', IpdRegistrationDetailView.as_view()),
-    path('api/ipd-registration/update/<str:ipd_registeration_code>/', IpdRegistrationUpdateView.as_view()),
-    path('api/ipd-registration/delete/<str:ipd_registeration_code>/', IpdRegistrationDeleteView.as_view()),
-    path('api/doctors/', DoctorListView.as_view(), name='doctor-list'),
-    path('api/patients/', PatientListView.as_view(), name='patient-list'),
+    # path('api/ipd-registration/create/', IpdRegistrationCreateView.as_view()),
+    # path('api/ipd-registration/', IpdRegistrationListView.as_view()),
+    # path('api/ipd-registration/<str:ipd_registeration_code>/', IpdRegistrationDetailView.as_view()),
+    # path('api/ipd-registration/update/<str:ipd_registeration_code>/', IpdRegistrationUpdateView.as_view()),
+    # path('api/ipd-registration/delete/<str:ipd_registeration_code>/', IpdRegistrationDeleteView.as_view()),
+    # path('api/doctors/', DoctorListView.as_view(), name='doctor-list'),
+    # path('api/patients/', PatientListView.as_view(), name='patient-list'),
 
-    path("api/ipd-services/create/", IpdServicesCreateView.as_view()),
-    path("api/ipd-services/", IpdServicesListView.as_view()),
-    path("api/ipd-services/<str:service_id>/", IpdServicesDetailView.as_view()),
-    path("api/ipd-services/update/<str:service_id>/", IpdServicesUpdateView.as_view()),
-    path("api/ipd-services/delete/<str:service_id>/", IpdServicesDeleteView.as_view()),
+    # path("api/ipd-services/create/", IpdServicesCreateView.as_view()),
+    # path("api/ipd-services/", IpdServicesListView.as_view()),
+    # path("api/ipd-services/<str:service_id>/", IpdServicesDetailView.as_view()),
+    # path("api/ipd-services/update/<str:service_id>/", IpdServicesUpdateView.as_view()),
+    # path("api/ipd-services/delete/<str:service_id>/", IpdServicesDeleteView.as_view()),
 
-    path('api/mse_master/', MseMasterListView.as_view(), name='mse-list'),
-    path('api/mse_master/create/', MseMasterCreateView.as_view(), name='mse-create'),
-    path('api/mse_master/update/<str:mse_code>/', MseMasterUpdateView.as_view(), name='mse-update'),
-    path('api/mse_master/delete/<str:mse_code>/', MseMasterDeleteView.as_view(), name='mse-delete'),
+    # path('api/mse_master/', MseMasterListView.as_view(), name='mse-list'),
+    # path('api/mse_master/create/', MseMasterCreateView.as_view(), name='mse-create'),
+    # path('api/mse_master/update/<str:mse_code>/', MseMasterUpdateView.as_view(), name='mse-update'),
+    # path('api/mse_master/delete/<str:mse_code>/', MseMasterDeleteView.as_view(), name='mse-delete'),
     
-    path('api/complaints/', ComplaintListView.as_view(), name='complaint-list'),
-    path('api/complaints/create/', ComplaintCreateView.as_view(), name='complaint-create'),
-    path('api/complaints/update/<str:complaint_code>/', ComplaintUpdateView.as_view(), name='complaint-update'),
-    path('api/complaints/delete/<str:complaint_code>/', ComplaintDeleteView.as_view(), name='complaint-delete'),
+    # path('api/complaints/', ComplaintListView.as_view(), name='complaint-list'),
+    # path('api/complaints/create/', ComplaintCreateView.as_view(), name='complaint-create'),
+    # path('api/complaints/update/<str:complaint_code>/', ComplaintUpdateView.as_view(), name='complaint-update'),
+    # path('api/complaints/delete/<str:complaint_code>/', ComplaintDeleteView.as_view(), name='complaint-delete'),
 
    
 
     # API-prefixed routes (frontend uses baseURL + endpoint, ensure /api/expenses/ is reachable)
-    path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
-    path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
-    path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),
-    path('api/expenses/delete/<str:expenses_code>/', ExpensesDeleteView.as_view(), name='expenses-delete'),
+    # path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
+    # path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
+    # path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),
+    # path('api/expenses/delete/<str:expenses_code>/', ExpensesDeleteView.as_view(), name='expenses-delete'),
     
-    # Thought Content Master CRUD
-    path('api/thought_content_master/', ThoughtContentListView.as_view(), name='thoughtcontent-list'),
-    path('api/thought_content_master/create/', ThoughtContentListView.as_view(), name='thoughtcontent-create'),
-    path('api/thought_content_master/update/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-update'),
-    path('api/thought_content_master/delete/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-delete'),
+    # # Thought Content Master CRUD
+    # path('api/thought_content_master/', ThoughtContentListView.as_view(), name='thoughtcontent-list'),
+    # path('api/thought_content_master/create/', ThoughtContentListView.as_view(), name='thoughtcontent-create'),
+    # path('api/thought_content_master/update/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-update'),
+    # path('api/thought_content_master/delete/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-delete'),
     
-    # Noticeboard CRUD
-    path('api/noticeboard/', NoticeboardListView.as_view(), name='noticeboard-list'),
-    path('api/noticeboard/create/', NoticeboardListView.as_view(), name='noticeboard-create'),
-    path('api/noticeboard/update/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-update'),
-    path('api/noticeboard/delete/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-delete'),
+    # # Noticeboard CRUD
+    # path('api/noticeboard/', NoticeboardListView.as_view(), name='noticeboard-list'),
+    # path('api/noticeboard/create/', NoticeboardListView.as_view(), name='noticeboard-create'),
+    # path('api/noticeboard/update/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-update'),
+    # path('api/noticeboard/delete/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-delete'),
 
 
     # Mood History API Routes
-   path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
-path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
-path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='mood-history-update'),
-path('api/mood-history/delete/<str:mood_history_code>/', MoodHistoryDeleteView.as_view(), name='mood-history-delete'),
+    path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
+    path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
+    path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='mood-history-update'),
+    path('api/mood-history/delete/<str:mood_history_code>/', MoodHistoryDeleteView.as_view(), name='mood-history-delete'),
+
+
 ]
 
 
