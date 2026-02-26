@@ -584,3 +584,41 @@ class IpdServices(models.Model):
     class Meta:
         managed = False
         db_table = 'ipd_services'
+
+class IpdBill(models.Model):
+    ipd_registration_code = models.CharField(max_length=50, blank=True, null=True)
+    patient_code = models.CharField(max_length=20, blank=True, null=True)
+    bill_number = models.CharField(unique=True, max_length=50)
+    bill_date = models.DateTimeField()
+    gross_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    discount_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    net_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=50, blank=True, null=True)
+    created_on = models.DateTimeField()
+    created_by = models.BigIntegerField()
+    updated_on = models.DateTimeField()
+    updated_by = models.BigIntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'ipd_bill'
+
+
+class IpdBillTransaction(models.Model):
+    bill_number = models.CharField(max_length=50, blank=True, null=True)
+    patient_code = models.CharField(max_length=20, blank=True, null=True)
+    service_id = models.CharField(max_length=20, blank=True, null=True)
+    service_date = models.DateField(blank=True, null=True)
+    service_time = models.CharField(max_length=20, blank=True, null=True)
+    quantity = models.IntegerField(blank=True, null=True)
+    rate = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True)
+    created_on = models.DateTimeField(blank=True, null=True)
+    created_by = models.IntegerField(blank=True, null=True)
+    updated_on = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'ipd_bill_transaction'

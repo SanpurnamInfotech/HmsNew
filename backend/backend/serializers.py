@@ -241,4 +241,18 @@ class IpdServicesSerializer(serializers.ModelSerializer):
             'updated_on',
             'created_by',
             'updated_by',
-        )
+        ) 
+
+
+class IpdBillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IpdBill
+        fields = "__all__"
+
+
+class IpdBillTransactionSerializer(serializers.ModelSerializer):
+    service_name = serializers.CharField(source="service.service", read_only=True)
+
+    class Meta:
+        model = IpdBillTransaction
+        fields = "__all__"
