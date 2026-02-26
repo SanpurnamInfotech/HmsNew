@@ -701,6 +701,120 @@ class IpdRegistration(models.Model):
     class Meta:
         managed = False
         db_table = 'ipd_registration'
+
+from django.db import models
+
+
+class ComplaintMaster(models.Model):
+    complaint_code = models.CharField(unique=True, max_length=45)
+    complaint_name = models.CharField(max_length=225)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    created_on = models.DateTimeField(blank=True, null=True)
+    created_by = models.IntegerField(blank=True, null=True)
+    updated_on = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'complaint_master'
+
+
+
+
+
+
+
+
+from django.db import models
+
+
+class ExpensesMaster(models.Model):
+    expenses_code = models.CharField(unique=True, max_length=25)
+    expenses_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'expenses_master'
+
+
+from django.db import models
+
+
+class MseMaster(models.Model):
+    mse_code = models.CharField(unique=True, max_length=25)
+    mse_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'mse_master'
+
+from django.db import models
+
+
+class ThoughtContentMaster(models.Model):
+    thought_content_code = models.CharField(unique=True, max_length=25)
+    thought_content_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'thought_content_master'
+
+from django.db import models
+
+
+class MoodHistoryMaster(models.Model):
+    mood_history_code = models.CharField(unique=True, max_length=25)
+    mood_history_name = models.CharField(max_length=100)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'mood_history_master'
+
+from django.db import models
+
+
+class Noticeboard(models.Model):
+    notice_code = models.CharField(unique=True, max_length=45)
+    notice_name = models.CharField(max_length=255)
+    notice_description = models.TextField()
+    notice_srart_date = models.DateField(blank=True, null=True)
+    notice_expiry_date = models.DateField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'noticeboard'
+
         
         
 

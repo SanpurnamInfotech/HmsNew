@@ -1169,3 +1169,356 @@ class IpdServicesDeleteView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.shortcuts import get_object_or_404
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+from .models import ExpensesMaster
+from .serializers import ExpensesMasterSerializer
+
+class ExpensesListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            objs = ExpensesMaster.objects.all().order_by("expenses_code")
+            serializer = ExpensesMasterSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ExpensesCreateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            serializer = ExpensesMasterSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ExpensesUpdateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, expenses_code):
+        try:
+            obj = get_object_or_404(ExpensesMaster, expenses_code=expenses_code)
+            serializer = ExpensesMasterSerializer(obj, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ExpensesDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, expenses_code):
+        try:
+            obj = get_object_or_404(ExpensesMaster, expenses_code=expenses_code)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from .models import MseMaster
+from .serializers import MseMasterSerializer
+
+
+class MseMasterListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            objs = MseMaster.objects.all().order_by('mse_name')
+            serializer = MseMasterSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MseMasterCreateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            serializer = MseMasterSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MseMasterUpdateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, mse_code):
+        try:
+            obj = get_object_or_404(MseMaster, mse_code=mse_code)
+            serializer = MseMasterSerializer(obj, data=request.data, partial=True, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class MseMasterDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, mse_code):
+        try:
+            obj = get_object_or_404(MseMaster, mse_code=mse_code)
+            obj.delete()
+            return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+        from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+import traceback
+
+from .models import ThoughtContentMaster
+from .serializers import ThoughtContentMasterSerializer
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+class ThoughtContentListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            objs = ThoughtContentMaster.objects.all().order_by('thought_content_name')
+            serializer = ThoughtContentMasterSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        try:
+            serializer = ThoughtContentMasterSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=getattr(request.user, 'id', None),
+                    createdon=timezone.now(),
+                    updatedby=getattr(request.user, 'id', None),
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ThoughtContentDetailView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, thought_content_code):
+        try:
+            obj = get_object_or_404(ThoughtContentMaster, thought_content_code=thought_content_code)
+            serializer = ThoughtContentMasterSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, thought_content_code):
+        try:
+            obj = get_object_or_404(ThoughtContentMaster, thought_content_code=thought_content_code)
+            serializer = ThoughtContentMasterSerializer(obj, data=request.data, partial=True, context={'request': request})
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=getattr(request.user, 'id', None),
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, thought_content_code):
+        try:
+            obj = get_object_or_404(ThoughtContentMaster, thought_content_code=thought_content_code)
+            obj.delete()
+            return Response({"message": "Thought content deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+import traceback
+
+from .models import Noticeboard
+from .serializers import NoticeboardSerializer
+from backend.authentication import CustomJWTAuthentication
+from rest_framework.authentication import SessionAuthentication
+
+
+class NoticeboardListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            objs = Noticeboard.objects.all().order_by('notice_srart_date')
+            serializer = NoticeboardSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def post(self, request):
+        try:
+            serializer = NoticeboardSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=getattr(request.user, 'id', None),
+                    createdon=timezone.now(),
+                    updatedby=getattr(request.user, 'id', None),
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class NoticeboardDetailView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, notice_code):
+        try:
+            obj = get_object_or_404(Noticeboard, notice_code=notice_code)
+            serializer = NoticeboardSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def put(self, request, notice_code):
+        try:
+            obj = get_object_or_404(Noticeboard, notice_code=notice_code)
+            serializer = NoticeboardSerializer(obj, data=request.data, partial=True, context={'request': request})
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=getattr(request.user, 'id', None),
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def delete(self, request, notice_code):
+        try:
+            obj = get_object_or_404(Noticeboard, notice_code=notice_code)
+            obj.delete()
+            return Response({"message": "Notice deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import ComplaintMaster
+from .serializers import ComplaintMasterSerializer
+
+class ComplaintListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            obj = ComplaintMaster.objects.all().order_by('complaint_name')
+            serializer = ComplaintMasterSerializer(obj, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ComplaintCreateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            serializer = ComplaintMasterSerializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save(
+                    created_on=timezone.now(),
+                    created_by=1,
+                    updated_on=timezone.now(),
+                    updated_by=1
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ComplaintUpdateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, complaint_code):
+        try:
+            obj = get_object_or_404(ComplaintMaster, complaint_code=complaint_code)
+
+            serializer = ComplaintMasterSerializer(obj, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save(
+                    updated_on=timezone.now(),
+                    updated_by=1
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ComplaintDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, complaint_code):
+        try:
+            obj = get_object_or_404(ComplaintMaster, complaint_code=complaint_code)
+            obj.delete()
+            return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
