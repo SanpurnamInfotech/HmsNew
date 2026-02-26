@@ -323,3 +323,207 @@ class IpdServicesSerializer(serializers.ModelSerializer):
             'updated_by',
         )
 
+from rest_framework import serializers
+from .models import ComplaintMaster
+
+
+class ComplaintMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ComplaintMaster
+        fields = '__all__'
+        read_only_fields = (
+            'created_on',
+            'created_by',
+            'updated_on',
+            'updated_by',
+        )
+
+
+        
+class ExpensesMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ExpensesMaster
+        fields = "__all__"
+        read_only_fields = [
+            "createdon",
+            "createdby",
+            "updatedon",
+            "updatedby",
+        ]
+
+    def validate_expenses_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Expenses code is required.")
+        return value.strip()
+
+    def validate_expenses_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Expenses name is required.")
+        return value.strip()
+
+    def create(self, validated_data):
+        from django.utils import timezone
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from django.utils import timezone
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().update(instance, validated_data)
+
+
+
+class MseMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MseMaster
+        fields = '__all__'
+        read_only_fields = (
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby',
+        )
+
+    def validate_mse_code(self, value):
+        if not value:
+            raise serializers.ValidationError("MSE code is required.")
+        return value.strip()
+
+    def validate_mse_name(self, value):
+        if not value:
+            raise serializers.ValidationError("MSE name is required.")
+        return value.strip()
+
+    def create(self, validated_data):
+        from django.utils import timezone
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from django.utils import timezone
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().update(instance, validated_data)
+
+
+class ThoughtContentMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ThoughtContentMaster
+        fields = [
+            'thought_content_code',
+            'thought_content_name',
+            'status',
+            'sort_order',
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby',
+        ]
+        read_only_fields = (
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby',
+        )
+
+    def create(self, validated_data):
+        from django.utils import timezone
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from django.utils import timezone
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().update(instance, validated_data)
+
+
+class NoticeboardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Noticeboard
+        fields = [
+            'notice_code',
+            'notice_name',
+            'notice_description',
+            'notice_srart_date',
+            'notice_expiry_date',
+            'status',
+            'sort_order',
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby',
+        ]
+        read_only_fields = (
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby',
+        )
+
+    def create(self, validated_data):
+        from django.utils import timezone
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from django.utils import timezone
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().update(instance, validated_data)
+
