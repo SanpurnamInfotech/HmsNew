@@ -891,229 +891,229 @@ class AdvicemasterDeleteView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework import status, permissions
+# from django.shortcuts import get_object_or_404
+# from django.utils import timezone
 
-from .models import States
-from .serializers import StatesSerializer
-
-
-class StatesListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        try:
-            obj = States.objects.all().order_by('state_name')
-            serializer = StatesSerializer(obj, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# from .models import States
+# from .serializers import StatesSerializer
 
 
-class StatesCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class StatesListView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
-        try:
-            serializer = StatesSerializer(data=request.data, context={'request': request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     def get(self, request):
+#         try:
+#             obj = States.objects.all().order_by('state_name')
+#             serializer = StatesSerializer(obj, many=True)
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class StatesUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class StatesCreateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def put(self, request, state_code):
-        try:
-            obj = get_object_or_404(States, state_code=state_code)
-            serializer = StatesSerializer(obj, data=request.data, partial=True, context={'request': request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class StatesDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def delete(self, request, state_code):
-        try:
-            obj = get_object_or_404(States, state_code=state_code)
-            obj.delete()
-            return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     def post(self, request):
+#         try:
+#             serializer = StatesSerializer(data=request.data, context={'request': request})
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-    from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
+# class StatesUpdateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-from .models import Districts
-from .serializers import DistrictsSerializer
+#     def put(self, request, state_code):
+#         try:
+#             obj = get_object_or_404(States, state_code=state_code)
+#             serializer = StatesSerializer(obj, data=request.data, partial=True, context={'request': request})
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data, status=status.HTTP_200_OK)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class DistrictsListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class StatesDeleteView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        try:
-            obj = Districts.objects.all().order_by('district_name')
-            serializer = DistrictsSerializer(obj, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     def delete(self, request, state_code):
+#         try:
+#             obj = get_object_or_404(States, state_code=state_code)
+#             obj.delete()
+#             return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class DistrictsCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
-        try:
-            serializer = DistrictsSerializer(
-                data=request.data,
-                context={'request': request}
-            )
+#     from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework import status, permissions
+# from django.shortcuts import get_object_or_404
+# from django.utils import timezone
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+# from .models import Districts
+# from .serializers import DistrictsSerializer
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+# class DistrictsListView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-class DistrictsUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+#     def get(self, request):
+#         try:
+#             obj = Districts.objects.all().order_by('district_name')
+#             serializer = DistrictsSerializer(obj, many=True)
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def put(self, request, district_code):
-        try:
-            obj = get_object_or_404(Districts, district_code=district_code)
+# class DistrictsCreateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-            serializer = DistrictsSerializer(
-                obj,
-                data=request.data,
-                partial=True,
-                context={'request': request}
-            )
+#     def post(self, request):
+#         try:
+#             serializer = DistrictsSerializer(
+#                 data=request.data,
+#                 context={'request': request}
+#             )
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class DistrictsDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class DistrictsUpdateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def delete(self, request, district_code):
-        try:
-            obj = get_object_or_404(Districts, district_code=district_code)
-            obj.delete()
-            return Response({"message": "District deleted successfully"}, status=status.HTTP_200_OK)
+#     def put(self, request, district_code):
+#         try:
+#             obj = get_object_or_404(Districts, district_code=district_code)
 
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#             serializer = DistrictsSerializer(
+#                 obj,
+#                 data=request.data,
+#                 partial=True,
+#                 context={'request': request}
+#             )
+
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data, status=status.HTTP_200_OK)
+
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# class DistrictsDeleteView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
+
+#     def delete(self, request, district_code):
+#         try:
+#             obj = get_object_or_404(Districts, district_code=district_code)
+#             obj.delete()
+#             return Response({"message": "District deleted successfully"}, status=status.HTTP_200_OK)
+
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework import status, permissions
+# from django.shortcuts import get_object_or_404
+# from django.utils import timezone
 
-from .models import Cities
-from .serializers import CitiesSerializer
+# from .models import Cities
+# from .serializers import CitiesSerializer
 
-class CitiesListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class CitiesListView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        try:
-            obj = Cities.objects.all().order_by('city_name')
-            serializer = CitiesSerializer(obj, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     def get(self, request):
+#         try:
+#             obj = Cities.objects.all().order_by('city_name')
+#             serializer = CitiesSerializer(obj, many=True)
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class CitiesCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class CitiesCreateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
-        try:
-            serializer = CitiesSerializer(
-                data=request.data,
-                context={'request': request}
-            )
+#     def post(self, request):
+#         try:
+#             serializer = CitiesSerializer(
+#                 data=request.data,
+#                 context={'request': request}
+#             )
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class CitiesUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class CitiesUpdateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def put(self, request, city_code):
-        try:
-            obj = get_object_or_404(Cities, city_code=city_code)
+#     def put(self, request, city_code):
+#         try:
+#             obj = get_object_or_404(Cities, city_code=city_code)
 
-            serializer = CitiesSerializer(
-                obj,
-                data=request.data,
-                partial=True,
-                context={'request': request}
-            )
+#             serializer = CitiesSerializer(
+#                 obj,
+#                 data=request.data,
+#                 partial=True,
+#                 context={'request': request}
+#             )
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+#             if serializer.is_valid():
+#                 serializer.save()
+#                 return Response(serializer.data, status=status.HTTP_200_OK)
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class CitiesDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class CitiesDeleteView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def delete(self, request, city_code):
-        try:
-            obj = get_object_or_404(Cities, city_code=city_code)
-            obj.delete()
-            return Response({"message": "City deleted successfully"}, status=status.HTTP_200_OK)
+#     def delete(self, request, city_code):
+#         try:
+#             obj = get_object_or_404(Cities, city_code=city_code)
+#             obj.delete()
+#             return Response({"message": "City deleted successfully"}, status=status.HTTP_200_OK)
 
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -1417,68 +1417,68 @@ class ComplaintDeleteView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from rest_framework import status, permissions
+# from django.shortcuts import get_object_or_404
+# from django.utils import timezone
 
-from .models import Doctor
-from .serializers import DoctorSerializer
+# from .models import Doctor
+# from .serializers import DoctorSerializer
 
-class DoctorListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class DoctorListView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request):
-        obj = Doctor.objects.all().order_by('doctor_name')
-        serializer = DoctorSerializer(obj, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+#     def get(self, request):
+#         obj = Doctor.objects.all().order_by('doctor_name')
+#         serializer = DoctorSerializer(obj, many=True)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class DoctorCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class DoctorCreateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
-        serializer = DoctorSerializer(data=request.data)
+#     def post(self, request):
+#         serializer = DoctorSerializer(data=request.data)
 
-        if serializer.is_valid():
-            serializer.save(
-                createdon=timezone.now(),
-                createdby=1,
-                updatedon=timezone.now(),
-                updatedby=1
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         if serializer.is_valid():
+#             serializer.save(
+#                 createdon=timezone.now(),
+#                 createdby=1,
+#                 updatedon=timezone.now(),
+#                 updatedby=1
+#             )
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class DoctorUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class DoctorUpdateView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def put(self, request, doctor_code):
-        obj = get_object_or_404(Doctor, doctor_code=doctor_code)
+#     def put(self, request, doctor_code):
+#         obj = get_object_or_404(Doctor, doctor_code=doctor_code)
 
-        serializer = DoctorSerializer(obj, data=request.data, partial=True)
+#         serializer = DoctorSerializer(obj, data=request.data, partial=True)
 
-        if serializer.is_valid():
-            serializer.save(
-                updatedon=timezone.now(),
-                updatedby=1
-            )
-            return Response(serializer.data, status=status.HTTP_200_OK)
+#         if serializer.is_valid():
+#             serializer.save(
+#                 updatedon=timezone.now(),
+#                 updatedby=1
+#             )
+#             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class DoctorDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# class DoctorDeleteView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
 
-    def delete(self, request, doctor_code):
-        obj = get_object_or_404(Doctor, doctor_code=doctor_code)
-        obj.delete()
-        return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
+#     def delete(self, request, doctor_code):
+#         obj = get_object_or_404(Doctor, doctor_code=doctor_code)
+#         obj.delete()
+#         return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
 
     from rest_framework.views import APIView
 from rest_framework.response import Response

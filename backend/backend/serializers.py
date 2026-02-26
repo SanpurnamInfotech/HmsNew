@@ -89,124 +89,124 @@ class AdvicemasterSerializer(serializers.ModelSerializer):
 
 
 
-class StatesSerializer(serializers.ModelSerializer):
-    country_code = serializers.SlugRelatedField(slug_field='country_code', queryset=Countries.objects.all())
-    class Meta:
-        model = States
-        fields = '__all__'
-        read_only_fields = (
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby',
-        )
+# class StatesSerializer(serializers.ModelSerializer):
+#     country_code = serializers.SlugRelatedField(slug_field='country_code', queryset=Countries.objects.all())
+#     class Meta:
+#         model = States
+#         fields = '__all__'
+#         read_only_fields = (
+#             'createdon',
+#             'createdby',
+#             'updatedon',
+#             'updatedby',
+#         )
 
-    def create(self, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['createdon'] = timezone.now()
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            validated_data['createdby'] = request.user.id
-            validated_data['updatedby'] = request.user.id
-        return super().create(validated_data)
+#     def create(self, validated_data):
+#         from django.utils import timezone
+#         request = self.context.get('request')
+#         validated_data['createdon'] = timezone.now()
+#         validated_data['updatedon'] = timezone.now()
+#         if request and hasattr(request, 'user'):
+#             validated_data['createdby'] = request.user.id
+#             validated_data['updatedby'] = request.user.id
+#         return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            validated_data['updatedby'] = request.user.id
-        return super().update(instance, validated_data)
+#     def update(self, instance, validated_data):
+#         from django.utils import timezone
+#         request = self.context.get('request')
+#         validated_data['updatedon'] = timezone.now()
+#         if request and hasattr(request, 'user'):
+#             validated_data['updatedby'] = request.user.id
+#         return super().update(instance, validated_data)
 
-from rest_framework import serializers
-from .models import Cities, Countries, States
-
-
-class CitiesSerializer(serializers.ModelSerializer):
-
-    district_code = serializers.SlugRelatedField(
-        slug_field='district_code',
-        queryset=Districts.objects.all()
-    )
-
-    class Meta:
-        model = Cities
-        fields = '__all__'
-        read_only_fields = (
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby',
-        )
-
-    def create(self, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['createdon'] = timezone.now()
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            validated_data['createdby'] = request.user.id
-            validated_data['updatedby'] = request.user.id
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            validated_data['updatedby'] = request.user.id
-        return super().update(instance, validated_data)
-
-from .models import Districts
+# from rest_framework import serializers
+# from .models import Cities, Countries, States
 
 
-class DistrictsSerializer(serializers.ModelSerializer):
+# class CitiesSerializer(serializers.ModelSerializer):
 
-    state_code = serializers.SlugRelatedField(
-        slug_field='state_code',
-        queryset=States.objects.all()
-    )
+#     district_code = serializers.SlugRelatedField(
+#         slug_field='district_code',
+#         queryset=Districts.objects.all()
+#     )
 
-    class Meta:
-        model = Districts
-        fields = '__all__'
-        read_only_fields = (
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby',
-        )
+#     class Meta:
+#         model = Cities
+#         fields = '__all__'
+#         read_only_fields = (
+#             'createdon',
+#             'createdby',
+#             'updatedon',
+#             'updatedby',
+#         )
 
-    def create(self, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['createdon'] = timezone.now()
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            validated_data['createdby'] = request.user.id
-            validated_data['updatedby'] = request.user.id
-        return super().create(validated_data)
+#     def create(self, validated_data):
+#         from django.utils import timezone
+#         request = self.context.get('request')
+#         validated_data['createdon'] = timezone.now()
+#         validated_data['updatedon'] = timezone.now()
+#         if request and hasattr(request, 'user'):
+#             validated_data['createdby'] = request.user.id
+#             validated_data['updatedby'] = request.user.id
+#         return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            validated_data['updatedby'] = request.user.id
-        return super().update(instance, validated_data)
+#     def update(self, instance, validated_data):
+#         from django.utils import timezone
+#         request = self.context.get('request')
+#         validated_data['updatedon'] = timezone.now()
+#         if request and hasattr(request, 'user'):
+#             validated_data['updatedby'] = request.user.id
+#         return super().update(instance, validated_data)
 
-class UsertypeMasterSerializer(serializers.ModelSerializer):
+# from .models import Districts
 
-    class Meta:
-        model = UsertypeMaster
-        fields = '__all__'
-        read_only_fields = (
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby',
-        )
+
+# class DistrictsSerializer(serializers.ModelSerializer):
+
+#     state_code = serializers.SlugRelatedField(
+#         slug_field='state_code',
+#         queryset=States.objects.all()
+#     )
+
+#     class Meta:
+#         model = Districts
+#         fields = '__all__'
+#         read_only_fields = (
+#             'createdon',
+#             'createdby',
+#             'updatedon',
+#             'updatedby',
+#         )
+
+#     def create(self, validated_data):
+#         from django.utils import timezone
+#         request = self.context.get('request')
+#         validated_data['createdon'] = timezone.now()
+#         validated_data['updatedon'] = timezone.now()
+#         if request and hasattr(request, 'user'):
+#             validated_data['createdby'] = request.user.id
+#             validated_data['updatedby'] = request.user.id
+#         return super().create(validated_data)
+
+#     def update(self, instance, validated_data):
+#         from django.utils import timezone
+#         request = self.context.get('request')
+#         validated_data['updatedon'] = timezone.now()
+#         if request and hasattr(request, 'user'):
+#             validated_data['updatedby'] = request.user.id
+#         return super().update(instance, validated_data)
+
+# class UsertypeMasterSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = UsertypeMaster
+#         fields = '__all__'
+#         read_only_fields = (
+#             'createdon',
+#             'createdby',
+#             'updatedon',
+#             'updatedby',
+#         )
 
 class AccountSerializer(serializers.ModelSerializer):
 
@@ -267,57 +267,57 @@ class ComplaintMasterSerializer(serializers.ModelSerializer):
             'updated_by',
         )
 
-class DoctorSerializer(serializers.ModelSerializer):
+# class DoctorSerializer(serializers.ModelSerializer):
 
-    department_code = serializers.SlugRelatedField(
-        slug_field='department_code',
-        queryset=Departments.objects.all()
-    )
+#     department_code = serializers.SlugRelatedField(
+#         slug_field='department_code',
+#         queryset=Departments.objects.all()
+#     )
 
-    marital_status_code = serializers.SlugRelatedField(
-        slug_field='marital_status_code',
-        queryset=MaritalStatusMaster.objects.all(),
-        required=False,
-        allow_null=True
-    )
+#     marital_status_code = serializers.SlugRelatedField(
+#         slug_field='marital_status_code',
+#         queryset=MaritalStatusMaster.objects.all(),
+#         required=False,
+#         allow_null=True
+#     )
 
-    city_code = serializers.SlugRelatedField(
-        slug_field='city_code',
-        queryset=Cities.objects.all(),
-        required=False,
-        allow_null=True
-    )
+#     city_code = serializers.SlugRelatedField(
+#         slug_field='city_code',
+#         queryset=Cities.objects.all(),
+#         required=False,
+#         allow_null=True
+#     )
 
-    district_code = serializers.SlugRelatedField(
-        slug_field='district_code',
-        queryset=Districts.objects.all(),
-        required=False,
-        allow_null=True
-    )
+#     district_code = serializers.SlugRelatedField(
+#         slug_field='district_code',
+#         queryset=Districts.objects.all(),
+#         required=False,
+#         allow_null=True
+#     )
 
-    state_code = serializers.SlugRelatedField(
-        slug_field='state_code',
-        queryset=States.objects.all(),
-        required=False,
-        allow_null=True
-    )
+#     state_code = serializers.SlugRelatedField(
+#         slug_field='state_code',
+#         queryset=States.objects.all(),
+#         required=False,
+#         allow_null=True
+#     )
 
-    country_code = serializers.SlugRelatedField(
-        slug_field='country_code',
-        queryset=Countries.objects.all(),
-        required=False,
-        allow_null=True
-    )
+#     country_code = serializers.SlugRelatedField(
+#         slug_field='country_code',
+#         queryset=Countries.objects.all(),
+#         required=False,
+#         allow_null=True
+#     )
 
-    class Meta:
-        model = Doctor
-        fields = '__all__'
-        read_only_fields = (
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby',
-        )
+#     class Meta:
+#         model = Doctor
+#         fields = '__all__'
+#         read_only_fields = (
+#             'createdon',
+#             'createdby',
+#             'updatedon',
+#             'updatedby',
+#         )
         
 class ExpensesMasterSerializer(serializers.ModelSerializer):
 
@@ -366,40 +366,40 @@ class ExpensesMasterSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class BankdetailsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bankdetails
-        fields = '__all__'
-        read_only_fields = (
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby',
-        )
+# class BankdetailsSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Bankdetails
+#         fields = '__all__'
+#         read_only_fields = (
+#             'createdon',
+#             'createdby',
+#             'updatedon',
+#             'updatedby',
+#         )
 
-    def create(self, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['createdon'] = timezone.now()
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            try:
-                validated_data['createdby'] = request.user.id
-                validated_data['updatedby'] = request.user.id
-            except Exception:
-                pass
-        return super().create(validated_data)
+#     def create(self, validated_data):
+#         from django.utils import timezone
+#         request = self.context.get('request')
+#         validated_data['createdon'] = timezone.now()
+#         validated_data['updatedon'] = timezone.now()
+#         if request and hasattr(request, 'user'):
+#             try:
+#                 validated_data['createdby'] = request.user.id
+#                 validated_data['updatedby'] = request.user.id
+#             except Exception:
+#                 pass
+#         return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            try:
-                validated_data['updatedby'] = request.user.id
-            except Exception:
-                pass
-        return super().update(instance, validated_data)
+#     def update(self, instance, validated_data):
+#         from django.utils import timezone
+#         request = self.context.get('request')
+#         validated_data['updatedon'] = timezone.now()
+#         if request and hasattr(request, 'user'):
+#             try:
+#                 validated_data['updatedby'] = request.user.id
+#             except Exception:
+#                 pass
+#         return super().update(instance, validated_data)
 
 
 class MseMasterSerializer(serializers.ModelSerializer):
