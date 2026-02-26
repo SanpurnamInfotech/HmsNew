@@ -3,7 +3,6 @@ from .views import *
 from .api_views import *
 
 
-
 urlpatterns = [
     
     path('api/', getRoutes),
@@ -11,6 +10,7 @@ urlpatterns = [
     path("api/admin-login/", LoginView.as_view(), name="admin-login"),
     path("api/admin-register/", RegisterView.as_view(), name="admin-register"),
     
+
     path('api/available_urls/', AvailableURLsView.as_view(), name='available_urls'),
     
     # path('api/settings/', SettingsListView.as_view(), name='settings-list'),
@@ -18,6 +18,12 @@ urlpatterns = [
     # path('api/settings/<int:setting_id>/', SettingsDetailView.as_view(), name='settings-detail'),
     # path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
     # path('api/settings/delete/<int:setting_id>/', SettingsDeleteView.as_view(), name='settings-delete'),
+
+    path('api/settings/', SettingsListView.as_view(), name='settings-list'),
+    path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
+    path('api/settings/<int:setting_id>/', SettingsDetailView.as_view(), name='settings-detail'),
+    path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
+    path('api/settings/delete/<int:setting_id>/', SettingsDeleteView.as_view(), name='settings-delete'),
     
     path('api/usertypes/', UserTypeListView.as_view(), name='usertype-list'),
     path('api/usertypes/create/', UserTypeCreateView.as_view(), name='usertype-create'),
@@ -57,6 +63,7 @@ urlpatterns = [
     path('api/advice_master/create/', AdvicemasterCreateView.as_view(), name='advice-create'),
     path('api/advice_master/update/<str:advice_code>/', AdvicemasterUpdateView.as_view(), name='advice-update'),
     path('api/advice_master/delete/<str:advice_code>/', AdvicemasterDeleteView.as_view(), name='advice-delete'),
+
 
 
 
@@ -102,7 +109,7 @@ urlpatterns = [
     path('api/history-master/delete/<str:history_code>/', HistoryMasterDeleteView.as_view()),
     path('api/history-master/<str:history_code>/', HistoryMasterDetailView.as_view()),
 
-        path('api/mental-illness-master/', MentalIllnessMasterListView.as_view()),
+    path('api/mental-illness-master/', MentalIllnessMasterListView.as_view()),
 
     # fixed routes first
     path('api/mental-illness-master/create/', MentalIllnessMasterCreateView.as_view()),
