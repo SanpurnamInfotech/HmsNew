@@ -182,6 +182,12 @@ urlpatterns = [
     path('api/noticeboard/update/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-update'),
     path('api/noticeboard/delete/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-delete'),
 
+
+    # Mood History API Routes
+   path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
+path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
+path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='mood-history-update'),
+path('api/mood-history/delete/<str:mood_history_code>/', MoodHistoryDeleteView.as_view(), name='mood-history-delete'),
 ]
 
 

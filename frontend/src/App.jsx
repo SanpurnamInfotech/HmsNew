@@ -27,13 +27,11 @@ import { adminRoutes } from './routes/routeConfig';
 
 
 import ComplaintMaster from './pages/masters/ComplaintMaster.jsx';
-
 import ExpensesMst from './pages/masters/ExpensesMst.jsx';
- import MseMaster from './pages/masters/MseMaster.jsx';
-
+import MseMaster from './pages/masters/MseMaster.jsx';
 import ThoughtContentMaster from './pages/masters/thought_content_master.jsx';
 import Noticeboard from './pages/masters/noticeboard.jsx';
-
+import MoodHistoryMst from './pages/masters/MoodHistoryMst.jsx';
 
 function App() {
   return (
@@ -98,6 +96,7 @@ function App() {
           <Route path="noticeboard" element={<Noticeboard />} />
           <Route path="complaints" element={<ComplaintMaster />} />
           <Route path="expenses" element={<ExpensesMst />} />
+          <Route path="mood_history" element={<MoodHistoryMst />} />
         </Route>
 
         {/* Root Redirect */}

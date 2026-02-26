@@ -585,4 +585,51 @@ class NoticeboardSerializer(serializers.ModelSerializer):
             except Exception:
                 pass
         return super().update(instance, validated_data)
+    
+from rest_framework import serializers
+from .models import MoodHistoryMaster
+from django.utils import timezone
 
+class MoodHistoryMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MoodHistoryMaster
+        fields = "__all__"
+        read_only_fields = [
+            "createdon",
+            "createdby",
+            "updatedon",
+            "updatedby",
+        ]
+
+    def validate_mood_history_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Mood history code is required.")
+        return value.strip()
+
+    def validate_mood_history_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Mood history name is required.")
+        return value.strip()
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().update(instance, validated_data)
