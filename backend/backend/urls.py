@@ -64,6 +64,68 @@ urlpatterns = [
     path('api/advice_master/update/<str:advice_code>/', AdvicemasterUpdateView.as_view(), name='advice-update'),
     path('api/advice_master/delete/<str:advice_code>/', AdvicemasterDeleteView.as_view(), name='advice-delete'),
 
+    path('api/company_master/', CompanyMasterListView.as_view(), name='company-master-list'),
+    path('api/company_master/detail/<str:company_code>/', CompanyMasterDetailView.as_view(), name='company-master-detail'),
+    path('api/company_master/create/', CompanyMasterCreateView.as_view(), name='company-master-create'),
+    path('api/company_master/update/<str:company_code>/', CompanyMasterUpdateView.as_view(), name='company-master-update'),
+    path('api/company_master/delete/<str:company_code>/', CompanyMasterDeleteView.as_view(), name='company-master-delete'),
+
+    path('api/employee_master/', EmployeeMasterListView.as_view(), name='employee-master-list'),
+    path('api/employee_master/detail/<str:employee_code>/', EmployeeMasterDetailView.as_view(), name='employee-master-detail'),
+    path('api/employee_master/create/', EmployeeMasterCreateView.as_view(), name='employee-master-create'),
+    path('api/employee_master/update/<str:employee_code>/', EmployeeMasterUpdateView.as_view(), name='employee-master-update'),
+    path('api/employee_master/delete/<str:employee_code>/', EmployeeMasterDeleteView.as_view(), name='employee-master-delete'),
+
+    path('api/marital_status_master/', MaritalStatusMasterListView.as_view(), name='marital-status-list'),
+    path('api/marital_status_master/detail/<str:marital_status_code>/', MaritalStatusMasterDetailView.as_view(), name='marital-status-detail'),
+    path('api/marital_status_master/create/', MaritalStatusMasterCreateView.as_view(), name='marital-status-create'),
+    path('api/marital_status_master/update/<str:marital_status_code>/', MaritalStatusMasterUpdateView.as_view(), name='marital-status-update'),
+    path('api/marital_status_master/delete/<str:marital_status_code>/', MaritalStatusMasterDeleteView.as_view(), name='marital-status-delete'),
+  
+    path('api/relation_master/', RelationMasterListView.as_view(), name='relation-list'),
+    path('api/relation_master/detail/<str:relation_code>/', RelationMasterDetailView.as_view(), name='realtion-detail'),
+    path('api/relation_master/create/', RelationMasterCreateView.as_view(), name='relation-create'),
+    path('api/relation_master/update/<str:relation_code>/', RelationMasterUpdateView.as_view(), name='relation-update'),
+    path('api/relation_master/delete/<str:relation_code>/', RelationMasterDeleteView.as_view(), name='relation-delete'),
+
+    path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
+    path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
+    path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
+    path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
+    path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
+
+    path('api/blood_group_master/', BloodGroupMasterListView.as_view(), name='blood-group-master-list'),
+    path('api/blood_group_master/detail/<str:blood_group_code>/', BloodGroupMasterDetailView.as_view(), name='blood-group-master-detail'),
+    path('api/blood_group_master/create/', BloodGroupMasterCreateView.as_view(), name='blood-group-master-create'),
+    path('api/blood_group_master/update/<str:blood_group_code>/', BloodGroupMasterUpdateView.as_view(), name='blood-group-master-update'),
+    path('api/blood_group_master/delete/<str:blood_group_code>/', BloodGroupMasterDeleteView.as_view(), name='blood-group-master-delete'),
+
+    path("api/blood_donor/", BloodDonorListView.as_view(), name="blood-donor-list"),
+    path("api/blood_donor/detail/<int:pk>/", BloodDonorDetailView.as_view(), name="blood-donor-detail"),
+    path("api/blood_donor/create/", BloodDonorCreateView.as_view(), name="blood-donor-create"),
+    path("api/blood_donor/update/<int:pk>/", BloodDonorUpdateView.as_view(), name="blood-donor-update"),
+    path("api/blood_donor/delete/<int:pk>/", BloodDonorDeleteView.as_view(), name="blood-donor-delete"),
+
+    path('api/bankdetails/', BankdetailsListView.as_view(), name='bankdetails-list'),
+    path('api/bankdetails/detail/<str:bank_code>/', BankdetailsDetailView.as_view(), name='bankdetails-detail'),
+    path('api/bankdetails/create/', BankdetailsCreateView.as_view(), name='bankdetails-create'),
+    path('api/bankdetails/update/<str:bank_code>/', BankdetailsUpdateView.as_view(), name='bankdetails-update'),
+    path('api/bankdetails/delete/<str:bank_code>/', BankdetailsDeleteView.as_view(), name='bankdetails-delete'),
+
+    path("api/bed_allotment/", BedAllotmentListView.as_view(), name="bed-allotment-list"),
+    path("api/bed_allotment/detail/<int:id>/", BedAllotmentDetailView.as_view(), name="bed-allotment-detail"),
+    path("api/bed_allotment/create/", BedAllotmentCreateView.as_view(), name="bed-allotment-create"),
+    path("api/bed_allotment/update/<int:id>/", BedAllotmentUpdateView.as_view(), name="bed-allotment-update"),
+    path("api/bed_allotment/delete/<int:id>/", BedAllotmentDeleteView.as_view(), name="bed-allotment-delete"),
+
+    path('api/patient/', PatientListView.as_view(), name='patient-list'),
+    path('api/patient/detail/<str:patient_code>/', PatientDetailView.as_view(), name='patient-detail'),
+    path('api/patient/create/', PatientCreateView.as_view(), name='patient-create'),
+    path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
+    path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
+    
+
+]
 
 
 
@@ -90,6 +152,42 @@ urlpatterns = [
     path("api/ipd-services/update/<str:service_id>/", IpdServicesUpdateView.as_view()),
     path("api/ipd-services/delete/<str:service_id>/", IpdServicesDeleteView.as_view()),
 
+    path('api/mse_master/', MseMasterListView.as_view(), name='mse-list'),
+    path('api/mse_master/create/', MseMasterCreateView.as_view(), name='mse-create'),
+    path('api/mse_master/update/<str:mse_code>/', MseMasterUpdateView.as_view(), name='mse-update'),
+    path('api/mse_master/delete/<str:mse_code>/', MseMasterDeleteView.as_view(), name='mse-delete'),
+    
+    path('api/complaints/', ComplaintListView.as_view(), name='complaint-list'),
+    path('api/complaints/create/', ComplaintCreateView.as_view(), name='complaint-create'),
+    path('api/complaints/update/<str:complaint_code>/', ComplaintUpdateView.as_view(), name='complaint-update'),
+    path('api/complaints/delete/<str:complaint_code>/', ComplaintDeleteView.as_view(), name='complaint-delete'),
+
+   
+
+    # API-prefixed routes (frontend uses baseURL + endpoint, ensure /api/expenses/ is reachable)
+    path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
+    path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
+    path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),
+    path('api/expenses/delete/<str:expenses_code>/', ExpensesDeleteView.as_view(), name='expenses-delete'),
+    
+    # Thought Content Master CRUD
+    path('api/thought_content_master/', ThoughtContentListView.as_view(), name='thoughtcontent-list'),
+    path('api/thought_content_master/create/', ThoughtContentListView.as_view(), name='thoughtcontent-create'),
+    path('api/thought_content_master/update/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-update'),
+    path('api/thought_content_master/delete/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-delete'),
+    
+    # Noticeboard CRUD
+    path('api/noticeboard/', NoticeboardListView.as_view(), name='noticeboard-list'),
+    path('api/noticeboard/create/', NoticeboardListView.as_view(), name='noticeboard-create'),
+    path('api/noticeboard/update/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-update'),
+    path('api/noticeboard/delete/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-delete'),
+
+
+    # Mood History API Routes
+   path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
+path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
+path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='mood-history-update'),
+path('api/mood-history/delete/<str:mood_history_code>/', MoodHistoryDeleteView.as_view(), name='mood-history-delete'),
 ]
 
 
