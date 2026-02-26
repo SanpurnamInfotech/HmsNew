@@ -134,9 +134,7 @@ class DepartmentsSerializer(serializers.ModelSerializer):
         model = Departments
         fields = "__all__"
         
-from rest_framework import serializers
-from django.db import transaction
-from .models import PrescriptionHeader, PrescriptionItems
+
 
 class PrescriptionItemsSerializer(serializers.ModelSerializer):
     medicine_name = serializers.ReadOnlyField(source='medicine_code.medicine_name')
@@ -208,8 +206,6 @@ class HallucinationMasterSerializer(serializers.ModelSerializer):
       class Meta:
         model = HallucinationMaster
         fields = "__all__"
-
-
 
 
 

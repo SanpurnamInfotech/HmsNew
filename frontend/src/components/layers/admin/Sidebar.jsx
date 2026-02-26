@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { DataService } from "../../../utils/domain"; 
 import { useAuth } from "../../../auth/AuthContext";
-import { FaChevronDown, FaChevronRight, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
+import { FaChevronDown, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
+import '../../../styles/sidebar.css';
 
 const Sidebar = ({ collapsed, theme, isMobile, toggleSidebar }) => {
   const location = useLocation();
@@ -60,7 +61,6 @@ const Sidebar = ({ collapsed, theme, isMobile, toggleSidebar }) => {
     fetchSidebarData();
   }, []);
 
-  // Tailwind v4 Dynamic Classes
   const sidebarWidth = collapsed ? 'w-[80px]' : 'w-[260px]';
   const mobileTranslate = collapsed ? '-translate-x-full' : 'translate-x-0';
   
@@ -69,94 +69,104 @@ const Sidebar = ({ collapsed, theme, isMobile, toggleSidebar }) => {
     ${isDark ? 'bg-slate-900 border-slate-800 text-slate-300' : 'bg-white border-gray-200 text-slate-600'}`;
 
   const navLinkStyles = (isActive) => `flex items-center px-4 py-3 my-1 mx-2 rounded-lg transition-all duration-200 cursor-pointer group
-    ${isActive 
-      ? (isDark ? 'bg-green-600/20 text-green-400' : 'bg-green-50 text-green-700 font-semibold') 
-      : (isDark ? 'hover:bg-slate-800 hover:text-white' : 'hover:bg-gray-50 hover:text-green-700')}`;
+  ${isActive 
+    ? (isDark ? 'bg-emerald-600/20 !text-emerald-400 font-bold' : 'bg-emerald-50 !text-emerald-700 font-bold') 
+    : (isDark ? 'hover:bg-slate-800 hover:text-white' : 'hover:bg-emerald-50/50 hover:!text-emerald-700')}`;
 
-  const submenuItemStyles = (isActive) => `block pl-11 pr-4 py-2 text-sm transition-colors duration-200 rounded-md mx-2
-    ${isActive 
-      ? 'text-green-600 font-bold bg-green-50/50' 
-      : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:text-green-700 hover:bg-gray-50')}`;
+const submenuItemStyles = (isActive) => `block pl-11 pr-4 py-2 text-sm transition-colors duration-200 rounded-md mx-2
+  ${isActive 
+    ? '!text-emerald-600 font-bold bg-emerald-50/50' 
+    : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:!text-emerald-700 hover:bg-emerald-50/30')}`;
 
   return (
-    <aside className={sidebarBase}>
-      {/* Brand Header - Starts at absolute top 0 */}
-      <div className={`flex items-center h-16 px-6 shrink-0 border-b ${isDark ? 'border-slate-800' : 'border-gray-100'}`}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-green-700 flex items-center justify-center shadow-lg shadow-green-900/20">
-             <span className="text-white font-black text-sm">H</span>
+    <>
+      {/* Mobile Overlay */}
+      {isMobile && !collapsed && (
+        <div 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
+          onClick={toggleSidebar}
+        />
+      )}
+
+      <aside className={sidebarBase}>
+        {/* Brand Header */}
+        <div className={`flex items-center h-16 px-6 shrink-0 border-b ${isDark ? 'border-slate-800' : 'border-gray-100'}`}>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/20">
+                <span className="text-white font-black text-sm">H</span>
+            </div>
+            {!collapsed && (
+              <span className="font-bold text-xl tracking-tight animate-in fade-in duration-500">
+                HMS <span className="text-emerald-600">Admin</span>
+              </span>
+            )}
           </div>
-          {!collapsed && (
-            <span className="font-bold text-xl tracking-tight animate-in fade-in duration-500">
-              HMS <span className="text-green-600">Admin</span>
-            </span>
-          )}
         </div>
-      </div>
 
-      {/* Navigation Body */}
-      <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-slate-700">
-        <Link 
-          to="/admin/dashboard" 
-          className={navLinkStyles(location.pathname === '/admin/dashboard')}
-        >
-          <FaTachometerAlt className={`text-lg shrink-0 ${location.pathname === '/admin/dashboard' ? 'text-green-600' : ''}`} />
-          {!collapsed && <span className="ml-4 truncate">Dashboard</span>}
-        </Link>
+        {/* Navigation Body */}
+        <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin">
+          <Link 
+            to="/admin/dashboard" 
+            className={navLinkStyles(location.pathname === '/admin/dashboard')}
+          >
+            <FaTachometerAlt className={`text-lg shrink-0 ${location.pathname === '/admin/dashboard' ? 'text-emerald-600' : ''}`} />
+            {!collapsed && <span className="ml-4 truncate">Dashboard</span>}
+          </Link>
 
-        {loading ? (
-          <div className="px-6 py-4 space-y-4">
-             {[1,2,3,4].map(i => <div key={i} />)}
-          </div>
-        ) : (
-          modules.map((mod) => (
-            <div key={mod.module_code} className="mb-1">
-              <div 
-                className={navLinkStyles(expanded === mod.module_code)}
-                onClick={() => setExpanded(expanded === mod.module_code ? null : mod.module_code)}
-              >
-                <div className="flex items-center flex-1 min-w-0">
-                  <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${expanded === mod.module_code ? 'bg-green-500 ring-4 ring-green-500/20' : 'bg-slate-500'}`}></div>
-                  {!collapsed && <span className="ml-4 truncate font-medium">{mod.module_name}</span>}
+          {loading ? (
+            <div className="px-6 py-4 space-y-4">
+               {[1,2,3,4].map(i => <div key={i} />)}
+            </div>
+          ) : (
+            modules.map((mod) => (
+              <div key={mod.module_code} className="mb-1">
+                <div 
+                  className={navLinkStyles(expanded === mod.module_code || location.pathname.includes(mod.module_name.toLowerCase()))}
+                  onClick={() => setExpanded(expanded === mod.module_code ? null : mod.module_code)}
+                >
+                  <div className="flex items-center flex-1 min-w-0">
+                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${expanded === mod.module_code ? 'bg-emerald-500 ring-4 ring-emerald-500/20' : 'bg-slate-400 group-hover:bg-emerald-500'}`}></div>
+                    {!collapsed && <span className="ml-4 truncate font-medium">{mod.module_name}</span>}
+                  </div>
+                  
+                  {!collapsed && mod.children.length > 0 && (
+                    <FaChevronDown size={10} className={`transition-transform duration-300 ${expanded === mod.module_code ? 'rotate-180' : 'rotate-0'}`} />
+                  )}
                 </div>
-                
-                {!collapsed && mod.children.length > 0 && (
-                  <FaChevronDown size={10} className={`transition-transform duration-300 ${expanded === mod.module_code ? 'rotate-180' : 'rotate-0'}`} />
+
+                {/* Submodules */}
+                {!collapsed && expanded === mod.module_code && (
+                  <div className="mt-1 space-y-1 animate-in slide-in-from-top-2 duration-200">
+                    {mod.children.map((sub) => (
+                      <Link 
+                        key={sub.submodule_code}
+                        to={`/admin/${sub.url}`} 
+                        onClick={isMobile ? toggleSidebar : undefined}
+                        className={submenuItemStyles(location.pathname.includes(sub.url))}
+                      >
+                        {sub.submodule_name}
+                      </Link>
+                    ))}
+                  </div>
                 )}
               </div>
+            ))
+          )}
+        </nav>
 
-              {/* Submodules */}
-              {!collapsed && expanded === mod.module_code && (
-                <div className="mt-1 space-y-1 animate-in slide-in-from-top-2 duration-200">
-                  {mod.children.map((sub) => (
-                    <Link 
-                      key={sub.submodule_code}
-                      to={`/admin/${sub.url}`} 
-                      onClick={isMobile ? toggleSidebar : undefined}
-                      className={submenuItemStyles(location.pathname.includes(sub.url))}
-                    >
-                      {sub.submodule_name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </nav>
-
-      {/* Footer / Logout */}
-      <div className={`p-4 mt-auto border-t ${isDark ? 'border-slate-800' : 'border-gray-100'}`}>
-        <button 
-          onClick={handleLogout} 
-          className={`w-full flex items-center p-3 rounded-xl transition-all group
-            ${isDark ? 'hover:bg-red-500/10 text-slate-400' : 'hover:bg-red-50 text-slate-600'}`}
-        >
-          <FaSignOutAlt className="text-lg group-hover:text-red-500 transition-colors" />
-          {!collapsed && <span className="ml-4 font-semibold group-hover:text-red-500">Logout</span>}
-        </button>
-      </div>
-    </aside>
+        {/* Footer / Logout */}
+        <div className={`p-4 mt-auto border-t ${isDark ? 'border-slate-800' : 'border-gray-100'}`}>
+          <button 
+            onClick={handleLogout} 
+            className={`w-full flex items-center p-3 rounded-xl transition-all group
+              ${isDark ? 'hover:bg-red-500/10 text-slate-400' : 'hover:bg-red-50 text-slate-600'}`}
+          >
+            <FaSignOutAlt className="text-lg group-hover:text-red-500 transition-colors" />
+            {!collapsed && <span className="ml-4 font-semibold group-hover:text-red-500">Logout</span>}
+          </button>
+        </div>
+      </aside>
+    </>
   );
 };
 

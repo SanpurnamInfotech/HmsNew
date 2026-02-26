@@ -586,14 +586,15 @@ class Doctor(models.Model):
         db_table = 'doctor'
 
 class Patient(models.Model):
-    patient_code = models.CharField( max_length=45)
+    uhid = models.CharField(max_length=14)
+    patient_code = models.CharField(unique=True, max_length=45)
     hospital_code = models.CharField(max_length=45)
     patient_first_name = models.CharField(max_length=100)
     patient_middle_name = models.CharField(max_length=100, blank=True, null=True)
     patient_last_name = models.CharField(max_length=100)
     dob = models.DateField(blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
-    gender = models.IntegerField(blank=True, null=True)
+    gender = models.IntegerField(blank=True, null=True, db_comment='1=>Male, 2=>Female, 3=>Other')
     marital_status_code = models.CharField(max_length=45, blank=True, null=True)
     blood_group_code = models.CharField(max_length=10, blank=True, null=True)
     occupation = models.CharField(max_length=100, blank=True, null=True)
@@ -618,7 +619,7 @@ class Patient(models.Model):
     emergency_contact_relation = models.CharField(max_length=45, blank=True, null=True)
     patient_photo_path = models.CharField(max_length=255, blank=True, null=True)
     renew_date = models.DateField(blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
@@ -644,3 +645,63 @@ class IpdServices(models.Model):
     class Meta:
         managed = False
         db_table = 'ipd_services'
+class PrescriptionItems(models.Model):
+    prescription_code = models.ForeignKey('PrescriptionHeader', models.DO_NOTHING, db_column='prescription_code', to_field='prescription_code')
+    medicine_code = models.ForeignKey('Medicine', models.DO_NOTHING, db_column='medicine_code', to_field='medicine_code')
+    dosage = models.CharField(max_length=100, blank=True, null=True)
+    duration = models.CharField(max_length=50, blank=True, null=True)
+    instructions = models.CharField(max_length=255, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'prescription_items'
+        
+class PrescriptionHeader(models.Model):
+    prescription_code = models.CharField(unique=True, max_length=45)
+    prescription_name = models.CharField(max_length=225)
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+    doctor_code = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctor_code', to_field='doctor_code')
+    prescription_date = models.DateTimeField(blank=True, null=True)
+    diagnosis = models.TextField()
+    symptoms = models.TextField()
+    next_visit_date = models.DateField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'prescription_header'
+        
+class IpdRegistration(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    ipd_registeration_code = models.CharField(max_length=50, blank=True, null=True)
+    patient_code = models.CharField(max_length=50, blank=True, null=True)
+    ipd_number = models.CharField(unique=True, max_length=150)
+    admission_date = models.DateTimeField()
+    discharge_date = models.DateTimeField(blank=True, null=True)
+    doctor_code = models.CharField(max_length=50, blank=True, null=True)
+    bed_id = models.CharField(max_length=50, blank=True, null=True)
+    status = models.CharField(max_length=20, blank=True, null=True)
+    remarks = models.CharField(max_length=255, blank=True, null=True)
+    created_on = models.DateTimeField(blank=True, null=True)
+    created_by = models.IntegerField(blank=True, null=True)
+    updated_on = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'ipd_registration'
+        
+        
+
+        

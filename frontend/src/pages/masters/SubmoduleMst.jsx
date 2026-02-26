@@ -198,7 +198,6 @@ const SubmoduleMst = () => {
   };
 
   const handleDelete = async () => {
-    if (!selectedSubmodule || !window.confirm("Are you sure?")) return;
     const result = await deleteItem(`${SUBMODULE_PATH}/delete/${selectedSubmodule.submodule_code}/`);
     if (result.success) { showModal("Deleted successfully!"); setSelectedSubmodule(null); refresh(); }
   };
@@ -208,7 +207,7 @@ const SubmoduleMst = () => {
   return (
     <div className="app-container">
       {modal.visible && (
-        <div className="modal-overlay fixed inset-0 bg-black/50 z-100 flex items-center justify-center">
+        <div className="modal-overlay fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
           <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center shadow-2xl">
             <div className="mb-4">{modal.type === "success" ? <FaCheckCircle size={50} className="text-emerald-500 mx-auto" /> : <FaTimesCircle size={50} className="text-red-500 mx-auto" />}</div>
             <h3 className={`text-xl font-bold mb-2 ${modal.type === "success" ? "text-emerald-700" : "text-red-700"}`}>{modal.type === "success" ? "Success" : "Error"}</h3>
@@ -349,7 +348,16 @@ const SubmoduleMst = () => {
               </tbody>
             </table>
           </div>
-          <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+          {/* FIX: Wrapped Pagination in a container with padding matching the toolbar for consistent spacing */}
+          <div className="bg-white p-6 border-t border-gray-50">
+            <Pagination 
+              totalEntries={filteredData.length} 
+              itemsPerPage={effectiveItemsPerPage} 
+              currentPage={currentPage} 
+              setCurrentPage={setCurrentPage} 
+              totalPages={totalPages} 
+            />
+          </div>
         </div>
       )}
     </div>

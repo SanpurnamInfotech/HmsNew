@@ -7,7 +7,7 @@ body:has(.fixed.-translate-x-0) {
 
 /* Custom Scrollbar for Sidebar */
 .scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
+  width: 5px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-track {
@@ -15,17 +15,76 @@ body:has(.fixed.-translate-x-0) {
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(156, 163, 175, 0.2);
+  background: rgba(16, 185, 129, 0.2); /* Emerald Green color */
   border-radius: 10px;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(156, 163, 175, 0.4);
+  background: rgba(16, 185, 129, 0.4); /* Stronger Green on hover */
 }
 
-/* Smooth layout transitions */
+/* Ensure smooth layout transitions */
 .transition-all {
   transition-property: all;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 300ms;
+}
+
+/* Sidebar item hover effects for Green Theme */
+.hover\:text-emerald-700:hover {
+  color: #047857; /* emerald-700 */
+}
+
+.bg-emerald-600 {
+  background-color: #059669;
+}
+
+
+/*  */
+/* Sidebar.css */
+
+/* Force Emerald Green on all sidebar links to prevent "Blue" default */
+aside a, 
+aside .cursor-pointer {
+  text-decoration: none !important;
+  color: inherit;
+}
+
+/* Specifically target the "Activities" and other active links */
+aside a.text-emerald-600,
+aside .text-emerald-700 {
+  color: #059669 !important; /* Emerald 600 */
+}
+
+/* Prevent body scroll when mobile sidebar is open */
+body:has(.fixed.-translate-x-0) {
+  overflow: hidden;
+}
+
+/* Custom Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 5px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #10b98133; /* Emerald with transparency */
+  border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #10b98166;
+}
+
+/* Layout transition */
+.transition-all {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ensure icons don't turn blue */
+aside svg {
+  color: inherit;
 }
