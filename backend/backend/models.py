@@ -727,11 +727,6 @@ class ComplaintMaster(models.Model):
 
 
 
-
-
-
-
-
 from django.db import models
 
 
@@ -820,6 +815,7 @@ class Noticeboard(models.Model):
     class Meta:
         managed = False
         db_table = 'noticeboard'
+
 
 class BedAllotment(models.Model):
     bed_code = models.ForeignKey('Bed', models.DO_NOTHING, db_column='bed_code', to_field='bed_code')

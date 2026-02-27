@@ -182,6 +182,26 @@ urlpatterns = [
 
 
     # Mood History API Routes
+   path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
+path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
+path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='mood-history-update'),
+path('api/mood-history/delete/<str:mood_history_code>/', MoodHistoryDeleteView.as_view(), name='mood-history-delete'),
+
+path('api/states/', StatesListView.as_view(), name='states-list'),
+path('api/states/create/', StatesCreateView.as_view(), name='states-create'),
+path('api/states/update/<str:state_code>/', StatesUpdateView.as_view(), name='states-update'),
+path('api/states/delete/<str:state_code>/', StatesDeleteView.as_view(), name='states-delete'),
+
+path('api/districts/', DistrictsListView.as_view(), name='districts-list'),
+path('api/districts/create/',  DistrictsCreateView.as_view(),  name='districts-create'),
+path('api/districts/update/<str:district_code>/',  DistrictsUpdateView.as_view(),  name='districts-update'),
+path('api/districts/delete/<str:district_code>/', DistrictsDeleteView.as_view(),  name='districts-delete'),
+
+
+path('api/cities/', CitiesListView.as_view(), name='cities-list'),
+path('api/cities/create/', CitiesCreateView.as_view(), name='cities-create'),
+path('api/cities/update/<str:city_code>/', CitiesUpdateView.as_view(), name='cities-update'),
+path('api/cities/delete/<str:city_code>/', CitiesDeleteView.as_view(), name='cities-delete'),
     path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
     path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
     path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='mood-history-update'),
