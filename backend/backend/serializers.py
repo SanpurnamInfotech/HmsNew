@@ -64,52 +64,6 @@ class CountriesSerializer(serializers.ModelSerializer):
         model = Countries
         fields = "__all__"
     
-class StatesSerializer(serializers.ModelSerializer):  
-    class Meta:
-        model = States
-        fields = "__all__"
-class CitiesSerializer(serializers.ModelSerializer):  
-    class Meta:
-        model = Cities
-        fields = "__all__"
-
-from .models import Districts
-
-
-class DistrictsSerializer(serializers.ModelSerializer):
-
-    state_code = serializers.SlugRelatedField(
-        slug_field='state_code',
-        queryset=States.objects.all()
-    )
-
-    class Meta:
-        model = Districts
-        fields = '__all__'
-        read_only_fields = (
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby',
-        )
-
-    def create(self, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['createdon'] = timezone.now()
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            validated_data['createdby'] = request.user.id
-            validated_data['updatedby'] = request.user.id
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        from django.utils import timezone
-        request = self.context.get('request')
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            validated_data['updatedby'] = request.user.id
-        return super().update(instance, validated_data)
 
 
 class FinancialyearMasterSerializer(serializers.ModelSerializer):  
@@ -120,10 +74,12 @@ class MaritalStatusMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaritalStatusMaster
         fields = "__all__"
+
 class DoctorSerializer(serializers.ModelSerializer):  
     class Meta:
         model = Doctor
         fields = "__all__"
+
 class PatientSerializer(serializers.ModelSerializer):  
     class Meta:
         model = Patient
@@ -300,10 +256,10 @@ class IpdRegistrationSerializer(serializers.ModelSerializer):
             'updated_by',
         )
 
-class DoctorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Doctor
-        fields = '__all__'
+# class DoctorSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Doctor
+#         fields = '__all__'
 
 class PatientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -573,4 +529,126 @@ class MoodHistoryMasterSerializer(serializers.ModelSerializer):
                 validated_data['updatedby'] = request.user.id
             except Exception:
                 pass
+        return super().update(instance, validated_data)
+
+from rest_framework import serializers
+from .models import States
+from django.utils import timezone
+
+class StatesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = States
+        fields = "__all__"
+        read_only_fields = [
+            "createdon",
+            "createdby",
+            "updatedon",
+            "updatedby",
+        ]
+
+    def validate_state_code(self, value):
+        if not value:
+            raise serializers.ValidationError("State code is required.")
+        return value.strip()
+
+    def validate_state_name(self, value):
+        if not value:
+            raise serializers.ValidationError("State name is required.")
+        return value.strip()
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().update(instance, validated_data)
+
+from rest_framework import serializers
+from .models import Districts
+from django.utils import timezone
+
+class DistrictsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Districts
+        fields = "__all__"
+        read_only_fields = ["createdon", "createdby", "updatedon", "updatedby"]
+
+    def validate_district_code(self, value):
+        if not value:
+            raise serializers.ValidationError("District code is required.")
+        return value.strip()
+
+    def validate_district_name(self, value):
+        if not value:
+            raise serializers.ValidationError("District name is required.")
+        return value.strip()
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception: pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception: pass
+        return super().update(instance, validated_data)
+
+from rest_framework import serializers
+from .models import Cities
+from django.utils import timezone
+
+class CitiesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cities
+        fields = "__all__"
+        read_only_fields = ["createdon", "createdby", "updatedon", "updatedby"]
+
+    def validate_city_code(self, value):
+        if not value:
+            raise serializers.ValidationError("City code is required.")
+        return value.strip()
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception: pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception: pass
         return super().update(instance, validated_data)

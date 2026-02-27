@@ -721,11 +721,6 @@ class ComplaintMaster(models.Model):
 
 
 
-
-
-
-
-
 from django.db import models
 
 
@@ -815,7 +810,4 @@ class Noticeboard(models.Model):
         managed = False
         db_table = 'noticeboard'
 
-        
-        
 
-        
