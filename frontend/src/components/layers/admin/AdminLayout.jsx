@@ -1,94 +1,112 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-import { FaBars, FaBell, FaUserCircle } from 'react-icons/fa';
+import { Container, Navbar } from 'react-bootstrap';
+import { FaBars, FaBell, FaUserCircle, FaSun, FaMoon } from 'react-icons/fa';
 import Sidebar from './Sidebar';
 import { useTheme } from '../../../theme/ThemeContext.jsx';
 
 const AdminLayout = () => {
-  const { theme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   
   const isDark = theme === 'dark';
 
+  // Constants for widths to match your Sidebar.jsx/css
+  const SIDEBAR_WIDTH = 260;
+  const COLLAPSED_WIDTH = 80;
+
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      setCollapsed(mobile);
+      if (mobile) setCollapsed(true);
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const toggleSidebar = () => setCollapsed(!collapsed);
 
+  // Dynamic margin calculation
+  const getMarginLeft = () => {
+    if (isMobile) return '0px';
+    return collapsed ? `${COLLAPSED_WIDTH}px` : `${SIDEBAR_WIDTH}px`;
+  };
+
   return (
-    <div className={`min-h-screen flex ${isDark ? 'bg-slate-950 text-white' : 'bg-gray-50 text-slate-900'}`}>
-      
-      {/* Sidebar Component - Still fixed to the side */}
-      <Sidebar collapsed={collapsed} theme={theme} isMobile={isMobile} />
+    <div className={`admin-layout ${theme}`} style={{ minHeight: '100vh' }}>
+      <Sidebar 
+        collapsed={collapsed} 
+        theme={theme} 
+        isMobile={isMobile} 
+        toggleSidebar={toggleSidebar} 
+      />
 
-      {/* Overlay for mobile view */}
-      {isMobile && !collapsed && (
-        <div 
-          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-          onClick={toggleSidebar}
-        ></div>
-      )}
-
-      {/* Main Container - Changed from fixed to flex-1 for natural document scrolling */}
-      <div 
-        className={`flex-1 flex flex-col min-w-0 transition-all duration-300 
-          ${isMobile ? 'ml-0' : (collapsed ? 'ml-20' : 'ml-64')}
-          [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden`}
-      >
-        {/* Top Header Navbar - Fixed removed, Background removed */}
-        <header className="h-16 flex items-center px-6 transition-colors duration-300 bg-transparent">
-          
-          <div className="flex items-center justify-between w-full">
-            {/* Left side: Toggle */}
-            <div className="flex items-center gap-4">
-              <button 
-                onClick={toggleSidebar}
-                className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-slate-800' : 'hover:bg-gray-200'}`}
-              >
-                <FaBars className="text-xl text-green-800" />
-              </button>
-            </div>
-
-            {/* Right side: Actions & Profile */}
-            <div className="flex items-center gap-5">
-              <div className="relative cursor-pointer p-2 group">
-                <FaBell className={`text-xl transition-colors ${isDark ? 'text-slate-400 group-hover:text-white' : 'text-gray-500 group-hover:text-green-900'}`} />
-                <span className="absolute top-2 right-2 flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border-2 border-white dark:border-slate-950"></span>
-                </span>
-              </div>
-
-              <div className={`flex items-center gap-3 pl-4 border-l ${isDark ? 'border-slate-800' : 'border-gray-200'}`}>
-                <div className="text-right hidden md:block">
-                  <p className="text-sm font-bold leading-none">Dr. Admin</p>
-                  <p className={`text-[10px] uppercase tracking-wider font-semibold mt-1 ${isDark ? 'text-slate-500' : 'text-gray-400'}`}>Super User</p>
-                </div>
-                <div className="relative">
-                  <FaUserCircle className="text-3xl text-green-800" />
-                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-800 border-2 border-white dark:border-slate-950 rounded-full"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Dynamic Page Content - Scrolls with the header */}
-        <main className="flex-1 p-6">
-          <div className="h-full">
-             <Outlet />
-          </div>
-        </main>
+<div 
+  className="main-wrapper transition-all duration-300"
+  style={{ 
+    marginLeft: getMarginLeft(),
+    minHeight: '100vh',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: 'transparent' // Ensure wrapper doesn't block sidebar bg
+  }}
+>
+  {/* REMOVED 'sticky-top' and fixed background classes */}
+  <Navbar 
+    expand="lg" 
+    className={`top-navbar border-bottom ${isDark ? 'border-slate-800' : 'border-gray-100'}`}
+    style={{ 
+      backgroundColor: 'transparent', // Header background is now transparent
+      paddingTop: '1rem',
+      paddingBottom: '1rem'
+    }}
+  >
+    <Container fluid>
+      <div className="d-flex align-items-center">
+        <button 
+          onClick={toggleSidebar} 
+          className={`btn-toggle-sidebar border-0 bg-transparent me-3 ${isDark ? 'text-emerald-500' : 'text-emerald-600'}`}
+        >
+          <FaBars size={20} />
+        </button>
+        <h5 className={`mb-0 fw-bold header-title ${isDark ? 'text-white' : 'text-dark'}`}>
+          Medical Center
+        </h5>
       </div>
+
+      <div className="d-flex align-items-center gap-3">
+        {/* ... rest of your icons and profile section stays the same ... */}
+        <div 
+          className={`theme-toggle-btn cursor-pointer p-2 rounded-circle ${isDark ? 'bg-slate-800' : 'bg-gray-100'}`} 
+          onClick={toggleTheme}
+          style={{ width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          {isDark ? <FaSun className="text-warning" /> : <FaMoon className="text-primary" />}
+        </div>
+        
+        {/* Notification and Profile */}
+        <div className="notification-icon-wrapper position-relative cursor-pointer">
+          <FaBell size={20} className={isDark ? 'text-slate-400' : 'text-muted'} />
+          <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+        </div>
+
+        <div className={`profile-section d-flex align-items-center gap-2 border-start ps-3 ${isDark ? 'border-slate-800' : 'border-gray-200'}`}>
+          <div className="text-end d-none d-sm-block">
+            <p className={`mb-0 fw-bold small ${isDark ? 'text-white' : 'text-dark'}`} style={{ fontSize: '0.85rem' }}>Dr. Admin</p>
+            <p className="mb-0 text-muted uppercase tracking-wider" style={{ fontSize: '0.65rem' }}>Super User</p>
+          </div>
+          <FaUserCircle size={32} className="text-emerald-500" />
+        </div>
+      </div>
+    </Container>
+  </Navbar>
+
+  <main className="content-area p-4 flex-grow-1">
+    <Outlet context={{ isDark }} />
+  </main>
+</div>
     </div>
   );
 };

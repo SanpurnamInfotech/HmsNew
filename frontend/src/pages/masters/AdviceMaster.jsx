@@ -100,8 +100,6 @@ const AdviceMaster = () => {
   /* ================= DELETE ================= */
   const handleDelete = async () => {
     if (!selectedRow) return;
-    // if (!window.confirm("Are you sure you want to delete this advice?")) return;
-
     const result = await deleteItem(
       `${PATH}/delete/${selectedRow.advice_code}/`
     );
@@ -119,9 +117,9 @@ const AdviceMaster = () => {
   if (loading) {
     return (
       <div className="loading-overlay">
-        <div className="loading-spinner-container text-center">
+        <div className="text-center">
           <div className="loading-spinner mx-auto mb-4"></div>
-          <p className="text-emerald-700 font-bold">
+          <p className="font-bold" style={{ color: "var(--primary-accent)" }}>
             Loading Advice Master...
           </p>
         </div>
@@ -133,35 +131,50 @@ const AdviceMaster = () => {
     <div className="app-container">
       {/* ================= MODAL ================= */}
       {modal.visible && (
-        <div className="modal-overlay fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
-          <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center shadow-2xl">
-            <div className="mb-4">{modal.type === "success" ? <FaCheckCircle size={50} className="text-emerald-500 mx-auto" /> : <FaTimesCircle size={50} className="text-red-500 mx-auto" />}</div>
-            <h3 className={`text-xl font-bold mb-2 ${modal.type === "success" ? "text-emerald-700" : "text-red-700"}`}>{modal.type === "success" ? "Success" : "Error"}</h3>
-            <p className="text-gray-600 mb-6">{modal.message}</p>
-            <button className="bg-emerald-600 text-white w-full py-2.5 rounded-lg font-semibold" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
+        <div className="modal-overlay">
+          <div className="modal-container animate-zoom-in">
+            <div className="p-8 text-center">
+              <div className="mb-4">
+                {modal.type === "success" ? (
+                  <FaCheckCircle className="text-4xl text-emerald-500 mx-auto" />
+                ) : (
+                  <FaTimesCircle className="text-4xl text-red-500 mx-auto" />
+                )}
+              </div>
+
+              <h3 className={modal.type === "success" ? "modal-title-success" : "modal-title-error"}>
+                {modal.type === "success" ? "Success" : "Error"}
+              </h3>
+
+              <p className="modal-message">{modal.message}</p>
+
+              <button
+                className="btn-primary w-full justify-center"
+                onClick={() => setModal({ ...modal, visible: false })}
+              >
+                OK
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* ================= HEADER ================= */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
+      <div className="section-header">
         <div>
-          <h4 className="text-xl font-bold text-gray-800">Advice Master</h4>
+          <h4 className="page-title">Advice Master</h4>
         </div>
 
         {!showForm && (
           <div className="flex gap-2">
-            <button
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md shadow-emerald-100"
-              onClick={() => setShowForm(true)}
-            >
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
               <FaPlus size={14} /> Add New
             </button>
 
             {selectedRow && (
-              <div className="flex gap-2 animate-in slide-in-from-right-5">
+              <div className="flex gap-2 animate-slide-in">
                 <button
-                  className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md"
+                  className="btn-warning"
                   onClick={() => {
                     setFormData(selectedRow);
                     setIsEdit(true);
@@ -171,10 +184,7 @@ const AdviceMaster = () => {
                   <FaEdit size={14} /> Edit
                 </button>
 
-                <button
-                  className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md"
-                  onClick={handleDelete}
-                >
+                <button className="btn-danger" onClick={handleDelete}>
                   <FaTrash size={14} /> Delete
                 </button>
               </div>
@@ -185,8 +195,8 @@ const AdviceMaster = () => {
 
       {/* ================= FORM ================= */}
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100 animate-in zoom-in-95 duration-200">
-          <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">
+        <div className="form-container animate-zoom-in">
+          <h6 className="form-section-title">
             {isEdit ? "Update Advice" : "Create Advice"}
           </h6>
 
@@ -196,15 +206,9 @@ const AdviceMaster = () => {
           >
             {/* CODE */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Advice Code
-              </label>
+              <label className="form-label">Advice Code</label>
               <input
-                className={`w-full px-4 py-3 rounded-lg border border-gray-200 
-                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 
-                outline-none transition-all ${
-                  isEdit ? "bg-gray-50 text-gray-400" : ""
-                }`}
+                className="form-input w-full"
                 value={formData.advice_code}
                 disabled={isEdit}
                 required
@@ -220,13 +224,9 @@ const AdviceMaster = () => {
 
             {/* NAME */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Description
-              </label>
+              <label className="form-label">Description</label>
               <input
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 
-                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 
-                outline-none transition-all"
+                className="form-input w-full"
                 value={formData.advice_name}
                 required
                 onChange={(e) =>
@@ -241,14 +241,10 @@ const AdviceMaster = () => {
 
             {/* SORT */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Sort Order
-              </label>
+              <label className="form-label">Sort Order</label>
               <input
                 type="number"
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 
-                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 
-                outline-none transition-all"
+                className="form-input w-full"
                 value={formData.sort_order}
                 onChange={(e) =>
                   setFormData({
@@ -261,20 +257,24 @@ const AdviceMaster = () => {
 
             {/* STATUS */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Status</label>
-              <select className="w-full px-4 py-3 rounded-lg border border-gray-200 appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: parseInt(e.target.value)})}>
+              <label className="form-label">Status</label>
+              <select 
+                className="form-input w-full appearance-none" 
+                value={formData.status} 
+                onChange={e => setFormData({...formData, status: parseInt(e.target.value)})}
+              >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
               </select>
             </div>
 
-            <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-emerald-100">
+            <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
+              <button className="btn-primary px-12">
                 {isEdit ? "Update" : "Save"}
               </button>
               <button
                 type="button"
-                className="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-700"
+                className="btn-ghost"
                 onClick={resetForm}
               >
                 Cancel
@@ -286,7 +286,7 @@ const AdviceMaster = () => {
 
       {/* ================= TABLE ================= */}
       {!showForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in duration-500">
+        <div className="data-table-container">
           <TableToolbar
             itemsPerPage={itemsPerPage}
             setItemsPerPage={setItemsPerPage}
@@ -298,15 +298,15 @@ const AdviceMaster = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="px-6 py-4 w-16"></th>
+                <tr>
+                  <th className="text-admin-th w-16"></th>
                   <th className="text-admin-th">Code</th>
                   <th className="text-admin-th">Description</th>
                   <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
                   [...paginatedData]
                     .sort((a, b) => {
@@ -324,22 +324,22 @@ const AdviceMaster = () => {
                               : item
                           )
                         }
-                        className={`group cursor-pointer transition-colors duration-150 ${
+                        className={`table-row ${
                           selectedRow?.advice_code === item.advice_code
-                            ? "bg-emerald-50/40"
-                            : "hover:bg-gray-50/50"
+                            ? "table-row-active"
+                            : ""
                         }`}
                       >
                         <td className="px-6 py-4">
                           <div
-                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                            className={`selection-indicator ${
                               selectedRow?.advice_code === item.advice_code
-                                ? "border-emerald-500 bg-emerald-500"
-                                : "border-gray-200 group-hover:border-emerald-300"
+                                ? "selection-indicator-active"
+                                : ""
                             }`}
                           >
                             {selectedRow?.advice_code === item.advice_code && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-white" />
+                              <div className="selection-dot" />
                             )}
                           </div>
                         </td>
@@ -348,10 +348,10 @@ const AdviceMaster = () => {
                         <td className="text-admin-td">{item.advice_name}</td>
                         <td className="text-admin-td">
                           <span
-                            className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            className={`badge ${
                               item.status === 1
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-red-50 text-red-600"
+                                ? "badge-success"
+                                : "badge-danger"
                             }`}
                           >
                             {item.status === 1 ? "Active" : "Inactive"}
@@ -361,12 +361,12 @@ const AdviceMaster = () => {
                     ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="px-6 py-20 text-center">
+                    <td colSpan="4" className="px-6 py-20 text-center">
                       <FaLightbulb
                         size={48}
-                        className="mb-4 text-gray-200 mx-auto"
+                        className="mb-4 mx-auto opacity-20"
                       />
-                      <p className="text-lg font-medium text-gray-400">
+                      <p className="text-lg font-medium text-muted">
                         No advice records found
                       </p>
                     </td>
@@ -376,7 +376,7 @@ const AdviceMaster = () => {
             </table>
           </div>
 
-          <div className="bg-white border-t border-gray-50 p-6">
+          <div className="pagination-container">
             <Pagination
               totalEntries={filteredData.length}
               itemsPerPage={effectiveItemsPerPage}

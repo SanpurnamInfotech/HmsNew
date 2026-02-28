@@ -25,6 +25,7 @@ import BloodDonor from '../pages/masters/BloodDonor';
 import BankDetails from "../pages/masters/BankDetails";
 import BedAllotment from "../pages/masters/BedAllotment";
 import Patient from "../pages/masters/Patient";
+import PrescriptionReport from "../pages/PrescriptionReport.jsx";
 
 
 
@@ -56,6 +57,7 @@ export const adminRoutes = [
   { path: "cities", label: "Cities Master", component: CitiesMst },
   { path: "noticeboard", label: "Noticeboard", component: Noticeboard },
   { path: "mood_history", label: "Mood History Master", component: MoodHistoryMst },
+  { path: "prescription_report", label: "Prescription Report", component: PrescriptionReport}
 
  
 
