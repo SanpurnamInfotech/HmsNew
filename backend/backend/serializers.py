@@ -232,16 +232,12 @@ class IcdMasterSerializer(serializers.ModelSerializer):
         model = IcdMaster
         fields = "__all__"
         
-
-
 class RoomTypeMasterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RoomTypeMaster
         fields = "__all__"
     
-
-
 class BedSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -249,15 +245,11 @@ class BedSerializer(serializers.ModelSerializer):
         fields = "__all__"
     
 
-
-
 class HabitMasterSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = HabitMaster
         fields = "__all__"
-
-
 
 
 class HallucinationMasterSerializer(serializers.ModelSerializer):

@@ -69,12 +69,6 @@ function App() {
           <Route path="bed_allotment" element={<BedAllotment />} />
           <Route path="patient" element={<Patient />} />
 
-
-
-
-
-
-          
           {/* Default Page */}
           <Route index element={<Navigate to="dashboard" replace />} />
 
