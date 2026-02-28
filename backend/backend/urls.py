@@ -163,6 +163,58 @@ urlpatterns = [
    
 
     # API-prefixed routes (frontend uses baseURL + endpoint, ensure /api/expenses/ is reachable)
+    path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
+    path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
+    path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),
+    path('api/expenses/delete/<str:expenses_code>/', ExpensesDeleteView.as_view(), name='expenses-delete'),
+    
+    # Thought Content Master CRUD
+    path('api/thought_content_master/', ThoughtContentListView.as_view(), name='thoughtcontent-list'),
+    path('api/thought_content_master/create/', ThoughtContentListView.as_view(), name='thoughtcontent-create'),
+    path('api/thought_content_master/update/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-update'),
+    path('api/thought_content_master/delete/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-delete'),
+    
+    # Noticeboard CRUD
+    path('api/noticeboard/', NoticeboardListView.as_view(), name='noticeboard-list'),
+    path('api/noticeboard/create/', NoticeboardListView.as_view(), name='noticeboard-create'),
+    path('api/noticeboard/update/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-update'),
+    path('api/noticeboard/delete/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-delete'),
+
+
+    # Mood History API Routes
+   path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
+path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
+path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='mood-history-update'),
+path('api/mood-history/delete/<str:mood_history_code>/', MoodHistoryDeleteView.as_view(), name='mood-history-delete'),
+
+path('api/states/', StatesListView.as_view(), name='states-list'),
+path('api/states/create/', StatesCreateView.as_view(), name='states-create'),
+path('api/states/update/<str:state_code>/', StatesUpdateView.as_view(), name='states-update'),
+path('api/states/delete/<str:state_code>/', StatesDeleteView.as_view(), name='states-delete'),
+
+path('api/districts/', DistrictsListView.as_view(), name='districts-list'),
+path('api/districts/create/',  DistrictsCreateView.as_view(),  name='districts-create'),
+path('api/districts/update/<str:district_code>/',  DistrictsUpdateView.as_view(),  name='districts-update'),
+path('api/districts/delete/<str:district_code>/', DistrictsDeleteView.as_view(),  name='districts-delete'),
+
+
+path('api/cities/', CitiesListView.as_view(), name='cities-list'),
+path('api/cities/create/', CitiesCreateView.as_view(), name='cities-create'),
+path('api/cities/update/<str:city_code>/', CitiesUpdateView.as_view(), name='cities-update'),
+path('api/cities/delete/<str:city_code>/', CitiesDeleteView.as_view(), name='cities-delete'),
+
+# path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
+    path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
+    path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
+    path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
+
+    path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
+    path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
+    path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
+    path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
+    path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
+
+ 
     # path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
     # path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
     # path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),

@@ -70,15 +70,16 @@ class FinancialyearMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinancialyearMaster
         fields = "__all__"
+
 class MaritalStatusMasterSerializer(serializers.ModelSerializer):  
     class Meta:
         model = MaritalStatusMaster
         fields = "__all__"
 
-class DoctorSerializer(serializers.ModelSerializer):  
-    class Meta:
-        model = Doctor
-        fields = "__all__"
+# class DoctorSerializer(serializers.ModelSerializer):  
+#     class Meta:
+#         model = Doctor
+#         fields = "__all__"
 
 class PatientSerializer(serializers.ModelSerializer):  
     class Meta:
@@ -704,6 +705,56 @@ class CitiesSerializer(serializers.ModelSerializer):
             except Exception: pass
         return super().update(instance, validated_data)
     
+from rest_framework import serializers
+from .models import Doctor
+from django.utils import timezone
+
+class DoctorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Doctor
+        fields = "__all__"
+        read_only_fields = [
+            "createdon",
+            "createdby",
+            "updatedon",
+            "updatedby",
+        ]
+
+    def validate_doctor_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Doctor code is required.")
+        return value.strip()
+
+    def validate_doctor_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Doctor name is required.")
+        return value.strip()
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        
+        if request and hasattr(request, 'user'):
+            try:
+                # User ID save karne ke liye
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        
+        if request and hasattr(request, 'user'):
+            try:
+                # Update ke waqt sirf updatedby change hoga
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().update(instance, validated_data)
     
 
 

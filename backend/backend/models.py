@@ -92,24 +92,6 @@ class EngineActivity(models.Model):
         db_table = 'engine_activity'
         
         
-# class Settings(models.Model):
-#     setting_id = models.IntegerField(unique=True)
-#     setting_name = models.CharField(max_length=100, blank=True, null=True)
-#     module_code = models.CharField(max_length=25, blank=True, null=True)
-#     submodule_code = models.CharField(max_length=25, blank=True, null=True)
-#     activity_code = models.CharField(max_length=25, blank=True, null=True)
-#     setting_value = models.CharField(max_length=255, blank=True, null=True)
-#     setting_value2 = models.CharField(max_length=255, blank=True, null=True)
-#     used_for = models.CharField(max_length=100, blank=True, null=True)
-#     createdon = models.DateTimeField(blank=True, null=True)
-#     createdby = models.IntegerField(blank=True, null=True)
-#     updatedon = models.DateTimeField(blank=True, null=True)
-#     updatedby = models.IntegerField(blank=True, null=True)
-
-#     class Meta:
-#         managed = False
-#         db_table = 'settings'
-        
 class Permissions(models.Model):
     usertype_code = models.CharField(max_length=45)
     module_code = models.CharField(max_length=45, blank=True, null=True)
@@ -342,10 +324,6 @@ class IcdMaster(models.Model):
 
 
 class RoomTypeMaster(models.Model):
-
-    room_type_code = models.CharField(unique=True, max_length=20)
-    room_type_name = models.CharField(max_length=100)
-    bed_charges = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
     room_type_code = models.CharField(unique=True, max_length=45)
     room_type_name = models.CharField(max_length=225)
     bed_charges = models.IntegerField(blank=True, null=True)
@@ -708,7 +686,7 @@ class IpdRegistration(models.Model):
         managed = False
         db_table = 'ipd_registration'
 
-from django.db import models
+
 
 
 class ComplaintMaster(models.Model):
@@ -727,7 +705,7 @@ class ComplaintMaster(models.Model):
 
 
 
-from django.db import models
+
 
 
 class ExpensesMaster(models.Model):
@@ -745,7 +723,6 @@ class ExpensesMaster(models.Model):
         db_table = 'expenses_master'
 
 
-from django.db import models
 
 
 class MseMaster(models.Model):
@@ -762,7 +739,7 @@ class MseMaster(models.Model):
         managed = False
         db_table = 'mse_master'
 
-from django.db import models
+
 
 
 class ThoughtContentMaster(models.Model):
@@ -779,7 +756,6 @@ class ThoughtContentMaster(models.Model):
         managed = False
         db_table = 'thought_content_master'
 
-from django.db import models
 
 
 class MoodHistoryMaster(models.Model):
@@ -796,7 +772,7 @@ class MoodHistoryMaster(models.Model):
         managed = False
         db_table = 'mood_history_master'
 
-from django.db import models
+
 
 
 class Noticeboard(models.Model):

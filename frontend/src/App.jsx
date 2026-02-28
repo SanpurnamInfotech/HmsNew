@@ -8,6 +8,16 @@ import Register from './auth/Register';
 import { adminRoutes } from './routes/routeConfig';
 
 
+import ComplaintMaster from './pages/masters/ComplaintMaster.jsx';
+import ExpensesMst from './pages/masters/ExpensesMst.jsx';
+import MseMaster from './pages/masters/MseMaster.jsx';
+import ThoughtContentMaster from './pages/masters/thought_content_master.jsx';
+import Noticeboard from './pages/masters/noticeboard.jsx';
+import MoodHistoryMst from './pages/masters/MoodHistoryMst.jsx';
+import StatesMst from './pages/masters/StatesMst.jsx';
+import DistrictsMst from './pages/masters/DistrictsMst.jsx';
+ import CitiesMst from './pages/masters/CitiesMst.jsx';
+import DoctorMst from './pages/masters/DoctorMst.jsx';
 
 
 function App() {
@@ -28,7 +38,6 @@ function App() {
             </PrivateRoute>
           }
         >
-<<<<<<< HEAD
           {/* Example of nested dynamic routes inside AdminLayout */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="countries" element={<Countries />} />
@@ -49,8 +58,6 @@ function App() {
 
           {/* Default Page */}
           <Route index element={<Navigate to="dashboard" replace />} />
-=======
->>>>>>> 6f14315d73976908b2ee9222ffd3454081defd56
 
           {/* Dynamic Routes */}
           {adminRoutes.map((route, index) => {
@@ -63,6 +70,18 @@ function App() {
               />
             );
           })}
+
+          {/* Static Admin Pages */}
+          <Route path="mse" element={<MseMaster />} />
+          <Route path="thought_content_master" element={<ThoughtContentMaster />} />
+          <Route path="noticeboard" element={<Noticeboard />} />
+          <Route path="complaints" element={<ComplaintMaster />} />
+          <Route path="expenses" element={<ExpensesMst />} />
+          <Route path="mood_history" element={<MoodHistoryMst />} />
+           <Route path="states" element={<StatesMst/>} />
+          <Route path="districts" element={<DistrictsMst/>} />
+         <Route path="cities" element={<CitiesMst/>} />
+         <Route path="doctors" element={<DoctorMst/>} />
         </Route>
 
         {/* Root Redirect */}
