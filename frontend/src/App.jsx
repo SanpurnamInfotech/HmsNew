@@ -4,34 +4,11 @@ import AdminLayout from './components/layers/admin/AdminLayout';
 import PrivateRoute from './auth/PrivateRoute';
 import Login from './auth/Login';
 import Register from './auth/Register';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Dashboard from './pages/dashboard/Dashboard';
-import ModuleMst from './pages/masters/ModuleMst';
-import SubmoduleMst from './pages/masters/SubmoduleMst';
-import Activities from './pages/masters/Activities';
-import AdviceMaster from './pages/masters/AdviceMaster';
-import CompanyMaster from './pages/masters/CompanyMaster';
-import EmployeeMaster from './pages/masters/EmployeeMaster';
-import MaritalStatusMaster from './pages/masters/MaritalStatusMaster';
-import RelationMaster from './pages/masters/RelationMaster';
-import Departments from './pages/masters/Departments';
-import BloodGroupMaster from './pages/masters/BloodGroupMaster';
-import BloodDonor from './pages/masters/BloodDonor';
-import BankDetails from "./pages/masters/BankDetails";
-import BedAllotment from "./pages/masters/BedAllotment";
-import Patient from "./pages/masters/Patient";
-
-
 
 import { adminRoutes } from './routes/routeConfig';
 
 
-import ComplaintMaster from './pages/masters/ComplaintMaster.jsx';
-import ExpensesMst from './pages/masters/ExpensesMst.jsx';
-import MseMaster from './pages/masters/MseMaster.jsx';
-import ThoughtContentMaster from './pages/masters/thought_content_master.jsx';
-import Noticeboard from './pages/masters/noticeboard.jsx';
-import MoodHistoryMst from './pages/masters/MoodHistoryMst.jsx';
+
 
 function App() {
   return (
@@ -51,6 +28,7 @@ function App() {
             </PrivateRoute>
           }
         >
+<<<<<<< HEAD
           {/* Example of nested dynamic routes inside AdminLayout */}
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="countries" element={<Countries />} />
@@ -71,6 +49,8 @@ function App() {
 
           {/* Default Page */}
           <Route index element={<Navigate to="dashboard" replace />} />
+=======
+>>>>>>> 6f14315d73976908b2ee9222ffd3454081defd56
 
           {/* Dynamic Routes */}
           {adminRoutes.map((route, index) => {
@@ -83,14 +63,6 @@ function App() {
               />
             );
           })}
-
-          {/* Static Admin Pages */}
-          <Route path="mse" element={<MseMaster />} />
-          <Route path="thought_content_master" element={<ThoughtContentMaster />} />
-          <Route path="noticeboard" element={<Noticeboard />} />
-          <Route path="complaints" element={<ComplaintMaster />} />
-          <Route path="expenses" element={<ExpensesMst />} />
-          <Route path="mood_history" element={<MoodHistoryMst />} />
         </Route>
 
         {/* Root Redirect */}
