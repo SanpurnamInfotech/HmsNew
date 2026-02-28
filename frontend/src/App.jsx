@@ -16,6 +16,8 @@ import MoodHistoryMst from './pages/masters/MoodHistoryMst.jsx';
 import StatesMst from './pages/masters/StatesMst.jsx';
 import DistrictsMst from './pages/masters/DistrictsMst.jsx';
  import CitiesMst from './pages/masters/CitiesMst.jsx';
+import DoctorMst from './pages/masters/DoctorMst.jsx';
+
 
 function App() {
   return (
@@ -60,6 +62,7 @@ function App() {
            <Route path="states" element={<StatesMst/>} />
           <Route path="districts" element={<DistrictsMst/>} />
          <Route path="cities" element={<CitiesMst/>} />
+         <Route path="doctors" element={<DoctorMst/>} />
         </Route>
 
         {/* Root Redirect */}

@@ -142,6 +142,19 @@ path('api/cities/', CitiesListView.as_view(), name='cities-list'),
 path('api/cities/create/', CitiesCreateView.as_view(), name='cities-create'),
 path('api/cities/update/<str:city_code>/', CitiesUpdateView.as_view(), name='cities-update'),
 path('api/cities/delete/<str:city_code>/', CitiesDeleteView.as_view(), name='cities-delete'),
+
+# path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
+    path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
+    path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
+    path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
+
+    path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
+    path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
+    path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
+    path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
+    path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
+
+ 
 ]
 
 
