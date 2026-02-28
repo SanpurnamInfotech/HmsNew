@@ -134,34 +134,12 @@ const Countries = () => {
     <div className="app-container">
       {/* ================= MODAL ================= */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body text-center">
-              <div className="modal-icon-container mb-4">
-                {modal.type === "success" ? (
-                  <FaCheckCircle className="text-4xl text-emerald-500 mx-auto" />
-                ) : (
-                  <FaTimesCircle className="text-4xl text-red-500 mx-auto" />
-                )}
-              </div>
-
-              <h3
-                className={`text-xl font-bold mb-2 ${
-                  modal.type === "success" ? "text-emerald-700" : "text-red-700"
-                }`}
-              >
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-
-              <p className="text-gray-600 mb-6">{modal.message}</p>
-
-              <button
-                className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-2.5 rounded-lg font-semibold"
-                onClick={() => setModal({ ...modal, visible: false })}
-              >
-                OK
-              </button>
-            </div>
+        <div className="modal-overlay fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
+          <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div className="mb-4">{modal.type === "success" ? <FaCheckCircle size={50} className="text-emerald-500 mx-auto" /> : <FaTimesCircle size={50} className="text-red-500 mx-auto" />}</div>
+            <h3 className={`text-xl font-bold mb-2 ${modal.type === "success" ? "text-emerald-700" : "text-red-700"}`}>{modal.type === "success" ? "Success" : "Error"}</h3>
+            <p className="text-gray-600 mb-6">{modal.message}</p>
+            <button className="bg-emerald-600 text-white w-full py-2.5 rounded-lg font-semibold" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
           </div>
         </div>
       )}

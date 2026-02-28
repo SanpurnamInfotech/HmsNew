@@ -4,6 +4,7 @@ import AdminLayout from './components/layers/admin/AdminLayout';
 import PrivateRoute from './auth/PrivateRoute';
 import Login from './auth/Login';
 import Register from './auth/Register';
+
 import { adminRoutes } from './routes/routeConfig';
 
 
@@ -37,6 +38,24 @@ function App() {
             </PrivateRoute>
           }
         >
+          {/* Example of nested dynamic routes inside AdminLayout */}
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="countries" element={<Countries />} />
+          <Route path='moduleMst' element={<ModuleMst />} />
+          <Route path='submoduleMst' element={<SubmoduleMst />} />
+          <Route path='activities' element={<Activities />} />
+          <Route path='advice_master' element={<AdviceMaster />} />
+          <Route path="company_master" element={<CompanyMaster />} />
+          <Route path="employee_master" element={<EmployeeMaster />} />
+          <Route path='marital_status_master' element={<MaritalStatusMaster />} />
+          <Route path='relation_master' element={<RelationMaster />} />
+          <Route path="departments" element={<Departments />} />
+          <Route path="blood_group_master" element={<BloodGroupMaster />} />
+          <Route path="blood_donor" element={<BloodDonor />} />
+          <Route path="bankdetails" element={<BankDetails />} />
+          <Route path="bed_allotment" element={<BedAllotment />} />
+          <Route path="patient" element={<Patient />} />
+
           {/* Default Page */}
           <Route index element={<Navigate to="dashboard" replace />} />
 
