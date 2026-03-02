@@ -90,7 +90,6 @@ function App() {
             );
           })}
 
-<<<<<<< HEAD
           {/* Static Admin Pages */}
           <Route path="mse" element={<MseMaster />} />
           <Route path="thought_content_master" element={<ThoughtContentMaster />} />
@@ -102,7 +101,6 @@ function App() {
           <Route path="districts" element={<DistrictsMst/>} />
          <Route path="cities" element={<CitiesMst/>} />
          <Route path="doctors" element={<DoctorMst/>} />
-=======
           <Route path="icd-master" element={<IcdMasterMst />} />
           <Route path="room-type-master" element={<RoomTypeMasterMst />} />
            <Route path="bed" element={<BedMaster />} />
@@ -120,7 +118,6 @@ function App() {
            <Route path="appointment-type-master" element={<AppointmentTypeMasterMst/>}/>
             <Route path="appointment" element={<AppointmentMst/>}/>
             {/* <Route path="transactions" element={<TransactionsMst/>}/> */}
->>>>>>> ganesh_28_02
         </Route>
 
         {/* Root Redirect */}
