@@ -19,11 +19,7 @@ urlpatterns = [
     # path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
     # path('api/settings/delete/<int:setting_id>/', SettingsDeleteView.as_view(), name='settings-delete'),
 
-    path('api/settings/', SettingsListView.as_view(), name='settings-list'),
-    path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
-    path('api/settings/<int:setting_id>/', SettingsDetailView.as_view(), name='settings-detail'),
-    path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
-    path('api/settings/delete/<int:setting_id>/', SettingsDeleteView.as_view(), name='settings-delete'),
+   
     
     path('api/usertypes/', UserTypeListView.as_view(), name='usertype-list'),
     path('api/usertypes/create/', UserTypeCreateView.as_view(), name='usertype-create'),
@@ -241,9 +237,9 @@ urlpatterns = [
     
     path('api/medicine/', MedicineListView.as_view(), name='medicine-list'),
     path('api/medicine/create/',MedicineCreateView.as_view(),name='medicine-create'),
-    path('api/medicine/<str:medicine_code>/',MedicineDetailView.as_view(),name='medicine-detail'),
     path('api/medicine/update/<str:medicine_code>/',MedicineUpdateView.as_view(),name='medicine-update'),
     path('api/medicine/delete/<str:medicine_code>/',MedicineDeleteView.as_view(),name='medicine-delete'),
+    path('api/medicine/<str:medicine_code>/',MedicineDetailView.as_view(),name='medicine-detail'),
         
     
     path("api/medicine-category/",MedicineCategoryListView.as_view(),name="medicine-category-list"),
@@ -251,6 +247,28 @@ urlpatterns = [
     path("api/medicine-category/<str:medicine_cat_code>/",MedicineCategoryDetailView.as_view(),name="medicine-category-detail"),
     path("api/medicine-category/update/<str:medicine_cat_code>/",MedicineCategoryUpdateView.as_view(),name="medicine-category-update"),
     path("api/medicine-category/delete/<str:medicine_cat_code>/",MedicineCategoryDeleteView.as_view(),name="medicine-category-delete"),
+    
+    
+    path("api/appointment-type-master/",AppointmentTypeMasterListView.as_view()),
+    path("api/appointment-type-master/create/",AppointmentTypeMasterCreateView.as_view()),
+    path("api/appointment-type-master/<str:appointment_type_code>/",AppointmentTypeMasterDetailView.as_view()),
+    path("api/appointment-type-master/update/<str:appointment_type_code>/",AppointmentTypeMasterUpdateView.as_view()),
+    path("api/appointment-type-master/delete/<str:appointment_type_code>/",AppointmentTypeMasterDeleteView.as_view()),
+    
+    
+    path('api/appointment/',AppointmentListView.as_view(),name='appointment-list'),
+    path('api/appointment/create/',AppointmentCreateView.as_view(),name='appointment-create'),
+    path('api/appointment/<str:appointment_code>/',AppointmentDetailView.as_view(),name='appointment-detail'),
+    path('api/appointment/update/<str:appointment_code>/',AppointmentUpdateView.as_view(),name='appointment-update'),
+    path('api/appointment/delete/<str:appointment_code>/',AppointmentDeleteView.as_view(),name='appointment-delete'),
+    
+    
+    # path('api/transactions/', TransactionsListView.as_view(), name='transactions-list'),
+    # path('api/transactions/create/', TransactionsCreateView.as_view(), name='transactions-create'),
+    # path('api/transactions/update/<str:transaction_code>/', TransactionsUpdateView.as_view(), name='transactions-update'),
+    # path('api/transactions/delete/<str:transaction_code>/', TransactionsDeleteView.as_view(), name='transactions-delete'),
+    # path('api/transactions/<str:transaction_code>/', TransactionsDetailView.as_view(), name='transactions-detail'),
+
 
 
 

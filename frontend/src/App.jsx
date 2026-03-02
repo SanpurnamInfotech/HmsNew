@@ -8,6 +8,18 @@ import Register from './auth/Register';
 import { adminRoutes } from './routes/routeConfig';
 import { ThemeProvider } from './theme/ThemeContext.jsx'; 
 
+import ComplaintMaster from './pages/masters/ComplaintMaster.jsx';
+import ExpensesMst from './pages/masters/ExpensesMst.jsx';
+import MseMaster from './pages/masters/MseMaster.jsx';
+import ThoughtContentMaster from './pages/masters/thought_content_master.jsx';
+import Noticeboard from './pages/masters/noticeboard.jsx';
+import MoodHistoryMst from './pages/masters/MoodHistoryMst.jsx';
+import StatesMst from './pages/masters/StatesMst.jsx';
+import DistrictsMst from './pages/masters/DistrictsMst.jsx';
+ import CitiesMst from './pages/masters/CitiesMst.jsx';
+import DoctorMst from './pages/masters/DoctorMst.jsx';
+
+
 function App() {
   return (
     // Wrap the entire application or just the routes in the Provider
