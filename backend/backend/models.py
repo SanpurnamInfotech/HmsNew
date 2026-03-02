@@ -307,197 +307,6 @@ class Advicemaster(models.Model):
         db_table = 'advicemaster'
 
 
-class IcdMaster(models.Model):
-    icd_code = models.CharField(unique=True, max_length=45)
-    icd_name = models.CharField(max_length=255)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'icd_master'
-
-
-
-class RoomTypeMaster(models.Model):
-    room_type_code = models.CharField(unique=True, max_length=45)
-    room_type_name = models.CharField(max_length=225)
-    bed_charges = models.IntegerField(blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'marital_status_master'
-
-
-
-class Bed(models.Model):
-    bed_code = models.CharField(unique=True, max_length=45)
-    bed_name = models.CharField(max_length=100, blank=True, null=True)
-    room_type = models.CharField(max_length=50)
-    bed_charges = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active/Available, 0=Inactive') 
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'relation_master'        
-
-
-class HabitMaster(models.Model):
-    habit_code = models.CharField(unique=True, max_length=25)
-    habit_name = models.CharField(max_length=100)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'departments'
-
-
-
-
-class HallucinationMaster(models.Model):
-    hallucination_code = models.CharField(unique=True, max_length=25)
-    hallucination_name = models.CharField(max_length=100)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'blood_group_master'
-
-
-
-class HistoryMaster(models.Model):
-    history_code = models.CharField(unique=True, max_length=25)
-    history_name = models.CharField(max_length=100)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = "blood_donor"
-
-
-
-
-
-class MentalIllnessMaster(models.Model):
-    mental_illness_code = models.CharField(unique=True, max_length=25)
-    mental_illness_name = models.CharField(max_length=100)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'mental_illness_master'
-
-
-
-
-class DsmMaster(models.Model):
-    dsm_code = models.CharField(unique=True, max_length=25)
-    dsm_name = models.CharField(max_length=100)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'dsm_master'
-
-
-class PremorbidPersonalityMaster(models.Model):
-    premorbid_personality_code = models.CharField(unique=True, max_length=25)
-    premorbid_personality_name = models.CharField(max_length=100)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'premorbid_personality_master'
-
-
-
-
-class PossessionMaster(models.Model):
-    possession_code = models.CharField(unique=True, max_length=25)
-    possession_name = models.CharField(max_length=100)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'possession_master'
-
-
-
-class Settings(models.Model):
-    setting_id = models.IntegerField(unique=True)
-    setting_name = models.CharField(max_length=100, blank=True, null=True)
-    module_code = models.CharField(max_length=25, blank=True, null=True)
-    submodule_code = models.CharField(max_length=25, blank=True, null=True)
-    activity_code = models.CharField(max_length=25, blank=True, null=True)
-    setting_value = models.CharField(max_length=255, blank=True, null=True)
-    setting_value2 = models.CharField(max_length=255, blank=True, null=True)
-    used_for = models.CharField(max_length=100, blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'settings'
-        
-        
-
-        
-
-
-
-
 
 class Medicine(models.Model):
     medicine_code = models.CharField(unique=True, max_length=45)
@@ -1132,5 +941,73 @@ class Settings(models.Model):
         managed = False
         db_table = 'settings'
         
-    
+        
+        
+
+class AppointmentTypeMaster(models.Model):
+    appointment_type_code = models.CharField(primary_key=True, max_length=45)
+    appointment_type_name = models.CharField(unique=True, max_length=255)
+    description = models.TextField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'appointment_type_master'          
+          
+        
+
+class Appointment(models.Model):
+    appointment_code = models.CharField(primary_key=True, max_length=45)
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+    doctor_code = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctor_code', to_field='doctor_code')
+    appointment_type_code = models.ForeignKey('AppointmentTypeMaster', models.DO_NOTHING, db_column='appointment_type_code')
+    hospital_code = models.CharField(max_length=45)
+    appointment_date = models.DateField(blank=True, null=True)
+    appointment_renew_date = models.DateField(blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    weight_kg = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    informant = models.CharField(max_length=100, blank=True, null=True)
+    appointment_fee = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)   
+    registration_fee = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)  
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'appointment'
+        
+        
+        
+# class Transactions(models.Model):
+#     transaction_code = models.CharField(primary_key=True, max_length=45)
+#     patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+#     bill_no = models.ForeignKey('OpdBilling', models.DO_NOTHING, db_column='bill_no', to_field='bill_no', blank=True, null=True)
+#     appointment_code = models.ForeignKey('Appointment', models.DO_NOTHING, db_column='appointment_code', blank=True, null=True)
+#     transaction_date = models.DateField()
+#     transaction_mode_code = models.ForeignKey('TransactionModeMaster', models.DO_NOTHING, db_column='transaction_mode_code', db_comment='Link to transaction_mode_master')
+#     transaction_type = models.CharField(max_length=45, blank=True, null=True, db_comment='PAYMENT, REFUND, ADJUSTMENT')
+#     depositor_name = models.CharField(max_length=100, blank=True, null=True)
+#     mobile = models.CharField(max_length=20, blank=True, null=True)
+#     bill_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
+#     amt_received = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)      
+#     dues_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
+#     sort_order = models.IntegerField(blank=True, null=True)
+#     status = models.IntegerField(blank=True, null=True)
+#     createdon = models.DateTimeField(blank=True, null=True)
+#     createdby = models.IntegerField(blank=True, null=True)
+#     updatedon = models.DateTimeField(blank=True, null=True)
+#     updatedby = models.IntegerField(blank=True, null=True)
+
+#     class Meta:
+#         managed = False
+#         db_table = 'transactions'        
                 

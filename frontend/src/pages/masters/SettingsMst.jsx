@@ -130,24 +130,30 @@ const SettingsMst = () => {
 
   /* ================= CRUD ================= */
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const actionPath = isEdit
-      ? `${PATH}/update/${formData.setting_id}/`
-      : `${PATH}/create/`;
+  const actionPath = isEdit
+    ? `${PATH}/update/${formData.setting_id}/`
+    : `${PATH}/create/`;
 
-    const result = isEdit
-      ? await updateItem(actionPath, formData)
-      : await createItem(actionPath, formData);
+  // ✅ create time la setting_id remove
+  const payload = { ...formData };
+  if (!isEdit) {
+    delete payload.setting_id;
+  }
 
-    if (result.success) {
-      showModal(`Setting ${isEdit ? "updated" : "created"} successfully!`);
-      resetForm();
-      refresh();
-    } else {
-      showModal(result.error || "Operation failed!", "error");
-    }
-  };
+  const result = isEdit
+    ? await updateItem(actionPath, payload)
+    : await createItem(actionPath, payload);
+
+  if (result.success) {
+    showModal(`Setting ${isEdit ? "updated" : "created"} successfully!`);
+    resetForm();
+    refresh();
+  } else {
+    showModal(result.error || "Operation failed!", "error");
+  }
+};
 
   const handleDelete = async () => {
     if (!selectedRow) return;
@@ -285,16 +291,12 @@ const SettingsMst = () => {
                 Setting ID
               </label>
               <input
-                type="number"
-                disabled={isEdit}
-                required
-                className={`w-full px-4 py-3 rounded-lg border border-gray-200 ${
-                  isEdit ? "bg-gray-50 text-gray-400" : ""
-                }`}
-                value={formData.setting_id}
-                onChange={(e) =>
-                  setFormData({ ...formData, setting_id: e.target.value })
-                }
+  type="number"
+  disabled
+  placeholder="Auto generated"
+  className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-gray-50 text-gray-400"
+  value={formData.setting_id}
+
               />
             </div>
 
