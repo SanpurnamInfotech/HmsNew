@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Container, Navbar } from 'react-bootstrap';
-import { FaBars, FaBell, FaUserCircle, FaSun, FaMoon } from 'react-icons/fa';
+import { FaBars, FaBell, FaUserCircle} from 'react-icons/fa';
+import { FiSun, FiMoon } from 'react-icons/fi';
 import Sidebar from './Sidebar';
 import { useTheme } from '../../../theme/ThemeContext.jsx';
 
@@ -79,12 +80,33 @@ const AdminLayout = () => {
       <div className="d-flex align-items-center gap-3">
         {/* ... rest of your icons and profile section stays the same ... */}
         <div 
-          className={`theme-toggle-btn cursor-pointer p-2 rounded-circle ${isDark ? 'bg-slate-800' : 'bg-gray-100'}`} 
-          onClick={toggleTheme}
-          style={{ width: '35px', height: '35px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-        >
-          {isDark ? <FaSun className="text-warning" /> : <FaMoon className="text-primary" />}
-        </div>
+  className="theme-toggle-btn cursor-pointer p-2 rounded-circle" 
+  onClick={toggleTheme}
+  style={{ 
+    width: '35px', 
+    height: '35px', 
+    display: 'flex', 
+    alignItems: 'center', 
+    justifyContent: 'center',
+    backgroundColor: 'transparent' // No background fill
+  }}
+>
+  {isDark ? (
+    <FiSun 
+      size={20} 
+      strokeWidth={2.5} 
+      className="text-white" 
+      style={{ fill: 'none' }} 
+    />
+  ) : (
+    <FiMoon 
+      size={20} 
+      strokeWidth={2.5} 
+      className="text-dark" 
+      style={{ fill: 'none' }} 
+    />
+  )}
+</div>
         
         {/* Notification and Profile */}
         <div className="notification-icon-wrapper position-relative cursor-pointer">

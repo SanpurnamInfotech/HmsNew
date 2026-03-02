@@ -26,6 +26,17 @@ import BankDetails from "../pages/masters/BankDetails";
 import BedAllotment from "../pages/masters/BedAllotment";
 import Patient from "../pages/masters/Patient";
 import PrescriptionReport from "../pages/PrescriptionReport.jsx";
+import IcdMasterMst from "../pages/masters/IcdMasterMst.jsx";
+import DsmMaster from "../pages/masters/DsmMaster.jsx";
+import RoomTypeMasterMst from "../pages/masters/RoomTypeMasterMst.jsx";
+import HabitMaster from "../pages/masters/HabitMaster.jsx";
+import HallucinationMaster from "../pages/masters/HabitMaster.jsx";
+import HistoryMaster from "../pages/masters/HistoryMaster.jsx";
+import MentalIllnessMaster from "../pages/masters/MentalIllnessMaster.jsx";
+import MedicineCategory from "../pages/masters/MedicineCategory.jsx";
+import MedicineMst from "../pages/masters/MedicineMst.jsx";
+import Possation from "../pages/masters/PossessionMaster.jsx";
+import FinancialYearMst from "../pages/masters/FinancialYearMst.jsx";
 
 
 
@@ -50,14 +61,25 @@ export const adminRoutes = [
   { path: "patient", label: "Patient", component: Patient },
   { path: "complaints", label: "Complaint Master", component: ComplaintMaster },
   { path: "expenses", label: "Expenses Master", component: ExpensesMst },
-  { path: "mse", label: "MSE Master", component: MseMaster },
+  { path: "mse_master", label: "MSE Master", component: MseMaster },
   { path: "thought_content_master", label: "Thought Content Master", component: ThoughtContentMaster },
   { path: "districts" , label: "Districts Master", component: DistrictsMst },
   { path: "states" , label: "States Master", component: StatesMst },
   { path: "cities", label: "Cities Master", component: CitiesMst },
   { path: "noticeboard", label: "Noticeboard", component: Noticeboard },
   { path: "mood_history", label: "Mood History Master", component: MoodHistoryMst },
-  { path: "prescription_report", label: "Prescription Report", component: PrescriptionReport}
+  { path: "prescription_report", label: "Prescription Report", component: PrescriptionReport},
+  { path: "icd_master", label:"ICD Master", component:IcdMasterMst},
+  { path: "dsm_master", label:"DSM Master", component:DsmMaster},
+  { path: "room_type", label: "Room Type Master", component:RoomTypeMasterMst},
+  { path: "habit", label: "Habit Master", component:HabitMaster},
+  { path: "hallucination", label:"Hallucination Master", component:HallucinationMaster},
+  { path :"history", label:"History Master", component:HistoryMaster}, 
+  { path :" mental_illness", label: "Mental Illness Master", component:MentalIllnessMaster},
+  { path: "medicine_category", label: "Medicine_category", component: MedicineCategory },
+  { path: "medicine", label: "Medicine" , component: MedicineMst },
+  { path: "posssation", label: "Possation", component: Possation },
+  { path: "financial_year", label: "financial year", component: FinancialYearMst },
 
  
 

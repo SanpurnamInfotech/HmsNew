@@ -1,16 +1,17 @@
 import React, { useState, useMemo } from "react";
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaSearch, FaChevronDown } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaSearch, FaChevronDown, FaMapMarkerAlt } from "react-icons/fa";
 
 const StatesMst = () => {
   const STATE_PATH = "states";
   const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${STATE_PATH}/`);
-  const { data: countries } = useCrud("countries/"); 
+  const { data: countries } = useCrud("countries/");
 
+  /* ================= UI STATE ================= */
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
-  
+
   // Dropdown UI States
   const [openDropdown, setOpenDropdown] = useState(null); // 'country'
   const [countrySearch, setCountrySearch] = useState("");
@@ -22,7 +23,21 @@ const StatesMst = () => {
     status: 1,
   });
 
-  const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
+  const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
+
+  /* ================= TABLE ================= */
+  const {
+    search,
+    setSearch,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
+    paginatedData,
+    effectiveItemsPerPage,
+    filteredData,
+    totalPages,
+  } = useTable(data || []);
 
   /* ================= HELPERS ================= */
   const resetForm = () => {
@@ -34,35 +49,12 @@ const StatesMst = () => {
     setFormData({ state_code: "", state_name: "", country_code: "", status: 1 });
   };
 
-  const showModal = (message, type = "success") => setModal({ message, visible: true, type });
-
-  /* ================= DELETE LOGIC ================= */
-  const handleDelete = async () => {
-    if (!selectedRow || !selectedRow.state_code) {
-      showModal("Please select a row to delete", "error");
-      return;
-    }
-
-    if (window.confirm(`Are you sure you want to delete state: ${selectedRow.state_name}?`)) {
-      try {
-        const result = await deleteItem(`${STATE_PATH}/delete/${selectedRow.state_code}/`);
-        if (result.success) {
-          showModal("State deleted successfully!", "success");
-          setSelectedRow(null);
-          refresh();
-        } else {
-          showModal(result.error || "Delete failed! This record might be in use.", "error");
-        }
-      } catch (err) {
-        showModal("An unexpected error occurred during delete.", "error");
-      }
-    }
-  };
+  const showModal = (message, type = "success") => setModal({ visible: true, message, type });
 
   /* ================= FILTER LOGIC ================= */
   const filteredCountries = useMemo(() => {
     if (!countries) return [];
-    return countries.filter(c => 
+    return countries.filter(c =>
       c.country_name.toLowerCase().includes(countrySearch.toLowerCase()) ||
       c.country_code.toLowerCase().includes(countrySearch.toLowerCase())
     );
@@ -70,15 +62,14 @@ const StatesMst = () => {
 
   const selectedCountryName = countries?.find(c => c.country_code === formData.country_code)?.country_name || "Select Country";
 
-  /* ================= TABLE LOGIC ================= */
-  const { search, setSearch, currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, paginatedData, effectiveItemsPerPage, filteredData, totalPages } = useTable(data || []);
-
+  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.country_code) {
       showModal("Please select a Country", "error");
       return;
     }
+
     const actionPath = isEdit ? `${STATE_PATH}/update/${formData.state_code}/` : `${STATE_PATH}/create/`;
     const result = isEdit ? await updateItem(actionPath, formData) : await createItem(actionPath, formData);
 
@@ -91,150 +82,273 @@ const StatesMst = () => {
     }
   };
 
-  if (loading) return <div className="p-10 text-center font-bold text-emerald-600 italic">Loading States...</div>;
+  /* ================= DELETE ================= */
+  const handleDelete = async () => {
+    if (!selectedRow || !selectedRow.state_code) return;
+
+    const result = await deleteItem(`${STATE_PATH}/delete/${selectedRow.state_code}/`);
+    if (result.success) {
+      showModal("State deleted successfully!");
+      setSelectedRow(null);
+      refresh();
+    } else {
+      showModal(result.error || "Delete failed!", "error");
+    }
+  };
+
+  /* ================= LOADING ================= */
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+    </div>
+  );
 
   return (
     <div className="app-container">
-      {/* MODAL (Success/Error) */}
+      {/* SUCCESS/ERROR MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body text-center">
-              <div className="modal-icon-container mb-4">
-                {modal.type === "success" ? <FaCheckCircle className="text-4xl text-emerald-500 mx-auto" /> : <FaTimesCircle className="text-4xl text-red-500 mx-auto" />}
-              </div>
-              <h3 className={`text-xl font-bold mb-2 ${modal.type === "success" ? "text-emerald-700" : "text-red-700"}`}>{modal.type === "success" ? "Success" : "Error"}</h3>
-              <p className="text-gray-600 mb-6">{modal.message}</p>
-              <button className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-2.5 rounded-lg font-semibold" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? (
+                <FaCheckCircle className="text-6xl text-emerald-500" />
+              ) : (
+                <FaTimesCircle className="text-6xl text-rose-500" />
+              )}
             </div>
+            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            <button
+              className="btn-primary w-full justify-center py-3"
+              onClick={() => setModal({ ...modal, visible: false })}
+            >
+              Continue
+            </button>
           </div>
         </div>
       )}
 
-      {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
-        <h4 className="text-2xl font-black text-gray-800 tracking-tight">States Master</h4>
+      {/* ================= HEADER ================= */}
+      <div className="section-header">
+        <h4 className="page-title">States Master</h4>
         {!showForm && (
-          <div className="flex gap-2">
-            <button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold" onClick={() => setShowForm(true)}><FaPlus size={14} /> Add New</button>
+          <div className="flex items-center gap-2">
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
+              <FaPlus size={14} /> Add New
+            </button>
+
             {selectedRow && (
-              <>
-                <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold" onClick={() => { setFormData(selectedRow); setIsEdit(true); setShowForm(true); }}><FaEdit size={14} /> Edit</button>
-                <button className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold" onClick={handleDelete}><FaTrash size={14} /> Delete</button>
-              </>
+              <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
+                <button
+                  className="btn-warning"
+                  onClick={() => {
+                    setFormData(selectedRow);
+                    setIsEdit(true);
+                    setShowForm(true);
+                  }}
+                >
+                  <FaEdit size={14} /> Edit
+                </button>
+                <button className="btn-danger" onClick={handleDelete}>
+                  <FaTrash size={14} /> Delete
+                </button>
+              </div>
             )}
           </div>
         )}
       </div>
 
+      {/* ================= FORM ================= */}
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100 animate-in zoom-in-95 duration-200">
-          <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">{isEdit ? "Update State" : "Create State"}</h6>
-          <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSubmit}>
-            
-            {/* 1. STATE CODE */}
+        <div className="form-container animate-in zoom-in-95 duration-200">
+          <h6 className="form-section-title uppercase tracking-tighter">
+            {isEdit ? "Update State Profile" : "Add New State"}
+          </h6>
+
+          <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
+            {/* STATE CODE */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">State Code</label>
+              <label className="form-label">State Code</label>
               <input
-                className={`w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all ${isEdit ? "bg-gray-50 text-gray-400" : ""}`}
-                value={formData.state_code} disabled={isEdit} required
+                className="form-input w-full"
+                value={formData.state_code}
+                disabled={isEdit}
+                required
                 onChange={e => setFormData({ ...formData, state_code: e.target.value.toUpperCase() })}
+                placeholder="E.G. KA"
               />
             </div>
 
-            {/* 2. STATE NAME */}
+            {/* STATE NAME */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">State Name</label>
+              <label className="form-label">State Name</label>
               <input
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all"
-                value={formData.state_name} required
+                className="form-input w-full"
+                value={formData.state_name}
+                required
                 onChange={e => setFormData({ ...formData, state_name: e.target.value })}
+                placeholder="E.G. Karnataka"
               />
             </div>
 
-            {/* 3. COUNTRY SEARCHABLE DROPDOWN */}
+            {/* COUNTRY DROPDOWN */}
             <div className="space-y-1.5 relative">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Country</label>
-              <div 
-                className="w-full px-4 py-3 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer bg-white"
+              <label className="form-label">Country</label>
+              <div
+                className="form-input w-full flex justify-between items-center cursor-pointer"
                 onClick={() => setOpenDropdown(openDropdown === 'country' ? null : 'country')}
               >
-                <span className={formData.country_code ? "text-gray-800" : "text-gray-400"}>{selectedCountryName}</span>
-                <FaChevronDown className="text-gray-400" size={12} />
+                <span className={formData.country_code ? "" : "opacity-50"}>{selectedCountryName}</span>
+                <FaChevronDown size={12} className="opacity-50" />
               </div>
+              
               {openDropdown === 'country' && (
-                <div className="absolute z-[60] w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl flex flex-col">
-                  <div className="p-2 border-b bg-gray-50 flex items-center gap-2">
-                    <FaSearch className="text-gray-400" size={14} />
-                    <input autoFocus className="bg-transparent outline-none text-sm w-full" placeholder="Search country..." value={countrySearch} onChange={(e) => setCountrySearch(e.target.value)} />
+                <div className="absolute z-[60] w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" 
+                     style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
+                  <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-hover)" }}>
+                    <FaSearch className="opacity-40" size={14} />
+                    <input
+                      autoFocus
+                      className="bg-transparent outline-none text-sm w-full"
+                      placeholder="Search country..."
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                    />
                   </div>
-                  <div className="max-h-48 overflow-y-auto">
-                    {filteredCountries.map(c => (
-                      <div key={c.country_code} className="px-4 py-2 hover:bg-emerald-50 cursor-pointer text-sm" onClick={() => { setFormData({...formData, country_code: c.country_code}); setOpenDropdown(null); setCountrySearch(""); }}>
-                        {c.country_name}
-                      </div>
-                    ))}
+                  <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                    {filteredCountries.length > 0 ? (
+                      filteredCountries.map(c => (
+                        <div
+                          key={c.country_code}
+                          className="px-4 py-3 hover:bg-emerald-500/10 cursor-pointer text-sm transition-colors"
+                          onClick={() => {
+                            setFormData({ ...formData, country_code: c.country_code });
+                            setOpenDropdown(null);
+                            setCountrySearch("");
+                          }}
+                        >
+                          {c.country_name} <span className="text-[10px] opacity-40 ml-2">({c.country_code})</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="p-4 text-center text-xs opacity-50">No results found</div>
+                    )}
                   </div>
                 </div>
               )}
             </div>
-            
+
+            {/* STATUS */}
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Status</label>
-              <select className="w-full px-4 py-3 rounded-lg border border-gray-200"
-                value={formData.status} onChange={e => setFormData({ ...formData, status: Number(e.target.value) })}>
+              <label className="form-label">Status</label>
+              <select
+                className="form-input w-full cursor-pointer appearance-none"
+                style={{ colorScheme: "dark" }}
+                value={formData.status}
+                onChange={e => setFormData({ ...formData, status: Number(e.target.value) })}
+              >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
               </select>
             </div>
 
-            <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-6">
-              <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-2.5 rounded-lg font-bold">{isEdit ? "Update" : "Save"}</button>
-              <button type="button" className="px-6 py-2.5 text-sm font-bold text-gray-400" onClick={resetForm}>Cancel</button>
+            <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
+              <button type="submit" className="btn-primary px-12 py-3">
+                {isEdit ? "Update" : "Save"}
+              </button>
+              <button type="button" className="btn-ghost" onClick={resetForm}>
+                Cancel
+              </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* TABLE */}
+      {/* ================= TABLE ================= */}
       {!showForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <TableToolbar itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} />
+        <div className="data-table-container animate-in fade-in duration-500">
+          <TableToolbar
+            itemsPerPage={itemsPerPage}
+            setItemsPerPage={setItemsPerPage}
+            search={search}
+            setSearch={setSearch}
+            setCurrentPage={setCurrentPage}
+          />
+
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="px-6 py-4 w-16"></th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">State Code</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">State Name</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Country</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
+                <tr>
+                  <th className="text-admin-th w-16"></th>
+                  <th className="text-admin-th">State Code</th>
+                  <th className="text-admin-th">State Name</th>
+                  <th className="text-admin-th">Country</th>
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
-                {paginatedData.map(row => (
-                  <tr key={row.state_code} onClick={() => setSelectedRow(selectedRow?.state_code === row.state_code ? null : row)}
-                    className={`group cursor-pointer ${selectedRow?.state_code === row.state_code ? "bg-emerald-50/40" : "hover:bg-gray-50/50"}`}>
-                    <td className="px-6 py-4">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedRow?.state_code === row.state_code ? "border-emerald-500 bg-emerald-500" : "border-gray-200"}`}>
-                        {selectedRow?.state_code === row.state_code && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 font-black text-gray-800 text-sm">{row.state_code}</td>
-                    <td className="px-6 py-4 font-bold text-gray-700">{row.state_name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500">{row.country_code}</td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${row.status === 1 ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
-                        {row.status === 1 ? "Active" : "Inactive"}
-                      </span>
+
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((item) => (
+                    <tr
+                      key={item.state_code}
+                      onClick={() => setSelectedRow(selectedRow?.state_code === item.state_code ? null : item)}
+                      className={`group cursor-pointer transition-colors ${
+                        selectedRow?.state_code === item.state_code
+                          ? "bg-emerald-500/10"
+                          : "hover:bg-emerald-500/5"
+                      }`}
+                    >
+                      <td className="px-6 py-4">
+                        <div
+                          className={`selection-indicator ${
+                            selectedRow?.state_code === item.state_code
+                              ? "selection-indicator-active"
+                              : "group-hover:border-emerald-500/50"
+                          }`}
+                        >
+                          {selectedRow?.state_code === item.state_code && (
+                            <div className="selection-dot" />
+                          )}
+                        </div>
+                      </td>
+                      <td className="text-admin-td">{item.state_code}</td>
+                      <td className="text-admin-td">{item.state_name}</td>
+                      <td className="text-admin-td">{item.country_code}</td>
+                      <td className="text-admin-td">
+                        <span className={`badge ${item.status === 1 ? "badge-success" : "badge-danger"}`}>
+                          {item.status === 1 ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-24 text-center">
+                      <FaMapMarkerAlt
+                        size={64}
+                        className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse"
+                      />
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">
+                        No states found
+                      </p>
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
-          <div className="bg-white border-t border-gray-50 p-6">
-            <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+
+          <div className="pagination-container">
+            <Pagination
+              totalEntries={filteredData.length}
+              itemsPerPage={effectiveItemsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
+            />
           </div>
         </div>
       )}

@@ -21,9 +21,7 @@ const Countries = () => {
 
   /* ================= API ================= */
   const PATH = "countries";
-
-  const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud(`${PATH}/`);
+  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${PATH}/`);
 
   /* ================= UI STATE ================= */
   const [showForm, setShowForm] = useState(false);
@@ -92,11 +90,11 @@ const Countries = () => {
       : await createItem(actionPath, payload);
 
     if (result.success) {
-      showModal(`Country ${isEdit ? "updated" : "created"} successfully`);
+      showModal(`Country ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
       refresh();
     } else {
-      showModal(result.error || "Operation failed", "error");
+      showModal(result.error || "Operation failed!", "error");
     }
   };
 
@@ -108,74 +106,62 @@ const Countries = () => {
     );
 
     if (result.success) {
-      showModal("Record deleted successfully");
+      showModal("Record deleted successfully!");
       setSelectedRow(null);
       refresh();
     } else {
-      showModal(result.error || "Delete failed", "error");
+      showModal(result.error || "Delete failed!", "error");
     }
   };
 
   /* ================= LOADING ================= */
-  if (loading) {
-    return (
-      <div className="loading-overlay">
-        <div className="text-center">
-          <div className="loading-spinner mx-auto mb-4"></div>
-          <p className="font-bold" style={{ color: "var(--primary-accent)" }}>
-            Loading Country Master...
-          </p>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+    </div>
+  );
 
   return (
     <div className="app-container">
-      {/* ================= MODAL ================= */}
+      {/* SUCCESS/ERROR MODAL (Updated to ModuleMst style) */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container animate-zoom-in">
-            <div className="p-8 text-center">
-              <div className="mb-4">
-                {modal.type === "success" ? (
-                  <FaCheckCircle className="text-4xl text-emerald-500 mx-auto" />
-                ) : (
-                  <FaTimesCircle className="text-4xl text-red-500 mx-auto" />
-                )}
-              </div>
-
-              <h3 className={modal.type === "success" ? "modal-title-success" : "modal-title-error"}>
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-
-              <p className="modal-message">{modal.message}</p>
-
-              <button
-                className="btn-primary w-full justify-center"
-                onClick={() => setModal({ ...modal, visible: false })}
-              >
-                OK
-              </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? (
+                <FaCheckCircle className="text-6xl text-emerald-500" />
+              ) : (
+                <FaTimesCircle className="text-6xl text-rose-500" />
+              )}
             </div>
+            
+            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            
+            <button
+              className="btn-primary w-full justify-center py-3"
+              onClick={() => setModal({ ...modal, visible: false })}
+            >
+              Continue
+            </button>
           </div>
         </div>
       )}
 
       {/* ================= HEADER ================= */}
       <div className="section-header">
-        <div>
-          <h4 className="page-title">Country Master</h4>
-        </div>
-
+        <h4 className="page-title">Country Master</h4>
         {!showForm && (
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <button className="btn-primary" onClick={() => setShowForm(true)}>
               <FaPlus size={14} /> Add New
             </button>
 
             {selectedRow && (
-              <div className="flex gap-2 animate-slide-in">
+              <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
                 <button
                   className="btn-warning"
                   onClick={() => {
@@ -198,13 +184,13 @@ const Countries = () => {
 
       {/* ================= FORM ================= */}
       {showForm && (
-        <div className="form-container animate-zoom-in">
-          <h6 className="form-section-title">
-            {isEdit ? "Update Country" : "Create Country"}
+        <div className="form-container animate-in zoom-in-95 duration-200">
+          <h6 className="form-section-title uppercase tracking-tighter">
+            {isEdit ? "Update Country Profile" : "Add New Country"}
           </h6>
 
           <form
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6"
             onSubmit={handleSubmit}
           >
             {/* CODE */}
@@ -219,7 +205,7 @@ const Countries = () => {
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    country_code: e.target.value.toUpperCase(),
+                    country_code: e.target.value.toUpperCase().replace(/\s/g, '_'),
                   })
                 }
                 placeholder="E.G. IND"
@@ -245,11 +231,12 @@ const Countries = () => {
 
             {/* SORT */}
             <div className="space-y-1.5">
-              <label className="form-label">Sort Order</label>
+              <label className="form-label">Sort Order (Optional)</label>
               <input
                 type="number"
                 className="form-input w-full"
                 value={formData.sort_order}
+                placeholder="E.G. 1"
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -263,7 +250,8 @@ const Countries = () => {
             <div className="space-y-1.5">
               <label className="form-label">Status</label>
               <select 
-                className="form-input w-full appearance-none" 
+                className="form-input w-full cursor-pointer appearance-none" 
+                style={{ colorScheme: "dark" }}
                 value={formData.status} 
                 onChange={e => setFormData({...formData, status: parseInt(e.target.value)})}
               >
@@ -273,8 +261,8 @@ const Countries = () => {
             </div>
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
-              <button className="btn-primary px-12">
-                {isEdit ? "Update" : "Save"}
+              <button type="submit" className="btn-primary px-12 py-3">
+                {isEdit ? "Update Country" : "Save Country"}
               </button>
               <button
                 type="button"
@@ -290,7 +278,7 @@ const Countries = () => {
 
       {/* ================= TABLE ================= */}
       {!showForm && (
-        <div className="data-table-container">
+        <div className="data-table-container animate-in fade-in duration-500">
           <TableToolbar
             itemsPerPage={itemsPerPage}
             setItemsPerPage={setItemsPerPage}
@@ -304,7 +292,7 @@ const Countries = () => {
               <thead>
                 <tr>
                   <th className="text-admin-th w-16"></th>
-                  <th className="text-admin-th">Country Code</th>
+                  <th className="text-admin-th">Code</th>
                   <th className="text-admin-th">Country Name</th>
                   <th className="text-admin-th">Status</th>
                 </tr>
@@ -314,8 +302,8 @@ const Countries = () => {
                 {paginatedData.length > 0 ? (
                   [...paginatedData]
                     .sort((a, b) => {
-                      const sa = a.sort_order ?? 999999;
-                      const sb = b.sort_order ?? 999999;
+                      const sa = a.sort_order ?? 999;
+                      const sb = b.sort_order ?? 999;
                       return Number(sa) - Number(sb);
                     })
                     .map((item) => (
@@ -328,10 +316,10 @@ const Countries = () => {
                               : item
                           )
                         }
-                        className={`table-row ${
+                        className={`group cursor-pointer transition-colors ${
                           selectedRow?.country_code === item.country_code
-                            ? "table-row-active"
-                            : ""
+                            ? "bg-emerald-500/10"
+                            : "hover:bg-emerald-500/5"
                         }`}
                       >
                         <td className="px-6 py-4">
@@ -339,7 +327,7 @@ const Countries = () => {
                             className={`selection-indicator ${
                               selectedRow?.country_code === item.country_code
                                 ? "selection-indicator-active"
-                                : ""
+                                : "group-hover:border-emerald-500/50"
                             }`}
                           >
                             {selectedRow?.country_code === item.country_code && (
@@ -353,9 +341,7 @@ const Countries = () => {
                         <td className="text-admin-td">
                           <span
                             className={`badge ${
-                              item.status === 1
-                                ? "badge-success"
-                                : "badge-danger"
+                              item.status === 1 ? "badge-success" : "badge-danger"
                             }`}
                           >
                             {item.status === 1 ? "Active" : "Inactive"}
@@ -365,12 +351,12 @@ const Countries = () => {
                     ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-6 py-20 text-center">
+                    <td colSpan="4" className="px-6 py-24 text-center">
                       <FaGlobeAmericas
-                        size={48}
-                        className="mb-4 mx-auto opacity-20"
+                        size={64}
+                        className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse"
                       />
-                      <p className="text-lg font-medium text-muted">
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">
                         No countries found
                       </p>
                     </td>

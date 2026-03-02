@@ -91,7 +91,7 @@ const Sidebar = ({ collapsed, theme, isMobile, toggleSidebar }) => {
 
           {loading ? (
             <div className="sidebar-loader px-3">
-               <div className="skeleton-item mb-2" style={{height: '20px', background: 'rgba(0,0,0,0.05)', borderRadius: '4px'}}></div>
+               <div className="skeleton-item mb-2"></div>
             </div>
           ) : (
             modules.map((mod) => {

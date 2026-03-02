@@ -6,7 +6,6 @@ import Login from './auth/Login';
 import Register from './auth/Register';
 
 import { adminRoutes } from './routes/routeConfig';
-// Import the ThemeProvider you created
 import { ThemeProvider } from './theme/ThemeContext.jsx'; 
 
 function App() {
