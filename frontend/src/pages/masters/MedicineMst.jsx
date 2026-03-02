@@ -296,11 +296,11 @@ const MedicineMst = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase">Status</label>
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Status</label>
               <select
-                className="w-full px-4 py-3 rounded-lg border border-gray-200"
+                className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all appearance-none"
                 value={formData.status}
-                onChange={e => setFormData({ ...formData, status: Number(e.target.value) })}
+                onChange={(e) => setFormData({ ...formData, status: Number(e.target.value) })}
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
@@ -385,9 +385,16 @@ const MedicineMst = () => {
                     </td>
                     <td className="table-td text-gray-500">{m.unit_price}</td>
                     <td className="table-td text-center">
-                      <span className={`badge ${m.status === 1 ? "badge-success" : "badge-danger"}`}>
-                        {m.status === 1 ? "Active" : "Inactive"}
-                      </span>
+                      <span
+                          className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
+                              ${
+                                m.status === 1
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-rose-100 text-rose-700"
+              }`}
+        >
+          {m.status === 1 ? "Active" : "Inactive"}
+        </span>
                     </td>
                   </tr>
                 ))}
