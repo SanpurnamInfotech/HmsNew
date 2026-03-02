@@ -1,171 +1,252 @@
 @reference "tailwindcss";
- 
-@layer components {
-  /* Layout & Cards */
-  .app-container { @apply min-h-screen bg-slate-50 p-4 lg:p-8 font-sans text-gray-900; }
- 
-  .section-header {
-    @apply mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between
-           gap-4 bg-white p-5 rounded-2xl shadow-sm border-l-8 border-emerald-600;
-  }
- 
-  .page-title { @apply text-xl font-black text-gray-800 tracking-tight; }
- 
 
-@layer components {
-  /* Layout & Cards */
-  .app-container { @apply min-h-screen bg-slate-50 p-4 lg:p-8 font-sans text-gray-900; }
-  
-  .section-header { 
-    @apply mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between 
-           gap-4 bg-white p-5 rounded-2xl shadow-sm border-l-8 border-emerald-600; 
-  }
-
-  .page-title { @apply text-xl font-black text-gray-800 tracking-tight; }
-
-  /* Forms */
-  .form-container { @apply bg-white rounded-2xl shadow-xl p-8 mb-8 border border-gray-100; }
-  .form-section-title { @apply text-lg font-bold text-gray-800 mb-6 border-b pb-4; }
-  .form-grid { @apply grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6; }
-  .form-group { @apply space-y-1.5; }
-  .form-label { @apply text-xs font-bold text-gray-400 uppercase tracking-widest ml-1; }
-  .form-input {
-    @apply px-4 py-3 rounded-xl border border-gray-200 outline-none transition-all
-           focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 bg-white text-sm;
-  .form-input { 
-    @apply px-4 py-3 rounded-xl border border-gray-200 outline-none transition-all
-           focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 bg-white text-sm; 
-  }
-  .form-input-disabled { @apply bg-gray-50 text-gray-400 cursor-not-allowed; }
-  .form-actions { @apply md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4; }
-  .full-width-section { @apply md:col-span-2 mt-4; }
- 
-  .permission-title { @apply text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4 mt-2; }
- 
-
-  .permission-title { @apply text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-4 mt-2; }
-
-  /* Custom Dropdowns */
-  .custom-select-trigger { @apply w-full px-4 py-3 rounded-xl border border-gray-200 flex justify-between items-center cursor-pointer bg-white text-sm; }
-  .dropdown-menu { @apply absolute z-20 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-2xl overflow-hidden; }
-  .dropdown-search { @apply p-2 border-b bg-gray-50 flex items-center gap-2; }
-  .search-input { @apply w-full bg-transparent border-none text-sm outline-none; }
-  .dropdown-list { @apply max-h-48 overflow-y-auto; }
-  .dropdown-item { @apply px-4 py-3 text-sm hover:bg-emerald-50 cursor-pointer border-b border-gray-50 last:border-0; }
-  .item-label { @apply font-bold text-gray-700; }
-  .item-subtext { @apply text-[10px] text-gray-400 font-mono italic; }
- 
-
-  /* Tables - Refined for Full Width Pattern */
-  .data-table-container { @apply bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden; }
-  .table-wrapper { @apply overflow-x-auto w-full; }
-  .data-table { @apply w-full border-separate border-spacing-0 table-fixed; }
-  .table-header-row { @apply bg-gray-50/50; }
- 
-  
-  .table-th {
-    @apply px-6 py-5 text-[11px] uppercase font-black text-gray-400 tracking-widest border-b border-gray-100;
-  }
- 
-  .table-td {
-    @apply px-6 py-5 text-sm transition-all text-gray-600 truncate;
-  }
- 
-    @apply px-6 py-5 text-sm transition-all text-gray-600 truncate; 
-  }
-
-  .table-row { @apply cursor-pointer transition-colors border-b border-gray-50 bg-white; }
-  .table-row-active { @apply bg-emerald-50/60; }
-  .table-row-hover:hover { @apply bg-gray-50/80; }
-  .mini-table { @apply rounded-xl border border-gray-100 bg-gray-50/30; }
- 
-  /* Specialized Table Text - Center aligned for specific "Master" columns */
-  .text-admin-th { @apply px-6 py-5 text-[11px] uppercase font-black text-gray-400 tracking-widest border-b border-gray-100 text-left; }
-  .text-admin-td { @apply px-6 py-5 text-sm transition-all text-gray-600 truncate text-left font-medium text-gray-800; }
- 
-
-  /* Specialized Table Text - Center aligned for specific "Master" columns */
-  .text-admin-th { @apply px-6 py-5 text-[11px] uppercase font-black text-gray-400 tracking-widest border-b border-gray-100 text-left; }
-  .text-admin-td { @apply px-6 py-5 text-sm transition-all text-gray-600 truncate text-left font-medium text-gray-800; }
-
-  /* Buttons */
-  .header-actions { @apply flex items-center gap-2; }
-  .selection-actions { @apply flex items-center gap-2; }
-  .btn-primary { @apply flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-emerald-200 transition-all active:scale-95; }
-  .btn-warning { @apply flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-amber-200 transition-all active:scale-95; }
-  .btn-danger { @apply flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-rose-200 transition-all active:scale-95; }
-  .btn-ghost { @apply px-6 py-2.5 rounded-xl text-sm font-bold text-gray-500 hover:bg-gray-100 transition-all; }
- 
-
-  /* Selection UI */
-  .selection-indicator { @apply w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all; }
-  .selection-indicator-active { @apply border-emerald-500 bg-emerald-500; }
-  .selection-indicator-inactive { @apply border-gray-200; }
-  .selection-dot { @apply w-1.5 h-1.5 rounded-full bg-white; }
- 
-
-  /* Badges */
-  .badge { @apply inline-flex items-center justify-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest; }
-  .badge-success { @apply bg-emerald-50 text-emerald-600; }
-  .badge-danger { @apply bg-red-50 text-red-600; }
- 
-
-  /* Modal */
-  .modal-overlay { @apply fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4; }
-  .modal-container { @apply bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden; }
-  .modal-body { @apply p-8 text-center; }
-  .modal-icon-container { @apply mb-4; }
-  .modal-icon-success { @apply text-emerald-500 text-6xl mx-auto; }
-  .modal-icon-error { @apply text-red-500 text-6xl mx-auto; }
-  .modal-title { @apply text-2xl font-black mb-2; }
-  .modal-title-success { @apply text-emerald-800; }
-  .modal-title-error { @apply text-red-800; }
-  .modal-message { @apply text-gray-500 mb-8 leading-relaxed; }
- 
-
-  /* Table Toolbar - Search and Entries selector */
-  .table-toolbar {
-  @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 p-[1.7rem];
+/* --- 1. THEME VARIABLES --- */
+:root {
+  --bg-app: #f8f9fa;
+  --bg-surface: #ffffff;
+  --bg-hover: #f1f5f9;
+  --text-main: #1e293b;
+  --text-title: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --primary-accent: #10b981;
+  --primary-hover: #059669;
+  --input-bg: #ffffff;
+  --header-bg: #ffffff;
+  /* Specific Badge Colors for Light Theme */
+  --badge-active-bg: #065f46; /* Dark Green */
+  --badge-active-text: #ffffff;
+  --badge-inactive-bg: #991b1b; /* Dark Red */
+  --badge-inactive-text: #ffffff;
 }
- 
 
-  /* Pagination Container */
-  .pagination-container {
-    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6 pt-4 border-t border-gray-100;
-  }
- 
-  .pagination-nav {
-    @apply flex items-center justify-end gap-0;
-  }
- 
+[data-bs-theme="dark"] {
+  --bg-app: #0a192f;
+  --bg-surface: #0f1d2d;
+  --bg-hover: #1e293b;
+  --text-main: #cbd5e1;
+  --text-title: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #1e293b;
+  --primary-accent: #10b981;
+  --primary-hover: #34d399;
+  --input-bg: #162231;
+  --header-bg: #0f1d2d;
+  /* Specific Badge Colors for Dark Theme */
+  --badge-active-bg: #10b981; 
+  --badge-active-text: #052c22;
+  --badge-inactive-bg: #f43f5e;
+  --badge-inactive-text: #ffffff;
+}
 
-  .pagination-nav {
-    @apply flex items-center justify-end gap-0;
+@layer components {
+  /* --- LAYOUT STRUCTURE --- */
+  .app-container { 
+    background-color: var(--bg-app);
+    color: var(--text-main);
+    @apply min-h-screen p-4 lg:p-8 font-sans transition-colors duration-300; 
   }
 
-  .pagination-btn {
-    @apply px-3 py-2 text-sm font-medium border border-gray-200 bg-white hover:bg-gray-50 transition-colors;
+  .section-header {
+    background-color: var(--bg-surface);
+    /* border-color: var(--border-color); */
+    @apply mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between 
+           gap-4 p-5 rounded-2xl shadow-sm border-l-8 border-emerald-600  ;
   }
- 
-  .pagination-btn-active {
-    @apply bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700;
-  }
- 
-  /* Animations */
-  .animate-slide-in { animation: slideIn 0.3s ease-out; }
-  .animate-zoom-in { animation: zoomIn 0.2s ease-out; }
- 
 
-  /* Animations */
-  .animate-slide-in { animation: slideIn 0.3s ease-out; }
-  .animate-zoom-in { animation: zoomIn 0.2s ease-out; }
+  .page-title { 
+    color: var(--text-title);
+    @apply text-xl font-black tracking-tight; 
+  }
 
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
+  /* --- FORMS & PERMISSIONS --- */
+  .form-container { 
+    background-color: var(--bg-surface);
+    border-color: var(--border-color);
+    @apply rounded-2xl shadow-xl p-8 mb-8 border transition-all; 
   }
-  @keyframes zoomIn {
-    from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+
+  .form-section-title { 
+    color: var(--text-title);
+    border-color: var(--border-color);
+    @apply text-lg font-bold mb-6 border-b pb-4; 
   }
-}}
+
+  .form-label { 
+    @apply text-xs font-bold text-emerald-500 uppercase tracking-widest ml-1; 
+  }
+
+  .form-input {
+    background-color: var(--input-bg);
+    border-color: var(--border-color);
+    color: var(--text-main);
+    @apply px-4 py-3 rounded-xl border outline-none transition-all
+           focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 text-sm;
+  }
+
+  .form-input:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    background-color: var(--bg-hover);
+  }
+
+  /* --- DATA TABLES --- */
+.data-table-container { 
+    background-color: var(--bg-surface);
+    border-color: var(--border-color);
+    @apply rounded-2xl shadow-sm border overflow-hidden transition-all flex flex-col; 
+  }
+
+  /* Fixed Toolbar: No white background, white text in dark mode */
+  .table-toolbar {
+    background-color: var(--bg-surface) !important;
+    color: var(--text-main) !important;
+    border-bottom: 1px solid var(--border-color);
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-6;
+  }
+
+  /* Targets the "Show entries" and "Search" labels inside the toolbar */
+  .table-toolbar label, 
+  .table-toolbar span, 
+  .table-toolbar div {
+    color: var(--text-main);
+  }
+
+  /* Targets the select box and search input specifically */
+/* --- DARK DROPDOWN FIX --- */
+  
+  /* 1. Force the select box itself to use the dark background */
+  .table-toolbar select {
+    background-color: var(--input-bg) !important;
+    color: var(--text-main) !important;
+    border: 1px solid var(--border-color);
+    /* This forces the browser to use dark-themed system UI for the dropdown list */
+    color-scheme: dark; 
+    @apply cursor-pointer;
+  }
+
+  /* 2. Style the individual options inside the dropdown */
+  .table-toolbar select option {
+    background-color: var(--input-bg);
+    color: var(--text-main);
+  }
+
+  /* 3. Ensure the search input also stays dark and has a dark blinking cursor */
+  .table-toolbar input {
+    color-scheme: dark;
+  }
+
+  .text-admin-th { 
+    background-color: var(--bg-hover);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-color);
+    @apply px-6 py-5 text-[11px] uppercase font-black tracking-widest text-left; 
+  }
+
+  .text-admin-td { 
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border-color);
+    @apply px-6 py-5 text-sm transition-all truncate text-left font-medium; 
+  }
+
+  .table-row { 
+    background-color: var(--bg-surface);
+    @apply cursor-pointer transition-colors border-b;
+    border-color: var(--border-color);
+  }
+
+  /* .table-row:hover { 
+    background-color: var(--bg-hover); 
+  } */
+
+  /* .table-row-active { 
+    background-color: rgba(16, 185, 129, 0.1) !important; 
+  } */
+
+  /* --- BUTTONS --- */
+  .btn-primary { @apply flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg transition-all active:scale-95; }
+  .btn-warning { @apply flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg transition-all active:scale-95; }
+  .btn-danger { @apply flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg transition-all active:scale-95; }
+  
+  .btn-ghost { 
+    color: var(--text-muted);
+    @apply px-6 py-2.5 rounded-xl text-sm font-bold transition-all; 
+  }
+  .btn-ghost:hover { background-color: var(--bg-hover); color: var(--text-main); }
+
+  /* --- PAGINATION (FIXED WIDTH) --- */
+/* --- UPDATED PAGINATION --- */
+.pagination-container {
+  background-color: var(--bg-surface) !important;
+  color: var(--text-main) !important;
+  @apply flex items-center justify-between w-full p-6 mt-auto;
+}
+
+/* Targets the "Showing X to Y" text */
+.pagination-container span, 
+.pagination-container p {
+  color: var(--text-main) !important;
+  @apply text-sm font-medium;
+}
+
+/* Specific styling for the Navigation area (< 1 >) */
+.pagination-container nav, 
+.pagination-container ul {
+  @apply flex items-center gap-1;
+}
+
+/* Style for all pagination buttons/links */
+.pagination-container button,
+.pagination-container a,
+.pagination-container .page-link {
+  background-color: var(--bg-hover) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color);
+  min-width: 32px;
+  height: 32px;
+  @apply flex items-center justify-center rounded-lg text-xs transition-all duration-200;
+}
+
+/* Highlighting the ACTIVE page (the "1") */
+.pagination-container .active button,
+.pagination-container button.active,
+.pagination-container [aria-current="page"],
+.pagination-container .bg-blue-600 { /* Fallback for common library classes */
+  background-color: var(--primary-accent) !important;
+  color: #ffffff !important;
+  border-color: var(--primary-accent) !important;
+  @apply shadow-md font-bold;
+}
+
+/* Style for the arrows (< and >) */
+.pagination-container button:hover:not(:disabled) {
+  background-color: var(--primary-accent) !important;
+  color: white !important;
+  @apply opacity-90;
+}
+
+.pagination-container button:disabled {
+  @apply opacity-30 cursor-not-allowed;
+}
+
+  /* --- BADGES (FIXED COLORS) --- */
+  .badge { 
+    @apply inline-flex items-center justify-center px-4 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm; 
+  }
+  .badge-success { 
+    background-color: var(--badge-active-bg); 
+    color: var(--badge-active-text); 
+  }
+  .badge-danger { 
+    background-color: var(--badge-inactive-bg); 
+    color: var(--badge-inactive-text); 
+  }
+
+  /* --- SELECTION UI --- */
+  .selection-indicator { 
+    border-color: var(--border-color);
+    background-color: var(--input-bg);
+    @apply w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all; 
+  }
+  .selection-indicator-active { @apply border-emerald-500 bg-emerald-500; }
+  .selection-dot { @apply w-1.5 h-1.5 rounded-full bg-white; }
+}
