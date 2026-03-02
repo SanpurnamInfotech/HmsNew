@@ -149,22 +149,22 @@ urlpatterns = [
    
 
     # API-prefixed routes (frontend uses baseURL + endpoint, ensure /api/expenses/ is reachable)
-    path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
-    path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
-    path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),
-    path('api/expenses/delete/<str:expenses_code>/', ExpensesDeleteView.as_view(), name='expenses-delete'),
+    # path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
+    # path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
+    # path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),
+    # path('api/expenses/delete/<str:expenses_code>/', ExpensesDeleteView.as_view(), name='expenses-delete'),
     
-    # Thought Content Master CRUD
-    path('api/thought_content_master/', ThoughtContentListView.as_view(), name='thoughtcontent-list'),
-    path('api/thought_content_master/create/', ThoughtContentListView.as_view(), name='thoughtcontent-create'),
-    path('api/thought_content_master/update/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-update'),
-    path('api/thought_content_master/delete/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-delete'),
+    # # Thought Content Master CRUD
+    # path('api/thought_content_master/', ThoughtContentListView.as_view(), name='thoughtcontent-list'),
+    # path('api/thought_content_master/create/', ThoughtContentListView.as_view(), name='thoughtcontent-create'),
+    # path('api/thought_content_master/update/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-update'),
+    # path('api/thought_content_master/delete/<str:thought_content_code>/', ThoughtContentDetailView.as_view(), name='thoughtcontent-delete'),
     
-    # Noticeboard CRUD
-    path('api/noticeboard/', NoticeboardListView.as_view(), name='noticeboard-list'),
-    path('api/noticeboard/create/', NoticeboardListView.as_view(), name='noticeboard-create'),
-    path('api/noticeboard/update/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-update'),
-    path('api/noticeboard/delete/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-delete'),
+    # # Noticeboard CRUD
+    # path('api/noticeboard/', NoticeboardListView.as_view(), name='noticeboard-list'),
+    # path('api/noticeboard/create/', NoticeboardListView.as_view(), name='noticeboard-create'),
+    # path('api/noticeboard/update/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-update'),
+    # path('api/noticeboard/delete/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-delete'),
 
 
     # Mood History API Routes
@@ -189,8 +189,8 @@ path('api/cities/create/', CitiesCreateView.as_view(), name='cities-create'),
 path('api/cities/update/<str:city_code>/', CitiesUpdateView.as_view(), name='cities-update'),
 path('api/cities/delete/<str:city_code>/', CitiesDeleteView.as_view(), name='cities-delete'),
 
-# path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
-    path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
+    path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
+    # path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
     path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
     path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
 

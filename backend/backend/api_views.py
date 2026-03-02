@@ -4139,3 +4139,19 @@ class AppointmentDeleteView(APIView):
 #                 {"error": str(e)},
 #                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
 #             )            
+
+class DoctorListView(APIView):
+    permission_classes = [AllowAny]
+ 
+    def get(self, request):
+        try:
+            doctors = Doctor.objects.all().order_by('-doctor_code')
+            serializer = DoctorSerializer(doctors, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+ 
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+ 
