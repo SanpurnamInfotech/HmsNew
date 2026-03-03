@@ -148,11 +148,11 @@ path('api/cities/delete/<str:city_code>/', CitiesDeleteView.as_view(), name='cit
     path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
     path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
 
-    path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
-    path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
-    path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
-    path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
-    path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
+    # path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
+    # path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
+    # path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
+    # path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
+    # path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
 
  
 ]
