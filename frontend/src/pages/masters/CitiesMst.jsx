@@ -132,7 +132,7 @@ const CitiesMst = () => {
     <div className="app-container">
       {/* GLOBAL MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
@@ -174,7 +174,7 @@ const CitiesMst = () => {
                 className="form-input w-full"
                 value={formData.city_code} disabled={isEdit} required
                 onChange={e => setFormData({ ...formData, city_code: e.target.value.toUpperCase() })}
-                placeholder="E.G. NDEL"
+                placeholder="E.G. MUMBAI"
               />
             </div>
 
@@ -196,7 +196,7 @@ const CitiesMst = () => {
                 <FaChevronDown size={12} className="opacity-50" />
               </div>
               {openDropdown === 'country' && (
-                <div className="absolute z-[60] w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
+                <div className="absolute z-60 w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
                   <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-hover)" }}>
                     <FaSearch className="opacity-40" size={14} />
                     <input autoFocus className="bg-transparent outline-none text-sm w-full" placeholder="Search country..." value={countrySearch} onChange={(e) => setCountrySearch(e.target.value)} />
@@ -220,7 +220,7 @@ const CitiesMst = () => {
                 <FaChevronDown size={12} className="opacity-50" />
               </div>
               {openDropdown === 'state' && (
-                <div className="absolute z-[60] w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
+                <div className="absolute z-60 w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
                   <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-hover)" }}>
                     <FaSearch className="opacity-40" size={14} />
                     <input autoFocus className="bg-transparent outline-none text-sm w-full" placeholder="Search state..." value={stateSearch} onChange={(e) => setStateSearch(e.target.value)} />
@@ -244,7 +244,7 @@ const CitiesMst = () => {
                 <FaChevronDown size={12} className="opacity-50" />
               </div>
               {openDropdown === 'district' && (
-                <div className="absolute z-[60] w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
+                <div className="absolute z-60 w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
                   <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-hover)" }}>
                     <FaSearch className="opacity-40" size={14} />
                     <input autoFocus className="bg-transparent outline-none text-sm w-full" placeholder="Search district..." value={districtSearch} onChange={(e) => setDistrictSearch(e.target.value)} />

@@ -79,9 +79,11 @@ const RoomTypeMasterMst = () => {
       : `${PATH}/create/`;
 
     const payload = { ...formData };
-    if (payload.sort_order === "" || payload.sort_order === null) {
-      delete payload.sort_order;
-    }
+    if (payload.sort_order === "" || payload.sort_order === null || payload.sort_order === undefined) {
+        payload.sort_order = null; 
+      } else {
+        payload.sort_order = Number(payload.sort_order);
+      }
 
     const result = isEdit
       ? await updateItem(actionPath, payload)
@@ -121,7 +123,7 @@ const RoomTypeMasterMst = () => {
     <div className="app-container">
       {/* GLOBAL MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? (
@@ -264,7 +266,13 @@ const RoomTypeMasterMst = () => {
               <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
                   [...paginatedData]
-                    .sort((a, b) => (Number(a.sort_order || 999) - Number(b.sort_order || 999)))
+                    .sort((a, b) => {
+                      const sa = (a.sort_order === null || a.sort_order === "" || a.sort_order === undefined) 
+                                ? 999 : Number(a.sort_order);
+                      const sb = (b.sort_order === null || b.sort_order === "" || b.sort_order === undefined) 
+                                ? 999 : Number(b.sort_order);
+                      return sa - sb;
+                    })
                     .map((row) => (
                     <tr 
                       key={row.room_type_code} 

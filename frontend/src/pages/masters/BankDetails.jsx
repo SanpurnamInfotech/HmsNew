@@ -113,7 +113,7 @@ const BankDetails = () => {
 
   // Dropdowns
   const { data: employeeData } = useCrud("employee_master/");
-  const { data: financialyearDataRaw } = useCrud("financialyear_master/");
+  const { data: financialyearDataRaw } = useCrud("financialyear-master/");
   const { data: companyData } = useCrud("company_master/");
 
   const [showForm, setShowForm] = useState(false);
@@ -220,7 +220,7 @@ const BankDetails = () => {
     <div className="app-container">
       {/* GLOBAL MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
