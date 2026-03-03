@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa";
 
 /* =========================
-   Reusable Searchable Select
+   Reusable Searchable Select (Updated for Design System)
    ========================= */
 const SearchableSelect = ({
   value,
@@ -23,8 +23,6 @@ const SearchableSelect = ({
   options = [],
   placeholder = "Select",
   disabled = false,
-  className = "form-input",
-  panelWidth = "w-full",
 }) => {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -47,74 +45,52 @@ const SearchableSelect = ({
 
   useEffect(() => {
     const onDoc = (e) => {
-      if (!wrapRef.current) return;
-      if (!wrapRef.current.contains(e.target)) setOpen(false);
+      if (!wrapRef.current?.contains(e.target)) setOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  useEffect(() => {
-    if (!open) setQ("");
-  }, [open]);
-
   return (
     <div className="relative" ref={wrapRef}>
       <button
         type="button"
-        className={`${className} text-left flex items-center justify-between ${
-          disabled ? "opacity-70 cursor-not-allowed" : ""
-        }`}
+        className={`form-input w-full text-left flex items-center justify-between ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         disabled={disabled}
         onClick={() => !disabled && setOpen((s) => !s)}
       >
-        <span className={`${selectedLabel ? "text-gray-900" : "text-gray-400"}`}>
+        <span className={selectedLabel ? "" : "opacity-40"}>
           {selectedLabel || placeholder}
         </span>
-        <span className="ml-3 text-gray-500">▾</span>
+        <span className="text-[10px] opacity-50">▼</span>
       </button>
 
       {open && !disabled && (
-        <div
-          className={`absolute z-50 mt-2 ${panelWidth} rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden`}
-        >
-          <div className="p-3 border-b border-gray-100">
+        <div className="absolute z-[110] mt-2 w-full rounded-xl border border-emerald-500/20 bg-[var(--bg-surface)] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="p-3 border-b border-[var(--border-color)]">
             <input
               autoFocus
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="form-input w-full py-2 text-xs"
               placeholder="Search..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
-
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-60 overflow-y-auto">
             {filtered.length > 0 ? (
               filtered.map((o) => (
                 <button
                   key={String(o.value)}
                   type="button"
-                   className={`group w-full text-left px-4 py-3 flex items-center justify-between
-                    hover:bg-blue-900 hover:text-white
-                    ${String(o.value) === String(value) ? "bg-emerald-50" : ""}
-                  `}
-                  onClick={() => {
-                    onChange(o.value);
-                    setOpen(false);
-                  }}
+                  className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-emerald-500/10 
+                    ${String(o.value) === String(value) ? "bg-emerald-500/20 text-emerald-500 font-bold" : "text-[var(--text-main)]"}`}
+                  onClick={() => { onChange(o.value); setOpen(false); }}
                 >
-                  <span className="text-gray-800 group-hover:text-white">
-                    {o.label}
-                  </span>
-                  {String(o.value) === String(value) && (
-                    <span className="text-emerald-600 font-semibold">✓</span>
-                  )}
+                  {o.label}
                 </button>
               ))
             ) : (
-              <div className="px-4 py-6 text-sm text-gray-500">
-                No results found
-              </div>
+              <div className="px-4 py-4 text-xs text-center opacity-40">No results found</div>
             )}
           </div>
         </div>
@@ -124,22 +100,16 @@ const SearchableSelect = ({
 };
 
 const Departments = () => {
-  const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud("departments/");
+  const PATH = "departments";
+  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${PATH}/`);
 
-  // ✅ Financial Year dropdown (supports array / results / data)
-  const { data: financialYearsDataRaw } = useCrud("financialyear_master/");
-  const financialYearsList = useMemo(() => {
-    if (Array.isArray(financialYearsDataRaw)) return financialYearsDataRaw;
-    return (
-      financialYearsDataRaw?.results ||
-      financialYearsDataRaw?.data ||
-      []
-    );
-  }, [financialYearsDataRaw]);
-
+  // Financial Year & Company Data
+  const { data: fyRaw } = useCrud("financialyear_master/");
   const { data: companiesData } = useCrud("company_master/");
 
+  const financialYearsList = useMemo(() => Array.isArray(fyRaw) ? fyRaw : (fyRaw?.results || fyRaw?.data || []), [fyRaw]);
+
+  /* ================= UI STATE ================= */
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selected, setSelected] = useState(null);
@@ -147,127 +117,58 @@ const Departments = () => {
   const [formData, setFormData] = useState({
     department_code: "",
     department_name: "",
-    financialyear_code: "", // ✅ optional
+    financialyear_code: "",
     company_code: "",
     status: 1,
     sort_order: "",
   });
 
-  const [modal, setModal] = useState({
-    message: "",
-    visible: false,
-    type: "success",
-  });
+  const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
 
-  const showModal = (message, type = "success") =>
-    setModal({ message, visible: true, type });
-
-  /* ============================
-     ✅ Department code generator
-     DEP00001, DEP00002, ...
-     ============================ */
+  /* ================= LOGIC ================= */
   const nextDepartmentCode = useMemo(() => {
     const list = Array.isArray(data) ? data : [];
-    const codes = list
-      .map((x) => (x?.department_code || "").toString())
-      .filter((c) => c.startsWith("DEP"));
-
+    const codes = list.map((x) => (x?.department_code || "").toString()).filter((c) => c.startsWith("DEP"));
     let maxNum = 0;
     for (const code of codes) {
       const num = parseInt(code.replace("DEP", ""), 10);
       if (!isNaN(num) && num > maxNum) maxNum = num;
     }
-
-    const next = maxNum + 1;
-    return `DEP${String(next).padStart(5, "0")}`;
+    return `DEP${String(maxNum + 1).padStart(5, "0")}`;
   }, [data]);
 
-  /* ============================
-     ✅ Sort like EmployeeMaster
-     by sort_order asc, blank last
-     ============================ */
-  const sortedDepartments = useMemo(() => {
+  const sortedData = useMemo(() => {
     const list = Array.isArray(data) ? [...data] : [];
-
-    const getOrder = (row) => {
-      const raw = row?.sort_order;
-      const n = Number(raw);
-      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
-    };
-
-    list.sort((a, b) => {
-      const ao = getOrder(a);
-      const bo = getOrder(b);
-      if (ao !== bo) return ao - bo;
-
-      const ac = (a?.department_code || "").toString();
-      const bc = (b?.department_code || "").toString();
-      return ac.localeCompare(bc);
-    });
-
-    return list;
+    return list.sort((a, b) => (Number(a.sort_order || 99999) - Number(b.sort_order || 99999)));
   }, [data]);
 
   const {
-    search,
-    setSearch,
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    setItemsPerPage,
-    paginatedData,
-    effectiveItemsPerPage,
-    filteredData,
-    totalPages,
-  } = useTable(sortedDepartments);
+    search, setSearch, currentPage, setCurrentPage, itemsPerPage, setItemsPerPage,
+    paginatedData, effectiveItemsPerPage, filteredData, totalPages,
+  } = useTable(sortedData);
 
   const resetForm = () => {
-    setShowForm(false);
-    setIsEdit(false);
-    setSelected(null);
-    setFormData({
-      department_code: "",
-      department_name: "",
-      financialyear_code: "", // ✅ optional
-      company_code: "",
-      status: 1,
-      sort_order: "",
-    });
+    setShowForm(false); setIsEdit(false); setSelected(null);
+    setFormData({ department_code: "", department_name: "", financialyear_code: "", company_code: "", status: 1, sort_order: "" });
   };
+
+  const showModal = (message, type = "success") => setModal({ visible: true, message, type });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const payload = {
-      ...formData,
+    const payload = { 
+      ...formData, 
       status: Number(formData.status),
-      sort_order:
-        formData.sort_order === "" ||
-        formData.sort_order === null ||
-        formData.sort_order === undefined
-          ? null
-          : Number(formData.sort_order),
-
-      // ✅ IMPORTANT: if not selected, send null (not required)
-      financialyear_code:
-        formData.financialyear_code === "" ||
-        formData.financialyear_code === null ||
-        formData.financialyear_code === undefined
-          ? null
-          : formData.financialyear_code,
+      sort_order: formData.sort_order === "" ? null : Number(formData.sort_order),
+      financialyear_code: formData.financialyear_code || null
     };
 
-    const result = isEdit
-      ? await updateItem(
-          `departments/update/${formData.department_code}/`,
-          payload
-        )
-      : await createItem(`departments/create/`, payload);
+    const actionPath = isEdit ? `${PATH}/update/${formData.department_code}/` : `${PATH}/create/`;
+    const result = isEdit ? await updateItem(actionPath, payload) : await createItem(`${PATH}/create/`, payload);
 
     if (result.success) {
       showModal(`Department ${isEdit ? "updated" : "created"} successfully!`);
-      resetForm();
-      refresh();
+      resetForm(); refresh();
     } else {
       showModal(result.error || "Operation failed!", "error");
     }
@@ -275,342 +176,149 @@ const Departments = () => {
 
   const handleDelete = async () => {
     if (!selected) return;
-    const result = await deleteItem(
-      `departments/delete/${selected.department_code}/`
-    );
+    const result = await deleteItem(`${PATH}/delete/${selected.department_code}/`);
     if (result.success) {
       showModal("Department deleted successfully!");
-      setSelected(null);
-      refresh();
+      setSelected(null); refresh();
     } else {
       showModal(result.error || "Delete failed!", "error");
     }
   };
 
-  const statusBadge = (s) => {
-    const isActive = Number(s) === 1;
-    return (
-      <span
-        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-          isActive
-            ? "bg-green-100 text-green-700"
-            : "bg-red-100 text-red-700"
-        }`}
-      >
-        {isActive ? "Active" : "Inactive"}
-      </span>
-    );
-  };
+  const companyOptions = useMemo(() => (companiesData || []).map(c => ({ value: c.company_code, label: c.company_name })), [companiesData]);
+  const fyOptions = useMemo(() => financialYearsList.map(fy => ({ value: fy.financialyear_code, label: fy.financialyear_name || fy.financialyear_code })), [financialYearsList]);
 
-  /* ===== options for searchable dropdowns ===== */
-  const companyOptions = useMemo(
-    () =>
-      (companiesData || []).map((c) => ({
-        value: c.company_code,
-        label: c.company_name,
-      })),
-    [companiesData]
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+    </div>
   );
-
-  const fyOptions = useMemo(() => {
-    const list = Array.isArray(financialYearsList) ? financialYearsList : [];
-    return list.map((fy) => {
-      const code = fy.financialyear_code;
-      const label =
-        fy.financialyear_name ||
-        (fy.start_year && fy.end_year
-          ? `${code} (${fy.start_year}-${fy.end_year})`
-          : code);
-
-      return { value: code, label };
-    });
-  }, [financialYearsList]);
-
-  if (loading)
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Loading Departments Data...</p>
-        </div>
-      </div>
-    );
 
   return (
     <div className="app-container">
+      {/* GLOBAL MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body">
-              <div className="modal-icon-container">
-                {modal.type === "success" ? (
-                  <div className="modal-icon-success">
-                    <FaCheckCircle />
-                  </div>
-                ) : (
-                  <div className="modal-icon-error">
-                    <FaTimesCircle />
-                  </div>
-                )}
-              </div>
-              <h3
-                className={`modal-title ${
-                  modal.type === "success"
-                    ? "modal-title-success"
-                    : "modal-title-error"
-                }`}
-              >
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-              <p className="modal-message mb-6">{modal.message}</p>
-              <button
-                className="btn-primary w-full"
-                onClick={() => setModal({ ...modal, visible: false })}
-              >
-                OK
-              </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
             </div>
+            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            <button className="btn-primary w-full justify-center py-3" onClick={() => setModal({ ...modal, visible: false })}>Continue</button>
           </div>
         </div>
       )}
 
+      {/* HEADER */}
       <div className="section-header">
-        <h4 className="text-xl font-bold text-gray-800">Departments</h4>
-
+        <h4 className="page-title">Department Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
-            <button
-              className="btn-primary"
-              onClick={() => {
-                setIsEdit(false);
-                setSelected(null);
-
-                setFormData({
-                  department_code: nextDepartmentCode,
-                  department_name: "",
-                  financialyear_code: "", // ✅ optional
-                  company_code: "",
-                  status: 1,
-                  sort_order: "",
-                });
-
-                setShowForm(true);
-              }}
-            >
+            <button className="btn-primary" onClick={() => { setFormData({ ...formData, department_code: nextDepartmentCode }); setShowForm(true); }}>
               <FaPlus size={14} /> Add New
             </button>
-
             {selected && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
-                <button
-                  className="btn-warning"
-                  onClick={() => {
-                    setFormData({ ...selected });
-                    setIsEdit(true);
-                    setShowForm(true);
-                  }}
-                >
+                <button className="btn-warning" onClick={() => { setFormData(selected); setIsEdit(true); setShowForm(true); }}>
                   <FaEdit size={14} /> Edit
                 </button>
-                <button className="btn-danger" onClick={handleDelete}>
-                  <FaTrash size={14} /> Delete
-                </button>
+                <button className="btn-danger" onClick={handleDelete}><FaTrash size={14} /> Delete</button>
               </div>
             )}
           </div>
         )}
       </div>
 
+      {/* FORM (2 COLUMNS) */}
       {showForm && (
-        <div className="form-container">
-          <div className="mb-8 border-b border-gray-50 pb-5">
-            <h6 className="text-lg font-bold text-gray-800">
-              {isEdit ? "Update Department" : "Add New Department"}
-            </h6>
-            <div className="border-b border-gray-200 mt-3 mb-6"></div>
-          </div>
-
-          <form className="grid grid-cols-1 gap-y-10" onSubmit={handleSubmit}>
-            <div>
-              
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Department Code</label>
-                  <input
-                    className="form-input form-input-disabled"
-                    value={formData.department_code}
-                    disabled
-                    placeholder="Eg. DEP00001"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Department Name</label>
-                  <input
-                    className="form-input"
-                    value={formData.department_name}
-                    required
-                    maxLength={100}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        department_name: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                {/* ✅ Financial Year (NOT required) */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Financial Year</label>
-                  <SearchableSelect
-                    value={formData.financialyear_code || ""}
-                    disabled={!!formData.financialyear_code}
-                    options={fyOptions}
-                    placeholder="-- Select --"
-                    onChange={(val) =>
-                      setFormData({ ...formData, financialyear_code: val })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Company</label>
-                  <SearchableSelect
-                    value={formData.company_code || ""}
-                    disabled={!!formData.company_code}
-                    options={companyOptions}
-                    placeholder="-- Select --"
-                    onChange={(val) =>
-                      setFormData({ ...formData, company_code: val })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Sort Order</label>
-                  <input
-                    className="form-input"
-                    type="number"
-                    value={formData.sort_order ?? ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sort_order: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Status</label>
-                  <select
-                    className="form-input"
-                    value={Number(formData.status)}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        status: Number(e.target.value),
-                      })
-                    }
-                  >
-                    <option value={1}>Active</option>
-                    <option value={0}>Inactive</option>
-                  </select>
-                </div>
-              </div>
+        <div className="form-container animate-in zoom-in-95 duration-200">
+          <h6 className="form-section-title uppercase tracking-tighter">{isEdit ? "Update Department" : "Add New Department"}</h6>
+          <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-1.5">
+              <label className="form-label">Department Code</label>
+              <input className="form-input w-full opacity-50" value={formData.department_code} disabled />
             </div>
-
-            <div className="flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button className="btn-primary px-10">
-                {isEdit ? "Update" : "Save"}
-              </button>
-              <button type="button" className="btn-ghost" onClick={resetForm}>
-                Cancel
-              </button>
+            <div className="space-y-1.5">
+              <label className="form-label">Department Name</label>
+              <input className="form-input w-full" value={formData.department_name} required onChange={(e) => setFormData({ ...formData, department_name: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Financial Year (Optional)</label>
+              <SearchableSelect value={formData.financialyear_code} options={fyOptions} onChange={(val) => setFormData({ ...formData, financialyear_code: val })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Company</label>
+              <SearchableSelect value={formData.company_code} options={companyOptions} onChange={(val) => setFormData({ ...formData, company_code: val })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Sort Order</label>
+              <input type="number" className="form-input w-full" value={formData.sort_order} onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Status</label>
+              <select className="form-input w-full cursor-pointer appearance-none" style={{ colorScheme: "dark" }} value={formData.status} onChange={(e) => setFormData({ ...formData, status: Number(e.target.value) })}>
+                <option value={1}>Active</option>
+                <option value={0}>Inactive</option>
+              </select>
+            </div>
+            <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update" : "Save"}</button>
+              <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
         </div>
       )}
 
+      {/* TABLE */}
       {!showForm && (
-        <div className="data-table-container">
-          <TableToolbar
-            itemsPerPage={itemsPerPage}
-            setItemsPerPage={setItemsPerPage}
-            search={search}
-            setSearch={setSearch}
-            setCurrentPage={setCurrentPage}
-          />
-
+        <div className="data-table-container animate-in fade-in duration-500">
+          <TableToolbar itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} />
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="table-header-row">
-                  <th className="table-admin-th w-16"></th>
-                  <th className="table-admin-th">Department Code</th>
-                  <th className="table-admin-th">Department Name</th>
-                  <th className="table-admin-th">Status</th>
+                <tr>
+                  <th className="text-admin-th w-16"></th>
+                  <th className="text-admin-th">Code</th>
+                  <th className="text-admin-th">Department Name</th>
+                  <th className="text-admin-th text-center">Status</th>
                 </tr>
               </thead>
-
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
                   paginatedData.map((d) => (
-                    <tr
-                      key={d.department_code}
-                      onClick={() =>
-                        setSelected(
-                          selected?.department_code === d.department_code
-                            ? null
-                            : d
-                        )
-                      }
-                      className={`table-row ${
-                        selected?.department_code === d.department_code
-                          ? "table-row-active"
-                          : "table-row-hover"
-                      }`}
-                    >
-                      <td className="text-admin-td">
-                        <div
-                          className={`selection-indicator rounded-full ${
-                            selected?.department_code === d.department_code
-                              ? "selection-indicator-active"
-                              : "selection-indicator-inactive"
-                          }`}
-                        >
-                          {selected?.department_code === d.department_code && (
-                            <div className="selection-dot rounded-full" />
-                          )}
+                    <tr key={d.department_code} onClick={() => setSelected(selected?.department_code === d.department_code ? null : d)}
+                      className={`group cursor-pointer transition-colors ${selected?.department_code === d.department_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}>
+                      <td className="px-6 py-4">
+                        <div className={`selection-indicator ${selected?.department_code === d.department_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
+                          {selected?.department_code === d.department_code && <div className="selection-dot" />}
                         </div>
                       </td>
                       <td className="text-admin-td">{d.department_code}</td>
-                      <td className="text-admin-td">{d.department_name}</td>
-                      <td className="text-admin-td">{statusBadge(d.status)}</td>
+                      <td className="text-admin-td font-bold">{d.department_name}</td>
+                      <td className="text-admin-td text-center">
+                        <span className={`badge ${Number(d.status) === 1 ? "badge-success" : "badge-danger"}`}>
+                          {Number(d.status) === 1 ? "Active" : "Inactive"}
+                        </span>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="7" className="table-td py-20 text-center">
-                      <div className="empty-state-container">
-                        <FaBuilding size={48} className="mb-4 text-gray-400" />
-                        <p className="text-xl font-bold text-gray-500">
-                          No departments found
-                        </p>
-                      </div>
+                    <td colSpan="4" className="px-6 py-24 text-center">
+                      <FaBuilding size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No departments found</p>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-
-          <Pagination
-            totalEntries={filteredData.length}
-            itemsPerPage={effectiveItemsPerPage}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            totalPages={totalPages}
-          />
+          <div className="pagination-container">
+            <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+          </div>
         </div>
       )}
     </div>

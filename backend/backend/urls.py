@@ -84,11 +84,11 @@ urlpatterns = [
     path('api/relation_master/update/<str:relation_code>/', RelationMasterUpdateView.as_view(), name='relation-update'),
     path('api/relation_master/delete/<str:relation_code>/', RelationMasterDeleteView.as_view(), name='relation-delete'),
 
-    path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
-    path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
-    path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
-    path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
-    path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
+    # path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
+    # path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
+    # path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
+    # path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
+    # path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
 
     path('api/blood_group_master/', BloodGroupMasterListView.as_view(), name='blood-group-master-list'),
     path('api/blood_group_master/detail/<str:blood_group_code>/', BloodGroupMasterDetailView.as_view(), name='blood-group-master-detail'),
@@ -120,6 +120,7 @@ urlpatterns = [
     path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
     path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
     
+<<<<<<< HEAD
 
  
     # path('api/ipd-registration/create/', IpdRegistrationCreateView.as_view()),
@@ -218,6 +219,13 @@ path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='
     # path('api/noticeboard/update/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-update'),
     # path('api/noticeboard/delete/<str:notice_code>/', NoticeboardDetailView.as_view(), name='noticeboard-delete'),
 
+=======
+    path('api/settings/', SettingsListView.as_view(), name='settings-list'),
+    path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
+    path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
+    path('api/settings/delete/<int:setting_id>/', SettingsDeleteView.as_view(), name='settings-delete'),
+    path('api/settings/<int:setting_id>/', SettingsDetailView.as_view(), name='settings-detail'),
+>>>>>>> f5d956bf2e438942ab1353fffa7750e23ae84a50
 
     
     path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
@@ -249,8 +257,6 @@ path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='
 
     path('api/aadhaar-verify-otp/', AadhaarVerifyView.as_view(), name='aadhaar-verify-otp'),
     
-    
-    
     path('api/icd-master/', IcdMasterListView.as_view()),
     path('api/icd-master/create/', IcdMasterCreateView.as_view()),
     path('api/icd-master/update/<str:icd_code>/', IcdMasterUpdateView.as_view()),
@@ -263,9 +269,6 @@ path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='
     path('api/room-type-master/delete/<str:room_type_code>/', RoomTypeMasterDeleteView.as_view()),
     path('api/room-type-master/<str:room_type_code>/', RoomTypeMasterDetailView.as_view()),
 
-
-
-   
     path('api/bed/', BedListView.as_view(), name='bed-list'),
     path('api/bed/create/', BedCreateView.as_view(), name='bed-create'),
     path('api/bed/update/<str:bed_code>/', BedUpdateView.as_view(), name='bed-update'),
@@ -291,9 +294,8 @@ path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='
     path('api/history-master/update/<str:history_code>/', HistoryMasterUpdateView.as_view()),
     path('api/history-master/delete/<str:history_code>/', HistoryMasterDeleteView.as_view()),
     path('api/history-master/<str:history_code>/', HistoryMasterDetailView.as_view()),
-    path('api/mental-illness-master/', MentalIllnessMasterListView.as_view()),
 
-    # fixed routes first
+    path('api/mental-illness-master/', MentalIllnessMasterListView.as_view()),
     path('api/mental-illness-master/create/', MentalIllnessMasterCreateView.as_view()),
     path('api/mental-illness-master/update/<str:mental_illness_code>/', MentalIllnessMasterUpdateView.as_view()),
     path('api/mental-illness-master/delete/<str:mental_illness_code>/', MentalIllnessMasterDeleteView.as_view()),
