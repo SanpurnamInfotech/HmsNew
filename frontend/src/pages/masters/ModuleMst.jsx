@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import api from "../../utils/domain"; 
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
+import { 
+  FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, 
+  FaChevronDown, FaChevronUp, FaSearch, FaLayerGroup 
+} from 'react-icons/fa';
 import { adminRoutes } from "../../routes/routeConfig";  
 
 const ModuleMst = () => {
@@ -31,12 +34,10 @@ const ModuleMst = () => {
   const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
 
   /* ================= SORTING LOGIC ================= */
-  // Senior Dev Tip: We sort the data here before passing it to useTable 
-  // to ensure 'sequence' is respected regardless of backend behavior.
   const sortedData = useMemo(() => {
     if (!data) return [];
     return [...data].sort((a, b) => {
-      const seqA = parseInt(a.sequence) || 999; // Default high number if empty
+      const seqA = parseInt(a.sequence) || 999;
       const seqB = parseInt(b.sequence) || 999;
       return seqA - seqB;
     });
@@ -55,16 +56,16 @@ const ModuleMst = () => {
 
   /* ================= EFFECTS ================= */
   useEffect(() => {
-      fetchUserTypes();
+    fetchUserTypes();
 
-      const formattedRoutes = adminRoutes.map(route => ({
-        label: route.label,
-        value: `/admin/${route.path}` 
-      }))
-      .sort((a, b) => a.label.localeCompare(b.label));
+    const formattedRoutes = adminRoutes.map(route => ({
+      label: route.label,
+      value: `/admin/${route.path}` 
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
-      setUrlOptions(formattedRoutes);
-    }, []);
+    setUrlOptions(formattedRoutes);
+  }, []);
 
   useEffect(() => {
     if (isEdit && formData.module_code) {
@@ -108,8 +109,6 @@ const ModuleMst = () => {
   /* ================= CRUD OPERATIONS ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Removed the "URL is required" check to make it optional as requested
     const finalPayload = { ...formData, ...permissionsData };
     const actionPath = isEdit 
       ? `${MODULE_PATH}/update/${formData.module_code}/` 
@@ -130,8 +129,6 @@ const ModuleMst = () => {
 
   const handleDelete = async () => {
     if (!selectedModule) return;
-    // if (!window.confirm("Are you sure you want to delete this module?")) return;
-    
     const result = await deleteItem(`${MODULE_PATH}/delete/${selectedModule.module_code}/`);
     if (result.success) {
       showModal("Module deleted successfully!");
@@ -143,48 +140,55 @@ const ModuleMst = () => {
   };
 
   if (loading) return (
-    <div className="flex items-center justify-center min-h-100">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
     </div>
   );
 
   return (
     <div className="app-container">
-      {/* MODAL */}
+      {/* SUCCESS/ERROR MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body text-center p-6">
-              <div className="mb-4">
-                {modal.type === "success" 
-                  ? <FaCheckCircle className="text-emerald-500 text-5xl mx-auto" /> 
-                  : <FaTimesCircle className="text-red-500 text-5xl mx-auto" />
-                }
-              </div>
-              <h3 className={`text-xl font-bold mb-2 ${modal.type === "success" ? "text-emerald-700" : "text-red-700"}`}>
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-              <p className="text-gray-600 mb-6">{modal.message}</p>
-              <button className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-2.5 rounded-lg font-semibold" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? (
+                <FaCheckCircle className="text-6xl text-emerald-500" />
+              ) : (
+                <FaTimesCircle className="text-6xl text-rose-500" />
+              )}
             </div>
+            
+            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            
+            <button
+              className="btn-primary w-full justify-center py-3"
+              onClick={() => setModal({ ...modal, visible: false })}
+            >
+              Continue
+            </button>
           </div>
         </div>
       )}
 
       {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
-        <h4 className="text-xl font-bold text-gray-800">Module Master</h4>
+      <div className="section-header">
+        <h4 className="page-title">Module Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md" onClick={() => setShowForm(true)}>
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
               <FaPlus size={14} /> Add New
             </button>
             {selectedModule && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
-                <button className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md" onClick={() => { setFormData({...selectedModule}); setIsEdit(true); setShowForm(true); }}>
+                <button className="btn-warning" onClick={() => { setFormData({...selectedModule}); setIsEdit(true); setShowForm(true); }}>
                   <FaEdit size={14} /> Edit
                 </button>
-                <button className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md" onClick={handleDelete}>
+                <button className="btn-danger" onClick={handleDelete}>
                   <FaTrash size={14} /> Delete
                 </button>
               </div>
@@ -194,13 +198,13 @@ const ModuleMst = () => {
       </div>
 
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100 animate-in zoom-in-95 duration-200">
-          <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">{isEdit ? "Update Module Profile" : "Add New Module"}</h6>
+        <div className="form-container animate-in zoom-in-95 duration-200">
+          <h6 className="form-section-title uppercase tracking-tighter">{isEdit ? "Update Module Profile" : "Add New Module"}</h6>
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Module Code</label>
+              <label className="form-label">Module Code</label>
               <input 
-                className={`w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all ${isEdit ? "bg-gray-50 text-gray-400" : ""}`} 
+                className="form-input w-full" 
                 value={formData.module_code} 
                 disabled={isEdit} 
                 required 
@@ -209,49 +213,71 @@ const ModuleMst = () => {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Module Name</label>
-              <input className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none transition-all" value={formData.module_name} required onChange={e => setFormData({ ...formData, module_name: e.target.value })} placeholder="E.G. Human Resources" />
+              <label className="form-label">Module Name</label>
+              <input className="form-input w-full" value={formData.module_name} required onChange={e => setFormData({ ...formData, module_name: e.target.value })} placeholder="E.G. Human Resources" />
             </div>
 
-            {/* URL SELECTOR - Optional */}
+            {/* URL SELECTOR - Fixed for Dark Mode */}
             <div className="space-y-1.5 relative">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">URL Path (Optional)</label>
-              <div className="w-full px-4 py-3 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer bg-white" onClick={() => setShowUrlDropdown(!showUrlDropdown)}>
-                <span className={formData.url ? "text-gray-800" : "text-gray-400"}>{formData.url || "Select Navigation Path"}</span>
+              <label className="form-label">URL Path (Optional)</label>
+              <div 
+                className="form-input w-full flex justify-between items-center cursor-pointer select-none" 
+                onClick={() => setShowUrlDropdown(!showUrlDropdown)}
+              >
+                <span className={formData.url ? "opacity-100" : "opacity-40"}>{formData.url || "Select Navigation Path"}</span>
                 <div className="flex items-center gap-2">
-                   {formData.url && <FaTimesCircle className="text-gray-300 hover:text-red-400" onClick={(e) => { e.stopPropagation(); setFormData({...formData, url: ""}); }} />}
-                   {showUrlDropdown ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
+                   {formData.url && <FaTimesCircle className="text-rose-400 hover:scale-110 transition-transform" onClick={(e) => { e.stopPropagation(); setFormData({...formData, url: ""}); }} />}
+                   {showUrlDropdown ? <FaChevronUp size={12} className="text-emerald-500" /> : <FaChevronDown size={12} />}
                 </div>
               </div>
+
+              {/* Dropdown Menu - Linked to CSS variables */}
               {showUrlDropdown && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
-                    <div className="p-2 border-b bg-gray-50 flex items-center gap-2">
-                        <FaSearch className="text-gray-400" size={12} />
-                        <input type="text" autoFocus className="w-full bg-transparent border-none text-sm outline-none" placeholder="Search path..." value={urlSearchTerm} onChange={(e) => setUrlSearchTerm(e.target.value)} />
+                <div className="absolute z-50 w-full mt-2 rounded-2xl shadow-2xl border overflow-hidden animate-in fade-in slide-in-from-top-2"
+                     style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-color)" }}>
+                    <div className="p-3 border-b flex items-center gap-3" style={{ backgroundColor: "var(--bg-hover)", borderColor: "var(--border-color)" }}>
+                        <FaSearch className="text-emerald-500" size={14} />
+                        <input 
+                          type="text" 
+                          autoFocus 
+                          className="w-full bg-transparent border-none text-sm outline-none placeholder:opacity-50" 
+                          placeholder="Search routes..." 
+                          value={urlSearchTerm} 
+                          onChange={(e) => setUrlSearchTerm(e.target.value)} 
+                        />
                     </div>
-                    <div className="max-h-48 overflow-y-auto">
-                        {urlOptions.filter(u => u.label.toLowerCase().includes(urlSearchTerm.toLowerCase())).map(u => (
-                            <div key={u.value} className="px-4 py-3 text-sm hover:bg-emerald-50 cursor-pointer border-b border-gray-50 last:border-0" onClick={() => { setFormData({...formData, url: u.value}); setShowUrlDropdown(false); }}>
-                                <div className="font-bold text-gray-700">{u.label}</div>
-                                <div className="text-[10px] text-gray-400 font-mono italic">{u.value}</div>
+                    <div className="max-h-56 overflow-y-auto custom-scrollbar">
+                        {urlOptions.filter(u => u.label.toLowerCase().includes(urlSearchTerm.toLowerCase())).length > 0 ? (
+                          urlOptions.filter(u => u.label.toLowerCase().includes(urlSearchTerm.toLowerCase())).map(u => (
+                            <div 
+                              key={u.value} 
+                              className="px-5 py-3 hover:bg-emerald-500/10 cursor-pointer transition-colors border-b last:border-0"
+                              style={{ borderColor: "var(--border-color)" }}
+                              onClick={() => { setFormData({...formData, url: u.value}); setShowUrlDropdown(false); }}
+                            >
+                                <div className="text-sm font-bold tracking-tight">{u.label}</div>
+                                <div className="text-[10px] opacity-50 font-mono mt-0.5 italic">{u.value}</div>
                             </div>
-                        ))}
+                          ))
+                        ) : (
+                          <div className="p-8 text-center opacity-40 text-xs italic">No matching routes</div>
+                        )}
                     </div>
                 </div>
               )}
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Icon Class</label>
-              <input className="w-full px-4 py-3 rounded-lg border border-gray-200" value={formData.icon} placeholder="bi bi-list" onChange={e => setFormData({ ...formData, icon: e.target.value })} />
+              <label className="form-label">Icon Class</label>
+              <input className="form-input w-full" value={formData.icon} placeholder="bi bi-list" onChange={e => setFormData({ ...formData, icon: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Sequence (Optional)</label>
-              <input className="w-full px-4 py-3 rounded-lg border border-gray-200" type="number" value={formData.sequence} placeholder="E.G. 1" onChange={e => setFormData({ ...formData, sequence: e.target.value })} />
+              <label className="form-label">Sequence (Optional)</label>
+              <input className="form-input w-full" type="number" value={formData.sequence} placeholder="E.G. 1" onChange={e => setFormData({ ...formData, sequence: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">Status</label>
-              <select className="w-full px-4 py-3 rounded-lg border border-gray-200 appearance-none" value={formData.status} onChange={e => setFormData({...formData, status: parseInt(e.target.value)})}>
+              <label className="form-label">Status</label>
+              <select className="form-input w-full cursor-pointer appearance-none" style={{ colorScheme: "dark" }} value={formData.status} onChange={e => setFormData({...formData, status: parseInt(e.target.value)})}>
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
               </select>
@@ -259,10 +285,10 @@ const ModuleMst = () => {
 
             {/* PERMISSIONS SECTION */}
             <div className="md:col-span-2 mt-4">
-              <h6 className="text-sm font-bold text-emerald-700 mb-3 uppercase tracking-wider">Module Permissions</h6>
-              <div className="overflow-x-auto rounded-xl border border-gray-100 bg-gray-50/30">
+              <h6 className="form-label mb-4 block">Module Permissions</h6>
+              <div className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--border-color)" }}>
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-100/50 text-gray-400 text-[10px] uppercase font-black">
+                  <thead className="text-[10px] uppercase font-black" style={{ backgroundColor: "var(--bg-hover)", color: "var(--text-muted)" }}>
                     <tr>
                       <th className="px-6 py-4">User Role</th>
                       <th className="px-4 py-4 text-center">Full Access</th>
@@ -271,7 +297,7 @@ const ModuleMst = () => {
                       <th className="px-4 py-4 text-center">Update</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                     {userTypes.map((utype) => {
                       const uCode = utype.usertype_code; 
                       const isAllChecked = 
@@ -280,12 +306,12 @@ const ModuleMst = () => {
                         permissionsData[`updatePermission${uCode}`] === "Yes";
 
                       return (
-                        <tr key={uCode} className="hover:bg-white transition-colors">
-                          <td className="text-admin-td">{utype.usertype_code}</td>
+                        <tr key={uCode} className="hover:bg-emerald-500/5 transition-colors">
+                          <td className="px-6 py-4 font-bold opacity-90">{uCode}</td>
                           <td className="px-4 py-4 text-center">
                             <input 
                               type="checkbox" 
-                              className="w-4 h-4 rounded text-emerald-600 cursor-pointer" 
+                              className="w-4 h-4 rounded accent-emerald-500 cursor-pointer" 
                               checked={isAllChecked}
                               onChange={(e) => {
                                 const val = e.target.checked ? "Yes" : "No";
@@ -302,7 +328,7 @@ const ModuleMst = () => {
                             <td key={permType} className="px-4 py-4 text-center">
                               <input 
                                 type="checkbox" 
-                                className="w-4 h-4 rounded text-emerald-600 cursor-pointer" 
+                                className="w-4 h-4 rounded accent-emerald-500 cursor-pointer" 
                                 checked={permissionsData[`${permType}Permission${uCode}`] === "Yes"}
                                 onChange={(e) => setPermissionsData(prev => ({
                                   ...prev, 
@@ -319,8 +345,8 @@ const ModuleMst = () => {
               </div>
             </div>
 
-            <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-2.5 rounded-lg text-sm font-bold shadow-lg">{isEdit ? "Update" : "Save"}</button>
+            <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update Module" : "Save Module"}</button>
               <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
@@ -329,44 +355,54 @@ const ModuleMst = () => {
 
       {/* TABLE SECTION */}
       {!showForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in duration-500">
+        <div className="data-table-container animate-in fade-in duration-500">
           <TableToolbar itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} />
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-gray-50/50">
-                  <th className="px-6 py-4 w-16"></th>
+                <tr>
+                  <th className="text-admin-th w-16"></th>
                   <th className="text-admin-th">Code</th>
                   <th className="text-admin-th">Module Name</th>
                   <th className="text-admin-th">Endpoint</th>
-                  {/* <th className="text-admin-th text-center">Sequence</th> */}
                   <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
-                {paginatedData.map((m) => (
-                  <tr key={m.module_code} onClick={() => setSelectedModule(selectedModule?.module_code === m.module_code ? null : m)} 
-                      className={`group cursor-pointer transition-colors ${selectedModule?.module_code === m.module_code ? "bg-emerald-50/40" : "hover:bg-gray-50/50"}`}>
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((m) => (
+                  <tr 
+                    key={m.module_code} 
+                    onClick={() => setSelectedModule(selectedModule?.module_code === m.module_code ? null : m)} 
+                    className={`group cursor-pointer transition-colors ${selectedModule?.module_code === m.module_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}
+                  >
                     <td className="px-6 py-4">
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${selectedModule?.module_code === m.module_code ? "border-emerald-500 bg-emerald-500" : "border-gray-200 group-hover:border-emerald-300"}`}>
-                            {selectedModule?.module_code === m.module_code && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        <div className={`selection-indicator ${selectedModule?.module_code === m.module_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
+                            {selectedModule?.module_code === m.module_code && <div className="selection-dot" />}
                         </div>
                     </td>
                     <td className="text-admin-td">{m.module_code}</td>
                     <td className="text-admin-td">{m.module_name}</td>
                     <td className="text-admin-td">{m.url || 'N/A'}</td>
-                    {/* <td className="text-admin-td ">{m.sequence || '-'}</td> */}
                     <td className="text-admin-td">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${m.status === 1 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                      <span className={`badge ${m.status === 1 ? 'badge-success' : 'badge-danger'}`}>
                         {m.status === 1 ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                   </tr>
-                ))}
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-24 text-center">
+                      <FaLayerGroup size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No modules found</p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
-          <div className="bg-white border-t border-gray-50 p-6">
+          <div className="pagination-container">
             <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
           </div>
         </div>

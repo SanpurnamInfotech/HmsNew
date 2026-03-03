@@ -1,25 +1,11 @@
 import React, { useState } from "react";
-import {
-  useCrud,
-  useTable,
-  Pagination,
-  TableToolbar
-} from "../../components/common/BaseCRUD";
+import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
+import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaLightbulb } from "react-icons/fa";
 
-import {
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaCalendarAlt
-} from "react-icons/fa";
-
-const FinancialYearMst = () => {
-  /* ================= API ================= */
-  const PATH = "financialyear-master";
-  const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud(`${PATH}/`);
+const IcdMasterMst = () => {
+  /* ================= DATA FETCHING ================= */
+  const ICD_PATH = "icd-master";
+  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${ICD_PATH}/`);
 
   /* ================= UI STATES ================= */
   const [showForm, setShowForm] = useState(false);
@@ -27,27 +13,23 @@ const FinancialYearMst = () => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const [formData, setFormData] = useState({
-    financialyear_code: "",
-    start_year: "",
-    end_year: "",
-    status: 1
+    icd_code: "",
+    icd_name: "",
+    status: 1,
+    sort_order: "",
   });
 
-  const [modal, setModal] = useState({
-    message: "",
-    visible: false,
-    type: "success"
-  });
+  const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
 
   /* ================= TABLE LOGIC ================= */
-  const {
-    search, setSearch,
-    currentPage, setCurrentPage,
-    itemsPerPage, setItemsPerPage,
-    paginatedData,
-    effectiveItemsPerPage,
-    filteredData,
-    totalPages
+  const { 
+    search, setSearch, 
+    currentPage, setCurrentPage, 
+    itemsPerPage, setItemsPerPage, 
+    paginatedData, 
+    effectiveItemsPerPage, 
+    filteredData, 
+    totalPages 
   } = useTable(data || []);
 
   /* ================= HELPERS ================= */
@@ -55,31 +37,25 @@ const FinancialYearMst = () => {
     setShowForm(false);
     setIsEdit(false);
     setSelectedRow(null);
-    setFormData({
-      financialyear_code: "",
-      start_year: "",
-      end_year: "",
-      status: 1
-    });
+    setFormData({ icd_code: "", icd_name: "", status: 1, sort_order: "" });
   };
 
-  const showModal = (message, type = "success") =>
-    setModal({ message, visible: true, type });
+  const showModal = (message, type = "success") => setModal({ message, visible: true, type });
 
   /* ================= CRUD ACTIONS ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const actionPath = isEdit ? `${ICD_PATH}/update/${formData.icd_code}/` : `${ICD_PATH}/create/`;
+    
+    const payload = { ...formData };
+    if (payload.sort_order === "" || payload.sort_order === null) {
+      delete payload.sort_order;
+    }
 
-    const actionPath = isEdit
-      ? `${PATH}/update/${formData.financialyear_code}/`
-      : `${PATH}/create/`;
-
-    const result = isEdit
-      ? await updateItem(actionPath, formData)
-      : await createItem(actionPath, formData);
+    const result = isEdit ? await updateItem(actionPath, payload) : await createItem(actionPath, payload);
 
     if (result.success) {
-      showModal(`Financial Year ${isEdit ? "updated" : "created"} successfully!`);
+      showModal(`ICD Record ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
       refresh();
     } else {
@@ -87,16 +63,12 @@ const FinancialYearMst = () => {
     }
   };
 
-  /* ================= DELETE (Confirmation Removed) ================= */
   const handleDelete = async () => {
-    if (!selectedRow) return;
+    if (!selectedRow || !selectedRow.icd_code) return;
 
-    const result = await deleteItem(
-      `${PATH}/delete/${selectedRow.financialyear_code}/`
-    );
-
+    const result = await deleteItem(`${ICD_PATH}/delete/${selectedRow.icd_code}/`);
     if (result.success) {
-      showModal("Financial Year deleted successfully!");
+      showModal("ICD Record deleted successfully!");
       setSelectedRow(null);
       refresh();
     } else {
@@ -117,26 +89,20 @@ const FinancialYearMst = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
-              {modal.type === "success" ? (
-                <FaCheckCircle className="text-6xl text-emerald-500" />
-              ) : (
-                <FaTimesCircle className="text-6xl text-rose-500" />
-              )}
+              {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
             </div>
             <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
               {modal.type === "success" ? "Success" : "Error"}
             </h3>
             <p className="mb-6 font-medium opacity-80">{modal.message}</p>
-            <button className="btn-primary w-full justify-center py-3" onClick={() => setModal({ ...modal, visible: false })}>
-              Continue
-            </button>
+            <button className="btn-primary w-full justify-center py-3" onClick={() => setModal({ ...modal, visible: false })}>Continue</button>
           </div>
         </div>
       )}
 
       {/* HEADER SECTION */}
       <div className="section-header">
-        <h4 className="page-title">Financial Year Master</h4>
+        <h4 className="page-title">ICD Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
             <button className="btn-primary" onClick={() => setShowForm(true)}>
@@ -156,47 +122,42 @@ const FinancialYearMst = () => {
         )}
       </div>
 
-      {/* FORM SECTION (2 COLUMNS) */}
+      {/* FORM SECTION (2 Columns) */}
       {showForm && (
         <div className="form-container animate-in zoom-in-95 duration-200">
           <h6 className="form-section-title uppercase tracking-tighter">
-            {isEdit ? "Update Financial Year" : "Create Financial Year"}
+            {isEdit ? "Update ICD Details" : "Create New ICD"}
           </h6>
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
             
             <div className="space-y-1.5">
-              <label className="form-label">FY Code</label>
+              <label className="form-label">ICD Code</label>
               <input
-                className="form-input w-full"
-                value={formData.financialyear_code}
-                disabled={isEdit}
-                required
-                placeholder="E.G. FY_2024_25"
-                onChange={(e) => setFormData({ ...formData, financialyear_code: e.target.value.toUpperCase().replace(/\s/g, "_") })}
+                className={`form-input w-full ${isEdit ? "opacity-50 cursor-not-allowed" : ""}`}
+                value={formData.icd_code} disabled={isEdit} required
+                placeholder="E.G. A00.0"
+                onChange={e => setFormData({ ...formData, icd_code: e.target.value.toUpperCase() })}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="form-label">Start Year</label>
+              <label className="form-label">ICD Name</label>
               <input
-                type="number"
                 className="form-input w-full"
-                value={formData.start_year}
-                required
-                placeholder="2024"
-                onChange={(e) => setFormData({ ...formData, start_year: e.target.value })}
+                value={formData.icd_name} required
+                placeholder="Enter disease or condition name"
+                onChange={e => setFormData({ ...formData, icd_name: e.target.value })}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="form-label">End Year</label>
-              <input
-                type="number"
+              <label className="form-label">Sort Order</label>
+              <input 
+                type="number" 
                 className="form-input w-full"
-                value={formData.end_year}
-                required
-                placeholder="2025"
-                onChange={(e) => setFormData({ ...formData, end_year: e.target.value })}
+                value={formData.sort_order} 
+                placeholder="0"
+                onChange={e => setFormData({ ...formData, sort_order: e.target.value })} 
               />
             </div>
 
@@ -204,9 +165,8 @@ const FinancialYearMst = () => {
               <label className="form-label">Status</label>
               <select 
                 className="form-input w-full cursor-pointer appearance-none" 
-                style={{ colorScheme: "dark" }}
                 value={formData.status} 
-                onChange={(e) => setFormData({ ...formData, status: parseInt(e.target.value) })}
+                onChange={e => setFormData({ ...formData, status: Number(e.target.value) })}
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
@@ -238,29 +198,31 @@ const FinancialYearMst = () => {
               <thead>
                 <tr>
                   <th className="text-admin-th w-16"></th>
-                  <th className="text-admin-th">FY Code</th>
-                  <th className="text-admin-th">Start</th>
-                  <th className="text-admin-th">End</th>
-                  <th className="text-admin-th">Status</th>
+                  <th className="text-admin-th">ICD Code</th>
+                  <th className="text-admin-th">ICD Name</th>
+                  <th className="text-admin-th text-center">Sort</th>
+                  <th className="text-admin-th text-center">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
-                  paginatedData.map((row) => (
+                  [...(paginatedData || [])]
+                  .sort((a, b) => (Number(a.sort_order ?? 999) - Number(b.sort_order ?? 999)))
+                  .map(row => (
                     <tr 
-                      key={row.financialyear_code} 
-                      onClick={() => setSelectedRow(selectedRow?.financialyear_code === row.financialyear_code ? null : row)}
-                      className={`group cursor-pointer transition-colors ${selectedRow?.financialyear_code === row.financialyear_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}
+                      key={row.icd_code} 
+                      onClick={() => setSelectedRow(selectedRow?.icd_code === row.icd_code ? null : row)}
+                      className={`group cursor-pointer transition-colors ${selectedRow?.icd_code === row.icd_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}
                     >
                       <td className="px-6 py-4">
-                        <div className={`selection-indicator ${selectedRow?.financialyear_code === row.financialyear_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
-                          {selectedRow?.financialyear_code === row.financialyear_code && <div className="selection-dot" />}
+                        <div className={`selection-indicator ${selectedRow?.icd_code === row.icd_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
+                          {selectedRow?.icd_code === row.icd_code && <div className="selection-dot" />}
                         </div>
                       </td>
-                      <td className="text-admin-td">{row.financialyear_code}</td>
-                      <td className="text-admin-td">{row.start_year}</td>
-                      <td className="text-admin-td">{row.end_year}</td>
-                      <td className="text-admin-td">
+                      <td className="text-admin-td font-black">{row.icd_code}</td>
+                      <td className="text-admin-td font-bold">{row.icd_name}</td>
+                      <td className="text-admin-td text-center font-mono text-xs">{row.sort_order}</td>
+                      <td className="text-admin-td text-center">
                         <span className={`badge ${row.status === 1 ? "badge-success" : "badge-danger"}`}>
                           {row.status === 1 ? "Active" : "Inactive"}
                         </span>
@@ -270,8 +232,8 @@ const FinancialYearMst = () => {
                 ) : (
                   <tr>
                     <td colSpan="5" className="px-6 py-24 text-center">
-                      <FaCalendarAlt size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
-                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No Data Found</p>
+                      <FaLightbulb size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No ICD Records Found</p>
                     </td>
                   </tr>
                 )}
@@ -293,4 +255,4 @@ const FinancialYearMst = () => {
   );
 };
 
-export default FinancialYearMst;
+export default IcdMasterMst;

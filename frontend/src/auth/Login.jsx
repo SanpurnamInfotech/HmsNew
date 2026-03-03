@@ -36,65 +36,72 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 px-4 font-sans">
+    <div className="min-h-screen w-full flex items-center justify-center px-4 font-sans transition-colors duration-300" style={{ backgroundColor: "var(--bg-app)" }}>
       {/* Top accent bar */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500" />
+      <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "var(--primary-accent)" }} />
       
-      <div className="max-w-md w-full">
+      <div className="max-w-md w-full animate-in fade-in zoom-in-95 duration-500">
         {/* Compact Header Section */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-600 text-white shadow-lg mb-3">
-            <ShieldCheck className="w-6 h-6" />
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl text-white shadow-lg mb-4 transition-transform hover:rotate-3" style={{ backgroundColor: "var(--primary-accent)" }}>
+            <ShieldCheck className="w-7 h-7" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Admin Portal</h2>
+          <h2 className="text-2xl font-black tracking-tight uppercase" style={{ color: "var(--text-title)" }}>Admin Portal</h2>
+          {/* <p className="text-sm font-medium mt-1 opacity-60" style={{ color: "var(--text-muted)" }}>Secure Management Access</p> */}
         </div>
 
-        {/* Compact Card Container */}
-        <div className="bg-white p-6 rounded-4xl shadow-xl shadow-slate-200/50 border border-slate-100">
+        {/* Card Container using Theme Variables */}
+        <div className="form-container shadow-2xl overflow-hidden relative">
+          {/* Subtle background glow effect for Dark Mode */}
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+          
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs font-bold animate-pulse text-center">
+            <div className="mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold animate-in slide-in-from-top-2 text-center">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username Input */}
-            <div>
-              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1 ml-1">
+            <div className="space-y-1.5">
+              <label className="form-label block ml-1">
                 Username
               </label>
               <div className="relative group">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40 group-focus-within:opacity-100 transition-opacity" style={{ color: "var(--primary-accent)" }} />
                 <input
                   type="text"
                   required
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 placeholder:text-slate-400"
+                  className="form-input w-full pl-12"
                   placeholder="Enter username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  style={{ colorScheme: "dark" }}
                 />
               </div>
             </div>
 
             {/* Password Input */}
-            <div>
-              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1 ml-1">
+            <div className="space-y-1.5">
+              <label className="form-label block ml-1">
                 Password
               </label>
               <div className="relative group">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40 group-focus-within:opacity-100 transition-opacity" style={{ color: "var(--primary-accent)" }} />
                 <input
                   type={showPassword ? "text" : "password"}
                   required
-                  className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500 placeholder:text-slate-400"
+                  className="form-input w-full pl-12 pr-12"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  style={{ colorScheme: "dark" }}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100 transition-opacity"
+                  style={{ color: "var(--text-main)" }}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -105,7 +112,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 flex justify-center items-center py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-md transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="btn-primary w-full justify-center py-3.5 mt-4 text-sm uppercase tracking-widest shadow-emerald-500/20"
             >
               {loading ? (
                 <>
@@ -119,14 +126,15 @@ const Login = () => {
           </form>
 
           {/* Footer Link */}
-          <div className="mt-6 pt-4 border-t border-slate-50 text-center">
-            <p className="text-xs text-slate-500 font-medium">
-              Need access?{" "}
+          <div className="mt-8 pt-6 border-t text-center" style={{ borderColor: "var(--border-color)" }}>
+            <p className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+              Need administrative access?{" "}
               <Link 
                 to="/admin/register" 
-                className="font-bold text-emerald-600 hover:text-emerald-500 transition-colors hover:underline underline-offset-4"
+                className="font-bold transition-colors hover:underline underline-offset-4"
+                style={{ color: "var(--primary-accent)" }}
               >
-                Register as Admin
+                Register Account
               </Link>
             </p>
           </div>

@@ -1,93 +1,78 @@
 import React, { useState } from "react";
+import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
 import {
-  useCrud,
-  useTable,
-  Pagination,
-  TableToolbar,
-} from "../../components/common/BaseCRUD";
-
-import {
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaLightbulb,
+  FaPlus, FaEdit, FaTrash,
+  FaCheckCircle, FaTimesCircle,
+  FaRunning
 } from "react-icons/fa";
 
-const AdviceMaster = () => {
-  /* ================= API ================= */
-  const PATH = "advice_master";
-  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${PATH}/`);
+const HabitMaster = () => {
 
-  /* ================= UI STATE ================= */
+  /* ================= API ================= */
+  const HABIT_PATH = "habit-master";
+  const { data, loading, refresh, createItem, updateItem, deleteItem } =
+    useCrud(`${HABIT_PATH}/`);
+
+  /* ================= STATE ================= */
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null);
+  const [selectedHabit, setSelectedHabit] = useState(null);
 
   const [formData, setFormData] = useState({
-    advice_code: "",
-    advice_name: "",
+    habit_code: "",
+    habit_name: "",
     sort_order: "",
-    status: 1,
+    status: 1
   });
 
-  const [modal, setModal] = useState({
-    visible: false,
-    message: "",
-    type: "success",
-  });
+  const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
 
   /* ================= TABLE ================= */
   const {
-    search,
-    setSearch,
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    setItemsPerPage,
+    search, setSearch,
+    currentPage, setCurrentPage,
+    itemsPerPage, setItemsPerPage,
     paginatedData,
     effectiveItemsPerPage,
     filteredData,
-    totalPages,
-  } = useTable(data);
+    totalPages
+  } = useTable(data || []);
 
   /* ================= HELPERS ================= */
+  const showModal = (message, type = "success") =>
+    setModal({ message, visible: true, type });
+
   const resetForm = () => {
     setShowForm(false);
     setIsEdit(false);
-    setSelectedRow(null);
+    setSelectedHabit(null);
     setFormData({
-      advice_code: "",
-      advice_name: "",
+      habit_code: "",
+      habit_name: "",
       sort_order: "",
-      status: 1,
+      status: 1
     });
   };
 
-  const showModal = (message, type = "success") =>
-    setModal({ visible: true, message, type });
-
-  /* ================= SUBMIT ================= */
+  /* ================= SAVE ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const actionPath = isEdit
-      ? `${PATH}/update/${formData.advice_code}/`
-      : `${PATH}/create/`;
+    const path = isEdit
+      ? `${HABIT_PATH}/update/${formData.habit_code}/`
+      : `${HABIT_PATH}/create/`;
 
     const payload = { ...formData };
-
     if (payload.sort_order === "" || payload.sort_order === null) {
       delete payload.sort_order;
     }
 
     const result = isEdit
-      ? await updateItem(actionPath, payload)
-      : await createItem(actionPath, payload);
+      ? await updateItem(path, payload)
+      : await createItem(path, payload);
 
     if (result.success) {
-      showModal(`Advice ${isEdit ? "updated" : "created"} successfully!`);
+      showModal(`Habit ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
       refresh();
     } else {
@@ -95,23 +80,23 @@ const AdviceMaster = () => {
     }
   };
 
-  /* ================= DELETE ================= */
+  /* ================= DELETE (Confirm Msg Removed) ================= */
   const handleDelete = async () => {
-    if (!selectedRow) return;
+    if (!selectedHabit) return;
+
     const result = await deleteItem(
-      `${PATH}/delete/${selectedRow.advice_code}/`
+      `${HABIT_PATH}/delete/${selectedHabit.habit_code}/`
     );
 
     if (result.success) {
-      showModal("Record deleted successfully!");
-      setSelectedRow(null);
+      showModal("Habit deleted successfully!");
+      setSelectedHabit(null);
       refresh();
     } else {
       showModal(result.error || "Delete failed!", "error");
     }
   };
 
-  /* ================= LOADING ================= */
   if (loading) return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
@@ -120,6 +105,7 @@ const AdviceMaster = () => {
 
   return (
     <div className="app-container">
+
       {/* SUCCESS/ERROR MODAL */}
       {modal.visible && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -148,21 +134,21 @@ const AdviceMaster = () => {
         </div>
       )}
 
-      {/* ================= HEADER ================= */}
+      {/* HEADER SECTION */}
       <div className="section-header">
-        <h4 className="page-title">Advice Master</h4>
+        <h4 className="page-title">Habit Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
             <button className="btn-primary" onClick={() => setShowForm(true)}>
               <FaPlus size={14} /> Add New
             </button>
 
-            {selectedRow && (
+            {selectedHabit && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
                 <button
                   className="btn-warning"
                   onClick={() => {
-                    setFormData(selectedRow);
+                    setFormData(selectedHabit);
                     setIsEdit(true);
                     setShowForm(true);
                   }}
@@ -179,11 +165,11 @@ const AdviceMaster = () => {
         )}
       </div>
 
-      {/* ================= FORM ================= */}
+      {/* FORM SECTION (2 COLUMNS) */}
       {showForm && (
         <div className="form-container animate-in zoom-in-95 duration-200">
           <h6 className="form-section-title uppercase tracking-tighter">
-            {isEdit ? "Update Advice Profile" : "Add New Advice"}
+            {isEdit ? "Update Habit Profile" : "Add New Habit"}
           </h6>
 
           <form
@@ -192,36 +178,36 @@ const AdviceMaster = () => {
           >
             {/* CODE */}
             <div className="space-y-1.5">
-              <label className="form-label">Advice Code</label>
+              <label className="form-label">Habit Code</label>
               <input
                 className="form-input w-full"
-                value={formData.advice_code}
+                value={formData.habit_code}
                 disabled={isEdit}
                 required
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    advice_code: e.target.value.toUpperCase().replace(/\s/g, '_'),
+                    habit_code: e.target.value.toUpperCase().replace(/\s/g, '_'),
                   })
                 }
-                placeholder="E.G. ADV_DAILY_REST"
+                placeholder="E.G. HAB_01"
               />
             </div>
 
             {/* NAME */}
             <div className="space-y-1.5">
-              <label className="form-label">Description</label>
+              <label className="form-label">Habit Name</label>
               <input
                 className="form-input w-full"
-                value={formData.advice_name}
+                value={formData.habit_name}
                 required
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    advice_name: e.target.value,
+                    habit_name: e.target.value,
                   })
                 }
-                placeholder="E.G. Take 8 hours of sleep"
+                placeholder="E.G. Morning Exercise"
               />
             </div>
 
@@ -258,7 +244,7 @@ const AdviceMaster = () => {
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
               <button type="submit" className="btn-primary px-12 py-3">
-                {isEdit ? "Update Advice" : "Save Advice"}
+                {isEdit ? "Update Habit" : "Save Habit"}
               </button>
               <button
                 type="button"
@@ -272,7 +258,7 @@ const AdviceMaster = () => {
         </div>
       )}
 
-      {/* ================= TABLE ================= */}
+      {/* TABLE SECTION */}
       {!showForm && (
         <div className="data-table-container animate-in fade-in duration-500">
           <TableToolbar
@@ -288,8 +274,9 @@ const AdviceMaster = () => {
               <thead>
                 <tr>
                   <th className="text-admin-th w-16"></th>
-                  <th className="text-admin-th">Code</th>
-                  <th className="text-admin-th">Description</th>
+                  <th className="text-admin-th">Habit Code</th>
+                  <th className="text-admin-th">Habit Name</th>
+                  <th className="text-admin-th">Sort</th>
                   <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
@@ -298,22 +285,22 @@ const AdviceMaster = () => {
                 {paginatedData.length > 0 ? (
                   [...paginatedData]
                     .sort((a, b) => {
-                      const sa = a.sort_order ?? 999;
-                      const sb = b.sort_order ?? 999;
-                      return Number(sa) - Number(sb);
+                      const sa = Number(a.sort_order ?? 999);
+                      const sb = Number(b.sort_order ?? 999);
+                      return sa - sb;
                     })
                     .map((item) => (
                       <tr
-                        key={item.advice_code}
+                        key={item.habit_code}
                         onClick={() =>
-                          setSelectedRow(
-                            selectedRow?.advice_code === item.advice_code
+                          setSelectedHabit(
+                            selectedHabit?.habit_code === item.habit_code
                               ? null
                               : item
                           )
                         }
                         className={`group cursor-pointer transition-colors ${
-                          selectedRow?.advice_code === item.advice_code
+                          selectedHabit?.habit_code === item.habit_code
                             ? "bg-emerald-500/10"
                             : "hover:bg-emerald-500/5"
                         }`}
@@ -321,19 +308,20 @@ const AdviceMaster = () => {
                         <td className="px-6 py-4">
                           <div
                             className={`selection-indicator ${
-                              selectedRow?.advice_code === item.advice_code
+                              selectedHabit?.habit_code === item.habit_code
                                 ? "selection-indicator-active"
                                 : "group-hover:border-emerald-500/50"
                             }`}
                           >
-                            {selectedRow?.advice_code === item.advice_code && (
+                            {selectedHabit?.habit_code === item.habit_code && (
                               <div className="selection-dot" />
                             )}
                           </div>
                         </td>
 
-                        <td className="text-admin-td">{item.advice_code}</td>
-                        <td className="text-admin-td">{item.advice_name}</td>
+                        <td className="text-admin-td">{item.habit_code}</td>
+                        <td className="text-admin-td">{item.habit_name}</td>
+                        <td className="text-admin-td">{item.sort_order || "-"}</td>
                         <td className="text-admin-td">
                           <span
                             className={`badge ${
@@ -347,13 +335,13 @@ const AdviceMaster = () => {
                     ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-6 py-24 text-center">
-                      <FaLightbulb
+                    <td colSpan="5" className="px-6 py-24 text-center">
+                      <FaRunning
                         size={64}
                         className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse"
                       />
                       <p className="text-xl font-black opacity-30 uppercase tracking-widest">
-                        No advice records found
+                        No habits found
                       </p>
                     </td>
                   </tr>
@@ -377,4 +365,4 @@ const AdviceMaster = () => {
   );
 };
 
-export default AdviceMaster;
+export default HabitMaster;

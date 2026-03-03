@@ -65,12 +65,6 @@ class CountriesSerializer(serializers.ModelSerializer):
         fields = "__all__"
     
 
-
-class FinancialyearMasterSerializer(serializers.ModelSerializer):  
-    class Meta:
-        model = FinancialyearMaster
-        fields = "__all__"
-
 class MaritalStatusMasterSerializer(serializers.ModelSerializer):  
     class Meta:
         model = MaritalStatusMaster
@@ -123,126 +117,79 @@ class AdvicemasterSerializer(serializers.ModelSerializer):
         model = Advicemaster
         fields = "__all__"
 
-
-class IcdMasterSerializer(serializers.ModelSerializer):
-
+class CompanyMasterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = IcdMaster
+        model = CompanyMaster
+        fields = '__all__'
+
+class EmployeeMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeMaster
+        fields = '__all__'
+
+class MaritalStatusMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaritalStatusMaster
+        fields = '__all__'
+
+class RelationMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RelationMaster
+        fields = '__all__'
+
+class DepartmentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Departments
+        fields = '__all__'
+
+class BloodGroupMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BloodGroupMaster
         fields = "__all__"
-        
+        extra_kwargs = {
+            "createdon": {"required": False},
+            "updatedon": {"required": False},
+            "createdby": {"required": False},
+            "updatedby": {"required": False},
+        }
 
-
-class RoomTypeMasterSerializer(serializers.ModelSerializer):
-
+class BloodDonorSerializer(serializers.ModelSerializer):
     class Meta:
-        model = RoomTypeMaster
-        fields = "__all__"
-    
-
-
-class BedSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Bed
-        fields = "__all__"
-    
-
-
-
-class HabitMasterSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = HabitMaster
-        fields = "__all__"
-
-
-
-
-class HallucinationMasterSerializer(serializers.ModelSerializer):
-    
-      class Meta:
-        model = HallucinationMaster
-        fields = "__all__"
-
-
-
-class HistoryMasterSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = HistoryMaster
-        fields ="__all__"
-        
-
-
-
-class MentalIllnessMasterSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = MentalIllnessMaster
-        fields ="__all__"
-
-
-
-
-
-class DsmMasterSerializer(serializers.ModelSerializer):
-      class Meta:
-        model = DsmMaster
-        fields ="__all__"
-
-
-
-class PremorbidPersonalityMasterSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = PremorbidPersonalityMaster
-        fields = "__all__"
-    
-
-
-
-
-class PossessionMasterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model=PossessionMaster
-        fields ="__all__"
-        
-
-     
-   
-   
-
-
-
-class FinancialyearMasterSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = FinancialyearMaster
-        fields = "__all__"
-   
-
-
-class SettingsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Settings
+        model = BloodDonor
         fields = "__all__"
 
-    
-    
-
-
-class MedicineSerializer(serializers.ModelSerializer):
-
+class BankdetailsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Medicine
+        model = Bankdetails
         fields = "__all__"
-        
+        read_only_fields = ("createdon", "createdby", "updatedon", "updatedby")
 
-class MedicineCategorySerializer(serializers.ModelSerializer):
-
+class BedAllotmentSerializer(serializers.ModelSerializer):
     class Meta:
-        model = MedicineCategory
+        model = BedAllotment
         fields = "__all__"        
+
+class PatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = "__all__"
+        extra_kwargs = {
+    "hospital_code": {"required": False, "allow_null": True},
+}
+
+        
+
+
+
+
+
+# class BedSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = Bed
+#         fields = "__all__"
+    
+
 
 class IpdRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -704,3 +651,164 @@ class DoctorSerializer(serializers.ModelSerializer):
             except Exception:
                 pass
         return super().update(instance, validated_data)
+    
+
+
+class IcdMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = IcdMaster
+        fields = "__all__"
+        
+
+
+class RoomTypeMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RoomTypeMaster
+        fields = "__all__"
+    
+
+class BedSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Bed
+        fields = "__all__"
+        read_only_fields = ["bed_code", "createdon", "createdby", "updatedon", "updatedby"]
+    
+
+class HabitMasterSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = HabitMaster
+        fields = "__all__"
+
+
+class HallucinationMasterSerializer(serializers.ModelSerializer):
+    
+      class Meta:
+        model = HallucinationMaster
+        fields = "__all__"
+
+
+
+
+
+class HistoryMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HistoryMaster
+        fields ="__all__"
+        
+
+
+
+class MentalIllnessMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MentalIllnessMaster
+        fields ="__all__"
+
+
+
+
+
+class DsmMasterSerializer(serializers.ModelSerializer):
+      class Meta:
+        model = DsmMaster
+        fields ="__all__"
+
+
+
+class PremorbidPersonalityMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PremorbidPersonalityMaster
+        fields = "__all__"
+    
+
+
+
+
+class PossessionMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=PossessionMaster
+        fields ="__all__"
+        
+
+     
+   
+class FinancialyearMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FinancialyearMaster
+        fields = "__all__"
+   
+
+
+class SettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Settings
+        fields = "__all__"
+        read_only_fields = ["setting_id"]
+
+    
+    
+class MedicineSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Medicine
+        fields = "__all__"
+        
+
+
+
+class MedicineCategorySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MedicineCategory
+        fields = "__all__"      
+        
+
+class AppointmentTypeMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AppointmentTypeMaster
+        fields = "__all__"   
+        
+        
+from rest_framework import serializers
+from .models import Appointment, Patient, Doctor, AppointmentTypeMaster
+
+
+class AppointmentSerializer(serializers.ModelSerializer):
+
+    patient_code = serializers.SlugRelatedField(
+        queryset=Patient.objects.all(),
+        slug_field="patient_code",
+        allow_null=True,
+        required=False
+    )
+
+    
+    doctor_code = serializers.SlugRelatedField(
+        queryset=Doctor.objects.all(),
+        slug_field="doctor_code"
+    )
+
+    appointment_type_code = serializers.SlugRelatedField(
+        queryset=AppointmentTypeMaster.objects.all(),
+        slug_field="appointment_type_code",
+        allow_null=True,
+        required=False
+    )
+
+    class Meta:
+        model = Appointment
+        fields = "__all__" 
+        
+# class TransactionsSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = Transactions
+#         fields = "__all__"                         

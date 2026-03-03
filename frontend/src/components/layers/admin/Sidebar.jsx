@@ -38,11 +38,7 @@ const Sidebar = ({ collapsed, theme, isMobile, toggleSidebar }) => {
           .map((m) => ({
             ...m,
             children: submoduleArr
-              .filter(
-                (s) =>
-                  String(s.module_code) === String(m.module_code) &&
-                  (s.status === 1 || s.status === "ACTIVE")
-              )
+              .filter((s) => String(s.module_code) === String(m.module_code) && (s.status === 1 || s.status === "ACTIVE"))
               .sort((a, b) => (parseInt(a.sequence) || 999) - (parseInt(b.sequence) || 999))
               .map((s) => ({
                 ...s,
@@ -57,112 +53,91 @@ const Sidebar = ({ collapsed, theme, isMobile, toggleSidebar }) => {
         setLoading(false);
       }
     };
-
     fetchSidebarData();
   }, []);
 
-  const sidebarWidth = collapsed ? 'w-[80px]' : 'w-[260px]';
-  const mobileTranslate = collapsed ? '-translate-x-full' : 'translate-x-0';
-  
-  const sidebarBase = `fixed top-0 bottom-0 left-0 z-50 flex flex-col transition-all duration-300 ease-in-out shadow-2xl border-r
-    ${isMobile ? `${mobileTranslate} w-[260px]` : sidebarWidth}
-    ${isDark ? 'bg-slate-900 border-slate-800 text-slate-300' : 'bg-white border-gray-200 text-slate-600'}`;
-
-  const navLinkStyles = (isActive) => `flex items-center px-4 py-3 my-1 mx-2 rounded-lg transition-all duration-200 cursor-pointer group
-  ${isActive 
-    ? (isDark ? 'bg-emerald-600/20 !text-emerald-400 font-bold' : 'bg-emerald-50 !text-emerald-700 font-bold') 
-    : (isDark ? 'hover:bg-slate-800 hover:text-white' : 'hover:bg-emerald-50/50 hover:!text-emerald-700')}`;
-
-const submenuItemStyles = (isActive) => `block pl-11 pr-4 py-2 text-sm transition-colors duration-200 rounded-md mx-2
-  ${isActive 
-    ? '!text-emerald-600 font-bold bg-emerald-50/50' 
-    : (isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-500 hover:!text-emerald-700 hover:bg-emerald-50/30')}`;
+  const sidebarClasses = `sidebar-container ${collapsed ? 'collapsed' : ''} ${isDark ? 'dark' : 'light'} ${isMobile ? 'mobile' : ''} ${isMobile && !collapsed ? 'show' : ''}`;
 
   return (
     <>
-      {/* Mobile Overlay */}
       {isMobile && !collapsed && (
-        <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity"
-          onClick={toggleSidebar}
-        />
+        <div className="sidebar-backdrop" onClick={toggleSidebar} />
       )}
 
-      <aside className={sidebarBase}>
-        {/* Brand Header */}
-        <div className={`flex items-center h-16 px-6 shrink-0 border-b ${isDark ? 'border-slate-800' : 'border-gray-100'}`}>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-600/20">
-                <span className="text-white font-black text-sm">H</span>
+      <aside className={sidebarClasses}>
+        <div className="sidebar-header">
+          <div className="brand-wrapper">
+            <div className="brand-logo">
+                <span className="logo-letter">H</span>
             </div>
             {!collapsed && (
-              <span className="font-bold text-xl tracking-tight animate-in fade-in duration-500">
-                HMS <span className="text-emerald-600">Admin</span>
+              <span className="brand-name">
+                HMS <span className="text-emerald">Admin</span>
               </span>
             )}
           </div>
         </div>
 
-        {/* Navigation Body */}
-        <nav className="flex-1 overflow-y-auto py-4 scrollbar-thin">
+        <nav className="sidebar-nav scrollbar-thin">
           <Link 
             to="/admin/dashboard" 
-            className={navLinkStyles(location.pathname === '/admin/dashboard')}
+            className={`nav-link-item ${location.pathname === '/admin/dashboard' ? 'active' : ''}`}
           >
-            <FaTachometerAlt className={`text-lg shrink-0 ${location.pathname === '/admin/dashboard' ? 'text-emerald-600' : ''}`} />
-            {!collapsed && <span className="ml-4 truncate">Dashboard</span>}
+            <div className="nav-link-content d-flex align-items-center">
+              <FaTachometerAlt className="nav-icon-main" />
+              {!collapsed && <span className="nav-label">Dashboard</span>}
+            </div>
           </Link>
 
           {loading ? (
-            <div className="px-6 py-4 space-y-4">
-               {[1,2,3,4].map(i => <div key={i} />)}
+            <div className="sidebar-loader px-3">
+               <div className="skeleton-item mb-2"></div>
             </div>
           ) : (
-            modules.map((mod) => (
-              <div key={mod.module_code} className="mb-1">
-                <div 
-                  className={navLinkStyles(expanded === mod.module_code || location.pathname.includes(mod.module_name.toLowerCase()))}
-                  onClick={() => setExpanded(expanded === mod.module_code ? null : mod.module_code)}
-                >
-                  <div className="flex items-center flex-1 min-w-0">
-                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${expanded === mod.module_code ? 'bg-emerald-500 ring-4 ring-emerald-500/20' : 'bg-slate-400 group-hover:bg-emerald-500'}`}></div>
-                    {!collapsed && <span className="ml-4 truncate font-medium">{mod.module_name}</span>}
+            modules.map((mod) => {
+              const isModuleActive = expanded === mod.module_code;
+              const hasActiveChild = mod.children.some(sub => location.pathname.includes(sub.url));
+              
+              return (
+                <div key={mod.module_code} className="menu-group">
+                  <div 
+                    className={`nav-link-item cursor-pointer ${(isModuleActive || hasActiveChild) ? 'expanded' : ''}`}
+                    onClick={() => setExpanded(isModuleActive ? null : mod.module_code)}
+                  >
+                    <div className="nav-link-content d-flex align-items-center">
+                      <div className={`status-dot ${isModuleActive || hasActiveChild ? 'active' : ''}`}></div>
+                      {!collapsed && <span className="nav-label">{mod.module_name}</span>}
+                    </div>
+                    
+                    {!collapsed && mod.children.length > 0 && (
+                      <FaChevronDown size={10} className={`chevron-icon ${isModuleActive ? 'rotate' : ''}`} />
+                    )}
                   </div>
-                  
-                  {!collapsed && mod.children.length > 0 && (
-                    <FaChevronDown size={10} className={`transition-transform duration-300 ${expanded === mod.module_code ? 'rotate-180' : 'rotate-0'}`} />
+
+                  {!collapsed && isModuleActive && (
+                    <div className="submenu-container animate-slide-down">
+                      {mod.children.map((sub) => (
+                        <Link 
+                          key={sub.submodule_code}
+                          to={`/admin/${sub.url}`} 
+                          onClick={isMobile ? toggleSidebar : undefined}
+                          className={`submenu-item ${location.pathname.includes(sub.url) ? 'active' : ''}`}
+                        >
+                          {sub.submodule_name}
+                        </Link>
+                      ))}
+                    </div>
                   )}
                 </div>
-
-                {/* Submodules */}
-                {!collapsed && expanded === mod.module_code && (
-                  <div className="mt-1 space-y-1 animate-in slide-in-from-top-2 duration-200">
-                    {mod.children.map((sub) => (
-                      <Link 
-                        key={sub.submodule_code}
-                        to={`/admin/${sub.url}`} 
-                        onClick={isMobile ? toggleSidebar : undefined}
-                        className={submenuItemStyles(location.pathname.includes(sub.url))}
-                      >
-                        {sub.submodule_name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </nav>
 
-        {/* Footer / Logout */}
-        <div className={`p-4 mt-auto border-t ${isDark ? 'border-slate-800' : 'border-gray-100'}`}>
-          <button 
-            onClick={handleLogout} 
-            className={`w-full flex items-center p-3 rounded-xl transition-all group
-              ${isDark ? 'hover:bg-red-500/10 text-slate-400' : 'hover:bg-red-50 text-slate-600'}`}
-          >
-            <FaSignOutAlt className="text-lg group-hover:text-red-500 transition-colors" />
-            {!collapsed && <span className="ml-4 font-semibold group-hover:text-red-500">Logout</span>}
+        <div className="sidebar-footer">
+          <button onClick={handleLogout} className="logout-button">
+            <FaSignOutAlt className="logout-icon" />
+            {!collapsed && <span className="logout-text">Logout</span>}
           </button>
         </div>
       </aside>

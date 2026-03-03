@@ -1,24 +1,19 @@
 import React, { useState } from "react";
-import {
-  useCrud,
-  useTable,
-  Pagination,
-  TableToolbar,
-} from "../../components/common/BaseCRUD";
-
-import {
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaLightbulb,
+import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
+import { 
+  FaPlus, 
+  FaEdit, 
+  FaTrash, 
+  FaCheckCircle, 
+  FaTimesCircle, 
+  FaBrain 
 } from "react-icons/fa";
 
-const AdviceMaster = () => {
+const HallucinationMaster = () => {
   /* ================= API ================= */
-  const PATH = "advice_master";
-  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${PATH}/`);
+  const BASE_PATH = "hallucination-master";
+  const { data, loading, refresh, createItem, updateItem, deleteItem } =
+    useCrud(`${BASE_PATH}/`);
 
   /* ================= UI STATE ================= */
   const [showForm, setShowForm] = useState(false);
@@ -26,31 +21,28 @@ const AdviceMaster = () => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const [formData, setFormData] = useState({
-    advice_code: "",
-    advice_name: "",
+    hallucination_code: "",
+    hallucination_name: "",
     sort_order: "",
-    status: 1,
+    status: 1
   });
 
   const [modal, setModal] = useState({
-    visible: false,
     message: "",
-    type: "success",
+    visible: false,
+    type: "success"
   });
 
   /* ================= TABLE ================= */
   const {
-    search,
-    setSearch,
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    setItemsPerPage,
+    search, setSearch,
+    currentPage, setCurrentPage,
+    itemsPerPage, setItemsPerPage,
     paginatedData,
     effectiveItemsPerPage,
     filteredData,
-    totalPages,
-  } = useTable(data);
+    totalPages
+  } = useTable(data || []);
 
   /* ================= HELPERS ================= */
   const resetForm = () => {
@@ -58,26 +50,25 @@ const AdviceMaster = () => {
     setIsEdit(false);
     setSelectedRow(null);
     setFormData({
-      advice_code: "",
-      advice_name: "",
+      hallucination_code: "",
+      hallucination_name: "",
       sort_order: "",
-      status: 1,
+      status: 1
     });
   };
 
   const showModal = (message, type = "success") =>
-    setModal({ visible: true, message, type });
+    setModal({ message, visible: true, type });
 
   /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const actionPath = isEdit
-      ? `${PATH}/update/${formData.advice_code}/`
-      : `${PATH}/create/`;
+      ? `${BASE_PATH}/update/${formData.hallucination_code}/`
+      : `${BASE_PATH}/create/`;
 
     const payload = { ...formData };
-
     if (payload.sort_order === "" || payload.sort_order === null) {
       delete payload.sort_order;
     }
@@ -87,7 +78,7 @@ const AdviceMaster = () => {
       : await createItem(actionPath, payload);
 
     if (result.success) {
-      showModal(`Advice ${isEdit ? "updated" : "created"} successfully!`);
+      showModal(`Hallucination ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
       refresh();
     } else {
@@ -95,11 +86,12 @@ const AdviceMaster = () => {
     }
   };
 
-  /* ================= DELETE ================= */
+  /* ================= DELETE (Confirm Removed) ================= */
   const handleDelete = async () => {
     if (!selectedRow) return;
+
     const result = await deleteItem(
-      `${PATH}/delete/${selectedRow.advice_code}/`
+      `${BASE_PATH}/delete/${selectedRow.hallucination_code}/`
     );
 
     if (result.success) {
@@ -148,9 +140,9 @@ const AdviceMaster = () => {
         </div>
       )}
 
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
       <div className="section-header">
-        <h4 className="page-title">Advice Master</h4>
+        <h4 className="page-title">Hallucination Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
             <button className="btn-primary" onClick={() => setShowForm(true)}>
@@ -179,11 +171,11 @@ const AdviceMaster = () => {
         )}
       </div>
 
-      {/* ================= FORM ================= */}
+      {/* FORM (2-COLUMN GRID) */}
       {showForm && (
         <div className="form-container animate-in zoom-in-95 duration-200">
           <h6 className="form-section-title uppercase tracking-tighter">
-            {isEdit ? "Update Advice Profile" : "Add New Advice"}
+            {isEdit ? "Update Hallucination Record" : "Add New Hallucination"}
           </h6>
 
           <form
@@ -192,42 +184,42 @@ const AdviceMaster = () => {
           >
             {/* CODE */}
             <div className="space-y-1.5">
-              <label className="form-label">Advice Code</label>
+              <label className="form-label">Hallucination Code</label>
               <input
                 className="form-input w-full"
-                value={formData.advice_code}
+                value={formData.hallucination_code}
                 disabled={isEdit}
                 required
+                placeholder="E.G. H001"
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    advice_code: e.target.value.toUpperCase().replace(/\s/g, '_'),
+                    hallucination_code: e.target.value.toUpperCase().replace(/\s/g, '_'),
                   })
                 }
-                placeholder="E.G. ADV_DAILY_REST"
               />
             </div>
 
             {/* NAME */}
             <div className="space-y-1.5">
-              <label className="form-label">Description</label>
+              <label className="form-label">Hallucination Name</label>
               <input
                 className="form-input w-full"
-                value={formData.advice_name}
+                value={formData.hallucination_name}
                 required
+                placeholder="Enter Name"
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    advice_name: e.target.value,
+                    hallucination_name: e.target.value,
                   })
                 }
-                placeholder="E.G. Take 8 hours of sleep"
               />
             </div>
 
             {/* SORT */}
             <div className="space-y-1.5">
-              <label className="form-label">Sort Order (Optional)</label>
+              <label className="form-label">Sort Order</label>
               <input
                 type="number"
                 className="form-input w-full"
@@ -258,7 +250,7 @@ const AdviceMaster = () => {
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
               <button type="submit" className="btn-primary px-12 py-3">
-                {isEdit ? "Update Advice" : "Save Advice"}
+                {isEdit ? "Update Record" : "Save Record"}
               </button>
               <button
                 type="button"
@@ -272,7 +264,7 @@ const AdviceMaster = () => {
         </div>
       )}
 
-      {/* ================= TABLE ================= */}
+      {/* TABLE */}
       {!showForm && (
         <div className="data-table-container animate-in fade-in duration-500">
           <TableToolbar
@@ -289,7 +281,8 @@ const AdviceMaster = () => {
                 <tr>
                   <th className="text-admin-th w-16"></th>
                   <th className="text-admin-th">Code</th>
-                  <th className="text-admin-th">Description</th>
+                  <th className="text-admin-th">Name</th>
+                  <th className="text-admin-th">Sort</th>
                   <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
@@ -297,23 +290,19 @@ const AdviceMaster = () => {
               <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
                   [...paginatedData]
-                    .sort((a, b) => {
-                      const sa = a.sort_order ?? 999;
-                      const sb = b.sort_order ?? 999;
-                      return Number(sa) - Number(sb);
-                    })
+                    .sort((a, b) => Number(a.sort_order ?? 999) - Number(b.sort_order ?? 999))
                     .map((item) => (
                       <tr
-                        key={item.advice_code}
+                        key={item.hallucination_code}
                         onClick={() =>
                           setSelectedRow(
-                            selectedRow?.advice_code === item.advice_code
+                            selectedRow?.hallucination_code === item.hallucination_code
                               ? null
                               : item
                           )
                         }
                         className={`group cursor-pointer transition-colors ${
-                          selectedRow?.advice_code === item.advice_code
+                          selectedRow?.hallucination_code === item.hallucination_code
                             ? "bg-emerald-500/10"
                             : "hover:bg-emerald-500/5"
                         }`}
@@ -321,19 +310,20 @@ const AdviceMaster = () => {
                         <td className="px-6 py-4">
                           <div
                             className={`selection-indicator ${
-                              selectedRow?.advice_code === item.advice_code
+                              selectedRow?.hallucination_code === item.hallucination_code
                                 ? "selection-indicator-active"
                                 : "group-hover:border-emerald-500/50"
                             }`}
                           >
-                            {selectedRow?.advice_code === item.advice_code && (
+                            {selectedRow?.hallucination_code === item.hallucination_code && (
                               <div className="selection-dot" />
                             )}
                           </div>
                         </td>
 
-                        <td className="text-admin-td">{item.advice_code}</td>
-                        <td className="text-admin-td">{item.advice_name}</td>
+                        <td className="text-admin-td">{item.hallucination_code}</td>
+                        <td className="text-admin-td">{item.hallucination_name}</td>
+                        <td className="text-admin-td">{item.sort_order || "-"}</td>
                         <td className="text-admin-td">
                           <span
                             className={`badge ${
@@ -347,13 +337,13 @@ const AdviceMaster = () => {
                     ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-6 py-24 text-center">
-                      <FaLightbulb
+                    <td colSpan="5" className="px-6 py-24 text-center">
+                      <FaBrain
                         size={64}
                         className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse"
                       />
                       <p className="text-xl font-black opacity-30 uppercase tracking-widest">
-                        No advice records found
+                        No records found
                       </p>
                     </td>
                   </tr>
@@ -377,4 +367,4 @@ const AdviceMaster = () => {
   );
 };
 
-export default AdviceMaster;
+export default HallucinationMaster;

@@ -1,23 +1,10 @@
-import React, { useState } from "react";
-import {
-  useCrud,
-  useTable,
-  Pagination,
-  TableToolbar,
-} from "../../components/common/BaseCRUD";
+import React, { useMemo, useState } from "react";
+import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
+import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaUsers } from "react-icons/fa";
 
-import {
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaMedkit,
-} from "react-icons/fa";
-
-const MedicineCategory = () => {
+const RelationMaster = () => {
   /* ================= API ================= */
-  const PATH = "medicine-category";
+  const PATH = "relation_master";
   const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${PATH}/`);
 
   /* ================= UI STATE ================= */
@@ -26,32 +13,46 @@ const MedicineCategory = () => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   const [formData, setFormData] = useState({
-    medicine_cat_code: "",
-    medicine_cat_name: "",
-    description: "",
-    sort_order: "",
+    relation_code: "",
+    relation_name: "",
     status: 1,
+    sort_order: "",
   });
 
-  const [modal, setModal] = useState({
-    visible: false,
-    message: "",
-    type: "success",
-  });
+  const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
+
+  /* ================= SORTING LOGIC ================= */
+  const sortedData = useMemo(() => {
+    const list = Array.isArray(data) ? [...data] : [];
+
+    const getOrder = (row) => {
+      const n = Number(row?.sort_order);
+      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
+    };
+
+    list.sort((a, b) => {
+      const ao = getOrder(a);
+      const bo = getOrder(b);
+      if (ao !== bo) return ao - bo;
+
+      const ac = (a?.relation_code || "").toString();
+      const bc = (b?.relation_code || "").toString();
+      return ac.localeCompare(bc);
+    });
+
+    return list;
+  }, [data]);
 
   /* ================= TABLE ================= */
   const {
-    search,
-    setSearch,
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    setItemsPerPage,
+    search, setSearch,
+    currentPage, setCurrentPage,
+    itemsPerPage, setItemsPerPage,
     paginatedData,
     effectiveItemsPerPage,
     filteredData,
-    totalPages,
-  } = useTable(data || []);
+    totalPages
+  } = useTable(sortedData);
 
   /* ================= HELPERS ================= */
   const resetForm = () => {
@@ -59,11 +60,10 @@ const MedicineCategory = () => {
     setIsEdit(false);
     setSelectedRow(null);
     setFormData({
-      medicine_cat_code: "",
-      medicine_cat_name: "",
-      description: "",
-      sort_order: "",
+      relation_code: "",
+      relation_name: "",
       status: 1,
+      sort_order: "",
     });
   };
 
@@ -75,20 +75,21 @@ const MedicineCategory = () => {
     e.preventDefault();
 
     const actionPath = isEdit
-      ? `${PATH}/update/${formData.medicine_cat_code}/`
+      ? `${PATH}/update/${formData.relation_code}/`
       : `${PATH}/create/`;
 
-    const payload = { ...formData };
-    if (payload.sort_order === "" || payload.sort_order === null) {
-      delete payload.sort_order;
-    }
+    const payload = {
+      ...formData,
+      status: Number(formData.status),
+      sort_order: formData.sort_order === "" ? null : Number(formData.sort_order),
+    };
 
     const result = isEdit
       ? await updateItem(actionPath, payload)
-      : await createItem(actionPath, payload);
+      : await createItem(`${PATH}/create/`, payload);
 
     if (result.success) {
-      showModal(`Category ${isEdit ? "updated" : "created"} successfully!`);
+      showModal(`Relation ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
       refresh();
     } else {
@@ -96,14 +97,14 @@ const MedicineCategory = () => {
     }
   };
 
-  /* ================= DELETE (Confirm Removed) ================= */
+  /* ================= DELETE (No Confirm) ================= */
   const handleDelete = async () => {
     if (!selectedRow) return;
 
-    const result = await deleteItem(`${PATH}/delete/${selectedRow.medicine_cat_code}/`);
+    const result = await deleteItem(`${PATH}/delete/${selectedRow.relation_code}/`);
 
     if (result.success) {
-      showModal("Category deleted successfully!");
+      showModal("Record deleted successfully!");
       setSelectedRow(null);
       refresh();
     } else {
@@ -119,7 +120,7 @@ const MedicineCategory = () => {
 
   return (
     <div className="app-container">
-      {/* GLOBAL MODAL */}
+      {/* MODAL */}
       {modal.visible && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
@@ -143,15 +144,23 @@ const MedicineCategory = () => {
 
       {/* HEADER */}
       <div className="section-header">
-        <h4 className="page-title">Medicine Category Master</h4>
+        <h4 className="page-title">Relation Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
             <button className="btn-primary" onClick={() => setShowForm(true)}>
               <FaPlus size={14} /> Add New
             </button>
+
             {selectedRow && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
-                <button className="btn-warning" onClick={() => { setFormData(selectedRow); setIsEdit(true); setShowForm(true); }}>
+                <button
+                  className="btn-warning"
+                  onClick={() => {
+                    setFormData({ ...selectedRow });
+                    setIsEdit(true);
+                    setShowForm(true);
+                  }}
+                >
                   <FaEdit size={14} /> Edit
                 </button>
                 <button className="btn-danger" onClick={handleDelete}>
@@ -163,67 +172,55 @@ const MedicineCategory = () => {
         )}
       </div>
 
-      {/* FORM (2 COLUMNS) */}
+      {/* FORM (2-COLUMN GRID) */}
       {showForm && (
         <div className="form-container animate-in zoom-in-95 duration-200">
           <h6 className="form-section-title uppercase tracking-tighter">
-            {isEdit ? "Update Category Profile" : "Add New Category"}
+            {isEdit ? "Update Relation Profile" : "Add New Relation"}
           </h6>
+
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
-            
             <div className="space-y-1.5">
-              <label className="form-label">Category Code</label>
+              <label className="form-label">Relation Code</label>
               <input
                 className="form-input w-full"
-                value={formData.medicine_cat_code}
+                value={formData.relation_code}
                 disabled={isEdit}
                 required
-                placeholder="E.G. CAT_001"
-                onChange={e => setFormData({ ...formData, medicine_cat_code: e.target.value.toUpperCase().replace(/\s/g, "_") })}
+                onChange={(e) => setFormData({ ...formData, relation_code: e.target.value.toUpperCase().replace(/\s/g, '_') })}
+                placeholder="E.G. MOT"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="form-label">Category Name</label>
+              <label className="form-label">Relation Name</label>
               <input
                 className="form-input w-full"
-                value={formData.medicine_cat_name}
+                value={formData.relation_name}
                 required
-                placeholder="E.G. Antibiotics"
-                onChange={e => setFormData({ ...formData, medicine_cat_name: e.target.value })}
-              />
-            </div>
-
-            {/* Description takes full width in 2-col layout */}
-            <div className="md:col-span-2 space-y-1.5">
-              <label className="form-label">Description (Optional)</label>
-              <textarea
-                className="form-input w-full"
-                rows="2"
-                placeholder="Brief category details..."
-                value={formData.description || ""}
-                onChange={e => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, relation_name: e.target.value })}
+                placeholder="E.G. Mother"
               />
             </div>
 
             <div className="space-y-1.5">
               <label className="form-label">Sort Order</label>
               <input
-                type="number"
                 className="form-input w-full"
-                value={formData.sort_order}
+                type="number"
+                value={formData.sort_order ?? ""}
                 placeholder="E.G. 1"
-                onChange={e => setFormData({ ...formData, sort_order: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
               />
             </div>
 
             <div className="space-y-1.5">
               <label className="form-label">Status</label>
-              <select 
-                className="form-input w-full cursor-pointer appearance-none" 
+              <select
+                className="form-input w-full cursor-pointer appearance-none"
                 style={{ colorScheme: "dark" }}
-                value={formData.status} 
-                onChange={e => setFormData({ ...formData, status: parseInt(e.target.value) })}
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: Number(e.target.value) })}
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
@@ -231,9 +228,7 @@ const MedicineCategory = () => {
             </div>
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
-              <button type="submit" className="btn-primary px-12 py-3">
-                {isEdit ? "Update Category" : "Save Category"}
-              </button>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update " : "Save "}</button>
               <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
@@ -243,65 +238,64 @@ const MedicineCategory = () => {
       {/* TABLE */}
       {!showForm && (
         <div className="data-table-container animate-in fade-in duration-500">
-          <TableToolbar 
-            itemsPerPage={itemsPerPage} 
-            setItemsPerPage={setItemsPerPage} 
-            search={search} 
-            setSearch={setSearch} 
-            setCurrentPage={setCurrentPage} 
+          <TableToolbar
+            itemsPerPage={itemsPerPage}
+            setItemsPerPage={setItemsPerPage}
+            search={search}
+            setSearch={setSearch}
+            setCurrentPage={setCurrentPage}
           />
+
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr>
                   <th className="text-admin-th w-16"></th>
                   <th className="text-admin-th">Code</th>
-                  <th className="text-admin-th">Category Name</th>
+                  <th className="text-admin-th">Relation Name</th>
                   <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
+
               <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
-                {paginatedData.length > 0 ? (
-                  [...paginatedData]
-                    .sort((a, b) => (Number(a.sort_order || 999) - Number(b.sort_order || 999)))
-                    .map((row) => (
-                    <tr 
-                      key={row.medicine_cat_code} 
-                      onClick={() => setSelectedRow(selectedRow?.medicine_cat_code === row.medicine_cat_code ? null : row)}
-                      className={`group cursor-pointer transition-colors ${selectedRow?.medicine_cat_code === row.medicine_cat_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}
-                    >
-                      <td className="px-6 py-4">
-                        <div className={`selection-indicator ${selectedRow?.medicine_cat_code === row.medicine_cat_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
-                          {selectedRow?.medicine_cat_code === row.medicine_cat_code && <div className="selection-dot" />}
-                        </div>
-                      </td>
-                      <td className="text-admin-td">{row.medicine_cat_code}</td>
-                      <td className="text-admin-td">{row.medicine_cat_name}</td>
-                      <td className="text-admin-td">
-                        <span className={`badge ${row.status === 1 ? "badge-success" : "badge-danger"}`}>
-                          {row.status === 1 ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
+                {paginatedData.length > 0 ? paginatedData.map((item) => (
+                  <tr
+                    key={item.relation_code}
+                    onClick={() => setSelectedRow(selectedRow?.relation_code === item.relation_code ? null : item)}
+                    className={`group cursor-pointer transition-colors ${selectedRow?.relation_code === item.relation_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}
+                  >
+                    <td className="px-6 py-4">
+                      <div className={`selection-indicator ${selectedRow?.relation_code === item.relation_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
+                        {selectedRow?.relation_code === item.relation_code && <div className="selection-dot" />}
+                      </div>
+                    </td>
+                    <td className="text-admin-td">{item.relation_code}</td>
+                    <td className="text-admin-td">{item.relation_name}</td>
+                    <td className="text-admin-td">
+                      <span className={`badge ${item.status === 1 ? "badge-success" : "badge-danger"}`}>
+                        {item.status === 1 ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                  </tr>
+                )) : (
                   <tr>
-                    <td colSpan="5" className="px-6 py-24 text-center">
-                      <FaMedkit size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
-                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No Categories Found</p>
+                    <td colSpan="4" className="px-6 py-24 text-center">
+                      <FaUsers size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No relations found</p>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
           <div className="pagination-container">
-            <Pagination 
-              totalEntries={filteredData.length} 
-              itemsPerPage={effectiveItemsPerPage} 
-              currentPage={currentPage} 
-              setCurrentPage={setCurrentPage} 
-              totalPages={totalPages} 
+            <Pagination
+              totalEntries={filteredData.length}
+              itemsPerPage={effectiveItemsPerPage}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
             />
           </div>
         </div>
@@ -310,4 +304,4 @@ const MedicineCategory = () => {
   );
 };
 
-export default MedicineCategory;
+export default RelationMaster;
