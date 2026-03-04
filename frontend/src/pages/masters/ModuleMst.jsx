@@ -149,7 +149,7 @@ const ModuleMst = () => {
     <div className="app-container">
       {/* SUCCESS/ERROR MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? (
@@ -346,7 +346,7 @@ const ModuleMst = () => {
             </div>
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
-              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update Module" : "Save Module"}</button>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update" : "Save"}</button>
               <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>

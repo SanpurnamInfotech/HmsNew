@@ -66,8 +66,8 @@ const SearchableSelect = ({
       </button>
 
       {open && !disabled && (
-        <div className="absolute z-[110] mt-2 w-full rounded-xl border border-emerald-500/20 bg-[var(--bg-surface)] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
-          <div className="p-3 border-b border-[var(--border-color)]">
+        <div className="absolute z-110 mt-2 w-full rounded-xl border border-emerald-500/20 bg-(--bg-surface) shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="p-3 border-b border-(--border-color)">
             <input
               autoFocus
               className="form-input w-full py-2 text-xs"
@@ -83,7 +83,7 @@ const SearchableSelect = ({
                   key={String(o.value)}
                   type="button"
                   className={`w-full text-left px-4 py-3 text-sm transition-colors hover:bg-emerald-500/10 
-                    ${String(o.value) === String(value) ? "bg-emerald-500/20 text-emerald-500 font-bold" : "text-[var(--text-main)]"}`}
+                    ${String(o.value) === String(value) ? "bg-emerald-500/20 text-emerald-500 font-bold" : "text-(--text-main)"}`}
                   onClick={() => { onChange(o.value); setOpen(false); }}
                 >
                   {o.label}
@@ -198,7 +198,7 @@ const Departments = () => {
     <div className="app-container">
       {/* GLOBAL MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}

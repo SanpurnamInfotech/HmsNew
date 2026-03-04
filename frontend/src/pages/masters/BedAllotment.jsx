@@ -70,8 +70,8 @@ const SearchableSelect = ({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border bg-[var(--bg-surface)] border-[var(--border-color)] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
-          <div className="p-3 border-b border-[var(--border-color)]">
+        <div className="absolute z-50 mt-2 w-full rounded-xl border bg-(--bg-surface) border-(--border-color)shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+          <div className="p-3 border-b border-(--border-color)">
             <input
               autoFocus
               className="form-input w-full py-2 text-sm"
@@ -200,7 +200,7 @@ const BedAllotment = () => {
     <div className="app-container">
       {/* MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}

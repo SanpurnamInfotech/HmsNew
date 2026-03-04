@@ -358,7 +358,7 @@ const IpdRegistration = () => {
             <div className="space-y-1.5 md:col-span-4">
               <label className="form-label">Remarks</label>
               <textarea
-                className="form-input min-h-[45px]"
+                className="form-input min-h-11.25"
                 value={formData.remarks}
                 onChange={(e) =>
                   setFormData({ ...formData, remarks: e.target.value })
