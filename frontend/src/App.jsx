@@ -59,6 +59,9 @@ import DistrictsMst from './pages/masters/DistrictsMst.jsx';
 import CitiesMst from './pages/masters/CitiesMst.jsx';
 import DoctorMst from './pages/masters/DoctorMst.jsx';
 import { ThemeProvider } from './theme/ThemeContext.jsx'; 
+import DoctorMst from './pages/masters/DoctorMst.jsx'
+import EctMst from './pages/masters/EctMst.jsx'
+import FollowUpMst from './pages/masters/FollowUpMst.jsx'
 
 
 
@@ -100,61 +103,6 @@ function App() {
           <Route path="opd-bill-master" element={<OpdBillMaster />} />
           <Route path="opd-billing-details" element={<OpdBillingDetails />} />
           <Route path="opd-billing" element={<OpdBilling />} />
-          
-
-
-
-
-
-
-          
-        </Route>
-
-        {/* Redirect root to login or dashboard */}
-        <Route path="/" element={<Navigate to="/admin/login" replace />} />
-      </Routes>
-    </div>
-  )
-    // Wrap the entire application or just the routes in the Provider
-import DoctorMst from './pages/masters/DoctorMst.jsx'
-import EctMst from './pages/masters/EctMst.jsx'
-import FollowUpMst from './pages/masters/FollowUpMst.jsx'
-
-function App() {
-  return (
-    <ThemeProvider>
-      <div className="app-container">
-        <Routes>
-
-          {/* Auth */}
-          <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin/register" element={<Register />} />
-
-          {/* Protected Admin Routes */}
-          {/* Protected Admin Layout */}
-          <Route
-            path="/admin"
-            element={
-              <PrivateRoute>
-                <AdminLayout />
-              </PrivateRoute>
-            }
-          >
-            {/* default */}
-            <Route index element={<Navigate to="dashboard" replace />} />
-
-            {/* dashboard + other dynamic routes */}
-            {adminRoutes.map((route, index) => {
-              const Component = route.component;
-              return (
-                <Route
-                  key={index}
-                  path={route.path}
-                  element={<Component />}
-                />
-              );
-            })}
-
             {/* Masters (all under /admin) */}
             <Route path="icd-master" element={<IcdMasterMst />} />
             <Route path="room-type-master" element={<RoomTypeMasterMst />} />
@@ -197,6 +145,7 @@ function App() {
       </div>
     </ThemeProvider>
   );
+}
 }
 
 export default App;

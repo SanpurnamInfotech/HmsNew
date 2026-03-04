@@ -88,19 +88,16 @@ export const adminRoutes = [
   { path: "medicine", label: "Medicine" , component: MedicineMst },
   { path: "posssation", label: "Possation", component: Possation },
   { path: "financial_year", label: "financial year", component: FinancialYearMst },
-<<<<<<< HEAD
   { path: "settings", label: "Settings", component: SettingsMst },
   { path: "accounts", label: "Accounts Master", component: AccountMst },
   { path: "usertype", label: "Usertype Master", component: UsertypeMst },
   { path: "hospital", label: "Hospital Master", component: Hospital_detailsMst },
   { path: "doctor", label: "Doctor", component: DoctorMst },
-=======
   { path: "appointment", label: "Appointment", component: AppointmentMst},
   { path: "appointment-type-master", label: "Appointment Type Master", component: AppointmentTypeMasterMst },
   { path: "ect", label: "ECT", component: EctMst },
   { path: "follow-up", label: "Follow Up", component: FollowUpMst },
 
->>>>>>> ganesh-1
 
 
   { path: "complaints", label: "Complaint Master", component: ComplaintMaster },
