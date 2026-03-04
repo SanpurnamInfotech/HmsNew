@@ -1649,8 +1649,7 @@ class OpdBillMasterDeleteView(APIView):
 # Opd Billing Details
 
 class OpdBillingDetailsListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1663,8 +1662,7 @@ class OpdBillingDetailsListView(APIView):
 
 
 class OpdBillingDetailsDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, opd_billing_code):
         try:
@@ -1676,8 +1674,7 @@ class OpdBillingDetailsDetailView(APIView):
 
 
 class OpdBillingDetailsCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1698,8 +1695,7 @@ class OpdBillingDetailsCreateView(APIView):
 
 
 class OpdBillingDetailsUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, opd_billing_code):
         try:
@@ -1721,8 +1717,7 @@ class OpdBillingDetailsUpdateView(APIView):
 
 
 class OpdBillingDetailsDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, opd_billing_code):
         try:
@@ -1735,18 +1730,114 @@ class OpdBillingDetailsDeleteView(APIView):
 
 # Opd Billing
 class OpdBillingListView(APIView):
+
+ 
+    def get(self, request):
+        try:
+            data = OpdBilling.objects.all().order_by("sort_order", "opd_billing_code")
+            serializer = OpdBillingSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
+
+
+class OpdBillingDetailView(APIView):
+
+
+    def get(self, request, opd_billing_code):
+        try:
+            obj = get_object_or_404(OpdBilling, opd_billing_code=opd_billing_code)
+            serializer = OpdBillingSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
-from .models import MoodHistoryMaster
-from .serializers import MoodHistoryMasterSerializer
-import traceback
 
+class OpdBillingCreateView(APIView):
+
+ 
+    def post(self, request):
+        try:
+            serializer = OpdBillingSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+        except IntegrityError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+ 
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
+
+class OpdBillingUpdateView(APIView):
+
+
+    def put(self, request, opd_billing_code):
+        try:
+            obj = get_object_or_404(OpdBilling, opd_billing_code=opd_billing_code)
+            serializer = OpdBillingSerializer(obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillingDeleteView(APIView):
+
+
+    def delete(self, request, opd_billing_code):
+        try:
+            obj = get_object_or_404(OpdBilling, opd_billing_code=opd_billing_code)
+            obj.delete()
+            return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)        
+        serializer = SettingsSerializer(data=request.data)
+
+        if serializer.is_valid():
+
+            with transaction.atomic():
+
+                last_setting = (
+                    Settings.objects
+                    .select_for_update()
+                    .order_by("setting_id")
+                    .last()
+                )
+
+                if not last_setting:
+                    next_id = 1
+                else:
+                    next_id = last_setting.setting_id + 1
+
+                obj = serializer.save(
+                    setting_id=next_id,
+                    createdby=request.user.id,
+                    createdon=timezone.now()
+                )
+
+            return Response(
+                SettingsSerializer(obj).data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 class MoodHistoryListView(APIView):
 
 
@@ -4153,29 +4244,6 @@ class SettingsListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class OpdBillingDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, opd_billing_code):
-        try:
-            obj = get_object_or_404(OpdBilling, opd_billing_code=opd_billing_code)
-            serializer = OpdBillingSerializer(obj)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class OpdBillingCreateView(APIView):
-            data = Settings.objects.all().order_by('setting_name')
-            serializer = SettingsSerializer(data, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
 
 # -------------------- DETAIL --------------------
 class SettingsDetailView(APIView):
@@ -4216,70 +4284,7 @@ class SettingsCreateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class OpdBillingUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
-    def put(self, request, opd_billing_code):
-        try:
-            obj = get_object_or_404(OpdBilling, opd_billing_code=opd_billing_code)
-            serializer = OpdBillingSerializer(obj, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save(
-                    updatedby=request.user.id,
-                    updatedon=timezone.now(),
-                )
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except IntegrityError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class OpdBillingDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def delete(self, request, opd_billing_code):
-        try:
-            obj = get_object_or_404(OpdBilling, opd_billing_code=opd_billing_code)
-            obj.delete()
-            return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)        
-        serializer = SettingsSerializer(data=request.data)
-
-        if serializer.is_valid():
-
-            with transaction.atomic():
-
-                last_setting = (
-                    Settings.objects
-                    .select_for_update()
-                    .order_by("setting_id")
-                    .last()
-                )
-
-                if not last_setting:
-                    next_id = 1
-                else:
-                    next_id = last_setting.setting_id + 1
-
-                obj = serializer.save(
-                    setting_id=next_id,
-                    createdby=request.user.id,
-                    createdon=timezone.now()
-                )
-
-            return Response(
-                SettingsSerializer(obj).data,
-                status=status.HTTP_201_CREATED
-            )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # -------------------- UPDATE --------------------
