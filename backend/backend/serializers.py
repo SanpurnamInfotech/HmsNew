@@ -176,6 +176,21 @@ class PatientSerializer(serializers.ModelSerializer):
         extra_kwargs = {
     "hospital_code": {"required": False, "allow_null": True},
 }
+        
+class OpdBillMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpdBillMaster
+        fields = '__all__'
+        
+class OpdBillingDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpdBillingDetails
+        fields = "__all__"
+
+class OpdBillingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpdBilling
+        fields = "__all__"                        
 
         
 
