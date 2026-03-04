@@ -108,7 +108,7 @@ const HabitMaster = () => {
 
       {/* SUCCESS/ERROR MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? (

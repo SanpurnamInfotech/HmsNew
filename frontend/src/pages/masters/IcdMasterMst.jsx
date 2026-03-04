@@ -48,9 +48,12 @@ const IcdMasterMst = () => {
     const actionPath = isEdit ? `${ICD_PATH}/update/${formData.icd_code}/` : `${ICD_PATH}/create/`;
     
     const payload = { ...formData };
-    if (payload.sort_order === "" || payload.sort_order === null) {
-      delete payload.sort_order;
-    }
+    if (payload.sort_order === "" || payload.sort_order === null || payload.sort_order === undefined) {
+        payload.sort_order = null; 
+      } else {
+        payload.sort_order = Number(payload.sort_order);
+      }
+
 
     const result = isEdit ? await updateItem(actionPath, payload) : await createItem(actionPath, payload);
 
@@ -86,7 +89,7 @@ const IcdMasterMst = () => {
     <div className="app-container">
       {/* GLOBAL MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
@@ -200,14 +203,19 @@ const IcdMasterMst = () => {
                   <th className="text-admin-th w-16"></th>
                   <th className="text-admin-th">ICD Code</th>
                   <th className="text-admin-th">ICD Name</th>
-                  <th className="text-admin-th text-center">Sort</th>
-                  <th className="text-admin-th text-center">Status</th>
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
                   [...(paginatedData || [])]
-                  .sort((a, b) => (Number(a.sort_order ?? 999) - Number(b.sort_order ?? 999)))
+                  .sort((a, b) => {
+                    const sa = (a.sort_order === null || a.sort_order === "" || a.sort_order === undefined) 
+                              ? 999 : Number(a.sort_order);
+                    const sb = (b.sort_order === null || b.sort_order === "" || b.sort_order === undefined) 
+                              ? 999 : Number(b.sort_order);
+                    return sa - sb;
+                  })
                   .map(row => (
                     <tr 
                       key={row.icd_code} 
@@ -219,10 +227,9 @@ const IcdMasterMst = () => {
                           {selectedRow?.icd_code === row.icd_code && <div className="selection-dot" />}
                         </div>
                       </td>
-                      <td className="text-admin-td font-black">{row.icd_code}</td>
-                      <td className="text-admin-td font-bold">{row.icd_name}</td>
-                      <td className="text-admin-td text-center font-mono text-xs">{row.sort_order}</td>
-                      <td className="text-admin-td text-center">
+                      <td className="text-admin-td">{row.icd_code}</td>
+                      <td className="text-admin-td">{row.icd_name}</td>
+                      <td className="text-admin-td">
                         <span className={`badge ${row.status === 1 ? "badge-success" : "badge-danger"}`}>
                           {row.status === 1 ? "Active" : "Inactive"}
                         </span>

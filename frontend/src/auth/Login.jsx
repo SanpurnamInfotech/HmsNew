@@ -21,10 +21,11 @@ const Login = () => {
 
     try {
       const res = await api.post("admin-login/", { username, password });
-      const { access, refresh, username: resUser } = res.data;
+      
+      const { access, refresh, ...userData } = res.data;
 
       if (login) {
-        login(access, refresh, resUser); 
+        login(access, refresh, userData); 
       }
 
       navigate("/admin/dashboard");
@@ -47,12 +48,10 @@ const Login = () => {
             <ShieldCheck className="w-7 h-7" />
           </div>
           <h2 className="text-2xl font-black tracking-tight uppercase" style={{ color: "var(--text-title)" }}>Admin Portal</h2>
-          {/* <p className="text-sm font-medium mt-1 opacity-60" style={{ color: "var(--text-muted)" }}>Secure Management Access</p> */}
         </div>
 
-        {/* Card Container using Theme Variables */}
+      
         <div className="form-container shadow-2xl overflow-hidden relative">
-          {/* Subtle background glow effect for Dark Mode */}
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
           
           {error && (
@@ -64,7 +63,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Username Input */}
             <div className="space-y-1.5">
-              <label className="form-label block ml-1">
+              <label className="form-label block ml-1 text-sm font-semibold">
                 Username
               </label>
               <div className="relative group">
@@ -72,7 +71,7 @@ const Login = () => {
                 <input
                   type="text"
                   required
-                  className="form-input w-full pl-12"
+                  className="form-input w-full pl-12 py-3 rounded-xl border transition-all outline-none"
                   placeholder="Enter username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -83,7 +82,7 @@ const Login = () => {
 
             {/* Password Input */}
             <div className="space-y-1.5">
-              <label className="form-label block ml-1">
+              <label className="form-label block ml-1 text-sm font-semibold">
                 Password
               </label>
               <div className="relative group">
@@ -91,7 +90,7 @@ const Login = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   required
-                  className="form-input w-full pl-12 pr-12"
+                  className="form-input w-full pl-12 pr-12 py-3 rounded-xl border transition-all outline-none"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -112,7 +111,8 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary w-full justify-center py-3.5 mt-4 text-sm uppercase tracking-widest shadow-emerald-500/20"
+              className="btn-primary w-full flex items-center justify-center py-3.5 mt-4 text-sm font-bold uppercase tracking-widest rounded-xl transition-all shadow-lg active:scale-[0.98]"
+              style={{ backgroundColor: "var(--primary-accent)" }}
             >
               {loading ? (
                 <>

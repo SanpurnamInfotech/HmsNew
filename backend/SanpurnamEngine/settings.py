@@ -89,7 +89,7 @@ DATABASES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'backend.authentication.CustomJWTAuthentication',    
+        'backend.authentication.CustomJWTAuthentication', 
         'rest_framework.authentication.SessionAuthentication', 
     ),
     'DEFAULT_PERMISSION_CLASSES': (
