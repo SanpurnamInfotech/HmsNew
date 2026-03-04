@@ -416,5 +416,67 @@ class Patient(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'patient'        
+        db_table = 'patient'    
+
+class OpdBillMaster(models.Model):
+    opd_bill_code = models.CharField(max_length=45, unique=True)
+    opd_bill_name = models.TextField()
+    opd_bill_charge = models.IntegerField()
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'opd_bill_master'     
+
+class OpdBillingDetails(models.Model):
+    opd_billing_code = models.CharField(max_length=45, primary_key=True)
+    opd_bill_code = models.CharField(max_length=45)
+    opd_bill_name = models.CharField(max_length=5000, blank=True, null=True)
+    quantity = models.IntegerField(blank=True, null=True, default=1)
+    rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    sort_order = models.IntegerField(blank=True, null=True, default=1000)
+    status = models.IntegerField(blank=True, null=True, default=1)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'opd_billing_details'  
+
+class OpdBilling(models.Model):
+    opd_billing_code = models.CharField(max_length=45, primary_key=True)
+    patient_code = models.CharField(max_length=45)
+    bill_no = models.CharField(max_length=45, blank=True, null=True)
+    appointment_code = models.CharField(max_length=45, blank=True, null=True)
+    appointment_type_code = models.CharField(max_length=45, blank=True, null=True)
+    hospital_name = models.CharField(max_length=100, blank=True, null=True)
+
+    billing_date = models.DateField(blank=True, null=True)
+
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, default=0.00)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, default=0.00)
+    bill_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, default=0.00)
+    amt_received = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, default=0.00)
+    dues_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, default=0.00)
+
+    types_of_items = models.CharField(max_length=100, blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True, default=1000)
+    status = models.IntegerField(blank=True, null=True, default=1)
+
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "opd_billing"                     
 

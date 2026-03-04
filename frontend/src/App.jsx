@@ -21,6 +21,9 @@ import BloodDonor from './pages/masters/BloodDonor';
 import BankDetails from "./pages/masters/BankDetails";
 import BedAllotment from "./pages/masters/BedAllotment";
 import Patient from "./pages/masters/Patient";
+import OpdBillMaster from "./pages/masters/OpdBillMaster";
+import OpdBillingDetails from "./pages/masters/OpdBillingDetails";
+import OpdBilling from "./pages/masters/OpdBilling";
 
 
 
@@ -60,6 +63,10 @@ function App() {
           <Route path="bankdetails" element={<BankDetails />} />
           <Route path="bed_allotment" element={<BedAllotment />} />
           <Route path="patient" element={<Patient />} />
+          <Route path="opd-bill-master" element={<OpdBillMaster />} />
+          <Route path="opd-billing-details" element={<OpdBillingDetails />} />
+          <Route path="opd-billing" element={<OpdBilling />} />
+          
 
 
 
