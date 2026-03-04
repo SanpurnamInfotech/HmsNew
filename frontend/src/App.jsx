@@ -6,7 +6,6 @@ import Login from './auth/Login';
 import Register from './auth/Register';
 
 import { adminRoutes } from './routes/routeConfig';
-<<<<<<< HEAD
 import IcdMasterMst from "./pages/masters/IcdMasterMst.jsx";
 import RoomTypeMasterMst from "./pages/masters/RoomTypeMasterMst";
 import BedMaster from "./pages/masters/BedMaster"; 
@@ -24,9 +23,7 @@ import MedicineMst from './pages/masters/MedicineMst';
 import AppointmentTypeMasterMst from './pages/masters/AppointmentTypeMasterMst';
 import AppointmentMst from './pages/masters/AppointmentMst';
 // import TransactionsMst from './pages/masters/TransactionsMst';
-=======
 import { ThemeProvider } from './theme/ThemeContext.jsx'; 
->>>>>>> f5d956bf2e438942ab1353fffa7750e23ae84a50
 
 import ComplaintMaster from './pages/masters/ComplaintMaster.jsx';
 import ExpensesMst from './pages/masters/ExpensesMst.jsx';
