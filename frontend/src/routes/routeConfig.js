@@ -39,6 +39,7 @@ import ExpensesMst from "../pages/masters/ExpensesMst.jsx";
 import ThoughtContentMaster from "../pages/masters/thought_content_master.jsx";
 import Noticeboard from "../pages/masters/noticeboard.jsx";
 import DoctorMst from "../pages/masters/DoctorMst.jsx";
+import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.jsx";
 
 
 
@@ -85,9 +86,7 @@ export const adminRoutes = [
   { path: "thought-content-master", label: "Thought Content Master", component: ThoughtContentMaster },
   { path: "noticeboard", label: "Noticeboard", component: Noticeboard },
   { path: "doctors", label: "Doctors Master", component: DoctorMst },
-
- 
-
+  { path: "appointment-type-master", label: "Appointment Type MasterMst", component: AppointmentTypeMasterMst},
 
  
   
