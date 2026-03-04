@@ -1073,6 +1073,7 @@ class Appointment(models.Model):
 #         managed = False
 #         db_table = 'transactions'        
 
+<<<<<<< HEAD
 
 class Account(models.Model):
     account_code = models.CharField(unique=True, max_length=45)
@@ -1124,6 +1125,25 @@ class OpdCasesheet(models.Model):
     bp_dia = models.IntegerField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')        
     sort_order = models.IntegerField(blank=True, null=True)
+=======
+                
+
+class Ect(models.Model):
+    ect_code = models.CharField(primary_key=True, max_length=45)
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+    ect_date = models.DateField(blank=True, null=True)
+    anaesthesia = models.CharField(max_length=255, blank=True, null=True)
+    anaesthetist_name = models.CharField(max_length=255, blank=True, null=True)
+    duration_seconds = models.IntegerField(blank=True, null=True)
+    pulse_width_ms = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    frequency_hz = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    joules = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    result = models.TextField(blank=True, null=True)
+    remark = models.TextField(blank=True, null=True)
+    visit_type = models.CharField(max_length=10, blank=True, null=True, db_comment='IPD or OPD')
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+>>>>>>> ganesh-1
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)
@@ -1131,4 +1151,41 @@ class OpdCasesheet(models.Model):
 
     class Meta:
         managed = False
+<<<<<<< HEAD
         db_table = 'opd_casesheet'
+=======
+        db_table = 'ect'
+
+
+class FollowUp(models.Model):
+    follow_up_code = models.CharField(primary_key=True, max_length=45)
+    appointment_code = models.ForeignKey('Appointment', models.DO_NOTHING, db_column='appointment_code', blank=True, null=True)
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+    follow_up_date = models.DateField(blank=True, null=True)
+    next_follow_up_date = models.DateField(blank=True, null=True)
+    complaints = models.TextField(blank=True, null=True)
+    pulse = models.CharField(max_length=45, blank=True, null=True)
+    bp = models.CharField(max_length=45, blank=True, null=True)
+    temperature = models.CharField(max_length=45, blank=True, null=True)
+    hydration = models.CharField(max_length=45, blank=True, null=True)
+    rs = models.CharField(max_length=45, blank=True, null=True)
+    cvs = models.CharField(max_length=45, blank=True, null=True)
+    pa = models.CharField(max_length=45, blank=True, null=True)
+    sensory_system = models.CharField(max_length=45, blank=True, null=True)
+    duration_days = models.IntegerField(blank=True, null=True)
+    is_regular_followup = models.CharField(max_length=45, blank=True, null=True)
+    is_on_medication = models.CharField(max_length=45, blank=True, null=True)
+    present_status = models.CharField(max_length=255, blank=True, null=True)
+    advise = models.TextField(blank=True, null=True)
+    clinical_notes = models.TextField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'follow_up'
+>>>>>>> ganesh-1

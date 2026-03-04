@@ -204,8 +204,6 @@ urlpatterns = [
     path('api/hallucination-master/delete/<str:hallucination_code>/', HallucinationMasterDeleteView.as_view(), name='hallucination-master-delete'),
     path('api/hallucination-master/<str:hallucination_code>/', HallucinationMasterDetailView.as_view(), name='hallucination-master-detail'),
     path('api/hallucination-master/', HallucinationMasterListView.as_view(), name='hallucination-master-list'),
-
-
     
     path('api/history-master/', HistoryMasterListView.as_view()),
     path('api/history-master/create/', HistoryMasterCreateView.as_view()),
@@ -287,6 +285,24 @@ urlpatterns = [
     # path('api/transactions/update/<str:transaction_code>/', TransactionsUpdateView.as_view(), name='transactions-update'),
     # path('api/transactions/delete/<str:transaction_code>/', TransactionsDeleteView.as_view(), name='transactions-delete'),
     # path('api/transactions/<str:transaction_code>/', TransactionsDetailView.as_view(), name='transactions-detail'),
+    
+    
+     path('api/ect/', EctListView.as_view(), name='ect-list'),
+     path('api/ect/create/', EctCreateView.as_view(), name='ect-create'),
+     path('api/ect/<str:ect_code>/', EctDetailView.as_view(), name='ect-detail'),
+     
+     path('api/ect/update/<str:ect_code>/', EctUpdateView.as_view(), name='ect-update'),
+     path('api/ect/delete/<str:ect_code>/', EctDeleteView.as_view(), name='ect-delete'),
+
+
+
+    
+    path('api/follow-up/', FollowUpListView.as_view(), name='followup-list'),
+    path('api/follow-up/create/', FollowUpCreateView.as_view(), name='followup-create'),
+    path('api/follow-up/<str:follow_up_code>/', FollowUpDetailView.as_view(), name='followup-detail'),
+    path('api/follow-up/update/<str:follow_up_code>/', FollowUpUpdateView.as_view(), name='followup-update'),
+    path('api/follow-up/delete/<str:follow_up_code>/', FollowUpDeleteView.as_view(), name='followup-delete'),
+
 
     path('api/account/',AccountListView.as_view(),name='account-list'),
     path('api/account/create/',AccountCreateView.as_view(),name='account-create'),
