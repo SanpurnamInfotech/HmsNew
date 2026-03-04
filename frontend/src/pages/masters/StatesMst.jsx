@@ -1,6 +1,15 @@
 import React, { useState, useMemo } from "react";
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaSearch, FaChevronDown, FaMapMarkerAlt } from "react-icons/fa";
+import { 
+  FaPlus, 
+  FaEdit, 
+  FaTrash, 
+  FaCheckCircle, 
+  FaTimesCircle, 
+  FaSearch, 
+  FaChevronDown, 
+  FaMapMarkerAlt 
+} from "react-icons/fa";
 
 const StatesMst = () => {
   const STATE_PATH = "states";
@@ -13,13 +22,14 @@ const StatesMst = () => {
   const [selectedRow, setSelectedRow] = useState(null);
 
   // Dropdown UI States
-  const [openDropdown, setOpenDropdown] = useState(null); // 'country'
+  const [openDropdown, setOpenDropdown] = useState(null); 
   const [countrySearch, setCountrySearch] = useState("");
 
   const [formData, setFormData] = useState({
     state_code: "",
     state_name: "",
     country_code: "",
+    sort_order: "",
     status: 1,
   });
 
@@ -46,7 +56,13 @@ const StatesMst = () => {
     setSelectedRow(null);
     setOpenDropdown(null);
     setCountrySearch("");
-    setFormData({ state_code: "", state_name: "", country_code: "", status: 1 });
+    setFormData({ 
+      state_code: "", 
+      state_name: "", 
+      country_code: "", 
+      sort_order: "", 
+      status: 1 
+    });
   };
 
   const showModal = (message, type = "success") => setModal({ visible: true, message, type });
@@ -65,13 +81,30 @@ const StatesMst = () => {
   /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!formData.country_code) {
       showModal("Please select a Country", "error");
       return;
     }
 
-    const actionPath = isEdit ? `${STATE_PATH}/update/${formData.state_code}/` : `${STATE_PATH}/create/`;
-    const result = isEdit ? await updateItem(actionPath, formData) : await createItem(actionPath, formData);
+    const actionPath = isEdit 
+      ? `${STATE_PATH}/update/${formData.state_code}/` 
+      : `${STATE_PATH}/create/`;
+
+    // Clone data for processing
+    const payload = { ...formData };
+    
+    // CRITICAL FIX: If sort_order is empty string, explicitly set to null 
+    // This ensures the DB column is updated to NULL/Empty instead of being ignored or zeroed.
+    if (payload.sort_order === "" || payload.sort_order === null || payload.sort_order === undefined) {
+      payload.sort_order = null;
+    } else {
+      payload.sort_order = Number(payload.sort_order);
+    }
+
+    const result = isEdit 
+      ? await updateItem(actionPath, payload) 
+      : await createItem(actionPath, payload);
 
     if (result.success) {
       showModal(`State ${isEdit ? "updated" : "created"} successfully!`);
@@ -107,7 +140,7 @@ const StatesMst = () => {
     <div className="app-container">
       {/* SUCCESS/ERROR MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? (
@@ -144,7 +177,11 @@ const StatesMst = () => {
                 <button
                   className="btn-warning"
                   onClick={() => {
-                    setFormData(selectedRow);
+                    // Ensure we handle potential nulls from existing data
+                    setFormData({
+                      ...selectedRow,
+                      sort_order: selectedRow.sort_order ?? ""
+                    });
                     setIsEdit(true);
                     setShowForm(true);
                   }}
@@ -176,7 +213,7 @@ const StatesMst = () => {
                 value={formData.state_code}
                 disabled={isEdit}
                 required
-                onChange={e => setFormData({ ...formData, state_code: e.target.value.toUpperCase() })}
+                onChange={e => setFormData({ ...formData, state_code: e.target.value.toUpperCase().replace(/\s/g, '_') })}
                 placeholder="E.G. KA"
               />
             </div>
@@ -205,7 +242,7 @@ const StatesMst = () => {
               </div>
               
               {openDropdown === 'country' && (
-                <div className="absolute z-[60] w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" 
+                <div className="absolute z-60 w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" 
                      style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
                   <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-hover)" }}>
                     <FaSearch className="opacity-40" size={14} />
@@ -238,6 +275,18 @@ const StatesMst = () => {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* SORT ORDER */}
+            <div className="space-y-1.5">
+              <label className="form-label">Sort Order (Optional)</label>
+              <input
+                type="number"
+                className="form-input w-full"
+                value={formData.sort_order}
+                placeholder="E.G. 1"
+                onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
+              />
             </div>
 
             {/* STATUS */}
@@ -291,7 +340,16 @@ const StatesMst = () => {
 
               <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
-                  paginatedData.map((item) => (
+                  [...paginatedData]
+                    .sort((a, b) => {
+                      // Normalize sort_order for comparison (treat empty/null as 999)
+                      const sa = (a.sort_order === null || a.sort_order === "" || a.sort_order === undefined) 
+                                 ? 999 : Number(a.sort_order);
+                      const sb = (b.sort_order === null || b.sort_order === "" || b.sort_order === undefined) 
+                                 ? 999 : Number(b.sort_order);
+                      return sa - sb;
+                    })
+                    .map((item) => (
                     <tr
                       key={item.state_code}
                       onClick={() => setSelectedRow(selectedRow?.state_code === item.state_code ? null : item)}

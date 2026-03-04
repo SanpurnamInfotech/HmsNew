@@ -6,11 +6,7 @@ import Activities from "../pages/masters/Activities";
 import AdviceMaster from "../pages/masters/AdviceMaster";
 import Ipdregister from "../pages/IPD/Ipdregister";
 
-import ComplaintMaster from '../pages/masters/ComplaintMaster.jsx';
-import ExpensesMst from '../pages/masters/ExpensesMst.jsx';
-import MseMaster from '../pages/masters/MseMaster.jsx';
-import ThoughtContentMaster from '../pages/masters/thought_content_master.jsx';
-import Noticeboard from '../pages/masters/noticeboard.jsx';
+
 import MoodHistoryMst from '../pages/masters/MoodHistoryMst.jsx';
 import StatesMst from '../pages/masters/StatesMst.jsx';
 import DistrictsMst from '../pages/masters/DistrictsMst.jsx';
@@ -30,13 +26,20 @@ import IcdMasterMst from "../pages/masters/IcdMasterMst.jsx";
 import DsmMaster from "../pages/masters/DsmMaster.jsx";
 import RoomTypeMasterMst from "../pages/masters/RoomTypeMasterMst.jsx";
 import HabitMaster from "../pages/masters/HabitMaster.jsx";
-import HallucinationMaster from "../pages/masters/HabitMaster.jsx";
+import HallucinationMaster from "../pages/masters/HallucinationMaster.jsx";
 import HistoryMaster from "../pages/masters/HistoryMaster.jsx";
 import MentalIllnessMaster from "../pages/masters/MentalIllnessMaster.jsx";
 import MedicineCategory from "../pages/masters/MedicineCategory.jsx";
 import MedicineMst from "../pages/masters/MedicineMst.jsx";
 import Possation from "../pages/masters/PossessionMaster.jsx";
 import FinancialYearMst from "../pages/masters/FinancialYearMst.jsx";
+import ComplaintMaster from "../pages/masters/ComplaintMaster.jsx";
+import MseMaster from "../pages/masters/MseMaster.jsx";
+import ExpensesMst from "../pages/masters/ExpensesMst.jsx";
+import ThoughtContentMaster from "../pages/masters/thought_content_master.jsx";
+import Noticeboard from "../pages/masters/noticeboard.jsx";
+import DoctorMst from "../pages/masters/DoctorMst.jsx";
+import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.jsx";
 
 
 
@@ -59,14 +62,10 @@ export const adminRoutes = [
   { path: "bank_details", label: "Bank Details", component: BankDetails },
   { path: "bed_allotment", label: "Bed Allotment", component: BedAllotment },
   { path: "patient", label: "Patient", component: Patient },
-  { path: "complaints", label: "Complaint Master", component: ComplaintMaster },
-  { path: "expenses", label: "Expenses Master", component: ExpensesMst },
-  { path: "mse_master", label: "MSE Master", component: MseMaster },
-  { path: "thought_content_master", label: "Thought Content Master", component: ThoughtContentMaster },
+ 
   { path: "districts" , label: "Districts Master", component: DistrictsMst },
   { path: "states" , label: "States Master", component: StatesMst },
   { path: "cities", label: "Cities Master", component: CitiesMst },
-  { path: "noticeboard", label: "Noticeboard", component: Noticeboard },
   { path: "mood_history", label: "Mood History Master", component: MoodHistoryMst },
   { path: "prescription_report", label: "Prescription Report", component: PrescriptionReport},
   { path: "icd_master", label:"ICD Master", component:IcdMasterMst},
@@ -81,10 +80,16 @@ export const adminRoutes = [
   { path: "posssation", label: "Possation", component: Possation },
   { path: "financial_year", label: "financial year", component: FinancialYearMst },
 
- 
+  { path: "complaints", label: "Complaint Master", component: ComplaintMaster },
+  { path: "expenses", label: "Expenses Master", component: ExpensesMst },
+  { path: "mse-master", label: "MSE Master", component: MseMaster },
+  { path: "thought-content-master", label: "Thought Content Master", component: ThoughtContentMaster },
+  { path: "noticeboard", label: "Noticeboard", component: Noticeboard },
+  { path: "doctors", label: "Doctors Master", component: DoctorMst },
+  { path: "appointment-type-master", label: "Appointment Type MasterMst", component: AppointmentTypeMasterMst},
 
-
  
+  
   
 ];
 

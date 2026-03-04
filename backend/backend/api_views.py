@@ -40,6 +40,7 @@ logger = logging.getLogger(__name__)
 import threading
 from django.db.models import Max
 from django.contrib.auth import authenticate
+from django.db import IntegrityError
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
@@ -83,9 +84,10 @@ class CredentialsProvidedPermission(permissions.BasePermission):
         password = request.data.get("password")
         return bool(username and password)
 
-from django.contrib.sessions.backends.db import SessionStore
+
+
 class LoginView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]
 
     def post(self, request):
         username = request.data.get("username")
@@ -116,13 +118,16 @@ class LoginView(APIView):
             except UsertypeMaster.DoesNotExist:
                 usertype_name = None
 
-        # 🔹 Save data into session
+        # 🔹 Session Management (Backend side storage)
         request.session['user_id'] = user.user_id
         request.session['username'] = user.username
         request.session['usertype_name'] = usertype_name
         request.session['login_time'] = str(timezone.now())
-
         request.session.save()
+
+        # Update last visit
+        user.lastvisiton = timezone.now()
+        user.save()
 
         # 🔹 JWT Token
         refresh = RefreshToken.for_user(user)
@@ -133,41 +138,36 @@ class LoginView(APIView):
             "username": user.username,
             "user_id": user.user_id,
             "usertype_name": usertype_name,
+            "company_code": user.company_code,
+            "employee_code": user.employee_code,
+            "status": user.status,
         }, status=status.HTTP_200_OK)
 
-
-
-
 class RegisterView(APIView):
-    permission_classes = [CredentialsProvidedPermission]
+    permission_classes = [AllowAny] 
 
     def post(self, request):
         data = request.data
         username = data.get("username")
         password = data.get("password")
 
-        # 1. Validation
         if not username or not password:
             return Response({"error": "Username and password required"}, status=status.HTTP_400_BAD_REQUEST)
 
         if Users.objects.filter(username=username).exists():
             return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 2. Dynamic ID generation
         max_id = Users.objects.aggregate(Max('user_id'))['user_id__max']
         next_user_id = (max_id or 0) + 1 
 
-        # 3. Dynamic Field Mapping
         create_params = {
             "user_id": next_user_id,
             "status": 1,
             "superuser": 0,
-            "createdon": timezone.now(), # Sets the exact creation time
-            "lastvisiton": timezone.now(), # Initializes last visit on registration
-            # "createdby": request.user.id if request.user.is_authenticated else next_user_id,
+            "createdon": timezone.now(),
+            "lastvisiton": timezone.now(),
         }
 
-        # List of Foreign Key fields (varchar in DB)
         fk_fields = ['company_code', 'usertype_code', 'employee_code']
 
         for key, value in data.items():
@@ -179,13 +179,9 @@ class RegisterView(APIView):
                 else:
                     create_params[key] = value
 
-        # Handle 'createdby'
-        # If a logged-in admin is creating the user, use their ID. 
-        # Otherwise, if it's a self-registration, the user is created by themselves.
         if not create_params.get("createdby"):
             create_params["createdby"] = next_user_id
 
-        # 4. Final Creation
         try:
             user = Users.objects.create(**create_params)
             refresh = RefreshToken.for_user(user)
@@ -202,11 +198,9 @@ class RegisterView(APIView):
         except Exception as e:
             return Response({"error": f"Database Error: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
-
 # Usertype
 class UserTypeListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -217,8 +211,7 @@ class UserTypeListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class UserTypeCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -234,8 +227,7 @@ class UserTypeCreateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class UserTypeDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, usertype_code):
         try:
@@ -246,8 +238,7 @@ class UserTypeDetailView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class UserTypeUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, usertype_code):
         try:
@@ -264,8 +255,7 @@ class UserTypeUpdateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class UserTypeDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, usertype_code):
         try:
@@ -284,8 +274,7 @@ class UserTypeDeleteView(APIView):
 # Available url
 
 class AvailableURLsView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, setting_id):
         try:
@@ -304,8 +293,7 @@ class AvailableURLsView(APIView):
 
 # Engine
 class EngineModuleCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -353,8 +341,7 @@ class EngineModuleCreateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class EngineModuleListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -368,8 +355,7 @@ class EngineModuleListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class EngineModuleUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, module_code):
         try:
@@ -411,8 +397,7 @@ class EngineModuleUpdateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class EngineModuleDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, module_code):
         try:
@@ -431,8 +416,7 @@ class EngineModuleDeleteView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class EngineModuleDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, module_code, format=None):
         module = get_object_or_404(EngineModule, module_code=module_code)
         serializer = EngineModuleSerializer(module)
@@ -440,8 +424,7 @@ class EngineModuleDetailView(APIView):
 
 # Universal Permissions 
 class UniversalPermissionsView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -471,8 +454,7 @@ class UniversalPermissionsView(APIView):
  
 # Engine Submodule
 class EngineSubmoduleCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         try:
             serializer = EngineSubmoduleSerializer(data=request.data)
@@ -490,8 +472,7 @@ class EngineSubmoduleCreateView(APIView):
             )
  
 class EngineSubmoduleListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
         try:
             data = EngineSubmodule.objects.all().order_by('submodule_code')
@@ -504,8 +485,7 @@ class EngineSubmoduleListView(APIView):
             )
  
 class EngineSubmoduleDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, submodule_code, format=None):
         module = get_object_or_404(EngineSubmodule, submodule_code=submodule_code)
         serializer = EngineSubmoduleSerializer(module)
@@ -513,8 +493,7 @@ class EngineSubmoduleDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
  
 class EngineSubmoduleUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def put(self, request, submodule_code):
         try:
             obj = get_object_or_404(EngineSubmodule, submodule_code=submodule_code)
@@ -533,8 +512,7 @@ class EngineSubmoduleUpdateView(APIView):
             )
  
 class EngineSubmoduleDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def delete(self, request, submodule_code):
         try:
             module = get_object_or_404(EngineSubmodule, submodule_code=submodule_code)
@@ -552,8 +530,7 @@ class EngineSubmoduleDeleteView(APIView):
 
 # Engine Activity
 class EngineActivityCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         try:
             serializer = EngineActivitySerializer(data=request.data)
@@ -571,8 +548,7 @@ class EngineActivityCreateView(APIView):
             )
  
 class EngineActivityListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
         try:
             data = EngineActivity.objects.all().order_by('activity_code')
@@ -585,8 +561,7 @@ class EngineActivityListView(APIView):
             )
  
 class EngineActivityDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, activity_code, format=None):
         module = get_object_or_404(EngineActivity, activity_code=activity_code)
         serializer = EngineActivitySerializer(module)
@@ -594,8 +569,7 @@ class EngineActivityDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
  
 class EngineActivityUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def put(self, request, activity_code):
         try:
             obj = get_object_or_404(EngineActivity, activity_code=activity_code)
@@ -614,8 +588,7 @@ class EngineActivityUpdateView(APIView):
             )
  
 class EngineActivityDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def delete(self, request, activity_code):
         try:
             module = get_object_or_404(EngineActivity, activity_code=activity_code)
@@ -634,8 +607,7 @@ class EngineActivityDeleteView(APIView):
 # countries
 
 class CountriesListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -649,8 +621,7 @@ class CountriesListView(APIView):
             )
 
 class CountriesCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -669,8 +640,7 @@ class CountriesCreateView(APIView):
             )
 
 class CountriesUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, country_code):
         try:
@@ -690,8 +660,7 @@ class CountriesUpdateView(APIView):
             )
 
 class CountriesDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, country_code):
         try:
@@ -710,8 +679,7 @@ class CountriesDeleteView(APIView):
             
 # advice master
 class AdvicemasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -725,8 +693,7 @@ class AdvicemasterListView(APIView):
             )
 
 class AdvicemasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, advice_code):
         try:
@@ -740,8 +707,7 @@ class AdvicemasterDetailView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             ) 
 class AdvicemasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -760,8 +726,7 @@ class AdvicemasterCreateView(APIView):
             )
 
 class AdvicemasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, advice_code):
         try:
@@ -782,8 +747,7 @@ class AdvicemasterUpdateView(APIView):
             )
 
 class AdvicemasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, advice_code):
         try:
@@ -869,8 +833,7 @@ class AadhaarVerifyView(APIView):
 # company_master
 
 class CompanyMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -884,8 +847,7 @@ class CompanyMasterListView(APIView):
             )
 
 class CompanyMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, company_code):
         try:
@@ -899,8 +861,7 @@ class CompanyMasterDetailView(APIView):
             )
 
 class CompanyMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -919,8 +880,7 @@ class CompanyMasterCreateView(APIView):
             )
 
 class CompanyMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, company_code):
         try:
@@ -940,8 +900,7 @@ class CompanyMasterUpdateView(APIView):
             )
 
 class CompanyMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, company_code):
         try:
@@ -960,8 +919,7 @@ class CompanyMasterDeleteView(APIView):
 # employee_master
 
 class EmployeeMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -973,8 +931,7 @@ class EmployeeMasterListView(APIView):
 
 
 class EmployeeMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, employee_code):
         try:
@@ -986,8 +943,7 @@ class EmployeeMasterDetailView(APIView):
 
 
 class EmployeeMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1004,8 +960,7 @@ class EmployeeMasterCreateView(APIView):
 
 
 class EmployeeMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, employee_code):
         try:
@@ -1023,8 +978,7 @@ class EmployeeMasterUpdateView(APIView):
 
 
 class EmployeeMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, employee_code):
         try:
@@ -1037,8 +991,7 @@ class EmployeeMasterDeleteView(APIView):
 # marital_status_master
 
 class MaritalStatusMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1050,8 +1003,7 @@ class MaritalStatusMasterListView(APIView):
 
 
 class MaritalStatusMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, marital_status_code):
         try:
@@ -1063,8 +1015,7 @@ class MaritalStatusMasterDetailView(APIView):
 
 
 class MaritalStatusMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1081,8 +1032,7 @@ class MaritalStatusMasterCreateView(APIView):
 
 
 class MaritalStatusMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, marital_status_code):
         try:
@@ -1100,8 +1050,7 @@ class MaritalStatusMasterUpdateView(APIView):
 
 
 class MaritalStatusMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, marital_status_code):
         try:
@@ -1114,8 +1063,7 @@ class MaritalStatusMasterDeleteView(APIView):
 # relation_master
 
 class RelationMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1127,8 +1075,7 @@ class RelationMasterListView(APIView):
 
 
 class RelationMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, relation_code):
         try:
@@ -1140,8 +1087,7 @@ class RelationMasterDetailView(APIView):
 
 
 class RelationMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1158,8 +1104,7 @@ class RelationMasterCreateView(APIView):
 
 
 class RelationMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, relation_code):
         try:
@@ -1177,8 +1122,7 @@ class RelationMasterUpdateView(APIView):
 
 
 class RelationMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, relation_code):
         try:
@@ -1191,8 +1135,7 @@ class RelationMasterDeleteView(APIView):
 # departments
 
 class DepartmentsListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1204,8 +1147,7 @@ class DepartmentsListView(APIView):
 
 
 class DepartmentsDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, department_code):
         try:
@@ -1217,8 +1159,7 @@ class DepartmentsDetailView(APIView):
 
 
 class DepartmentsCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1235,8 +1176,7 @@ class DepartmentsCreateView(APIView):
 
 
 class DepartmentsUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, department_code):
         try:
@@ -1254,8 +1194,7 @@ class DepartmentsUpdateView(APIView):
 
 
 class DepartmentsDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, department_code):
         try:
@@ -1269,8 +1208,7 @@ class DepartmentsDeleteView(APIView):
 # blood group master
 
 class BloodGroupMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1282,8 +1220,7 @@ class BloodGroupMasterListView(APIView):
 
 
 class BloodGroupMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, blood_group_code):
         try:
@@ -1295,8 +1232,7 @@ class BloodGroupMasterDetailView(APIView):
 
 
 class BloodGroupMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1315,8 +1251,7 @@ class BloodGroupMasterCreateView(APIView):
 
 
 class BloodGroupMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, blood_group_code):
         try:
@@ -1334,8 +1269,7 @@ class BloodGroupMasterUpdateView(APIView):
 
 
 class BloodGroupMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, blood_group_code):
         try:
@@ -1348,8 +1282,7 @@ class BloodGroupMasterDeleteView(APIView):
 
     # Blood Donor    
 class BloodDonorListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1361,8 +1294,7 @@ class BloodDonorListView(APIView):
 
 
 class BloodDonorDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, pk):
         try:
@@ -1374,8 +1306,7 @@ class BloodDonorDetailView(APIView):
 
 
 class BloodDonorCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1392,8 +1323,7 @@ class BloodDonorCreateView(APIView):
 
 
 class BloodDonorUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, pk):
         try:
@@ -1411,8 +1341,7 @@ class BloodDonorUpdateView(APIView):
 
 
 class BloodDonorDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, pk):
         try:
@@ -1425,8 +1354,7 @@ class BloodDonorDeleteView(APIView):
 # bankdetails
 
 class BankdetailsListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1438,8 +1366,7 @@ class BankdetailsListView(APIView):
 
 
 class BankdetailsDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, bank_code):
         try:
@@ -1451,8 +1378,7 @@ class BankdetailsDetailView(APIView):
 
 
 class BankdetailsCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1471,8 +1397,7 @@ class BankdetailsCreateView(APIView):
 
 
 class BankdetailsUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, bank_code):
         try:
@@ -1490,8 +1415,7 @@ class BankdetailsUpdateView(APIView):
 
 
 class BankdetailsDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, bank_code):
         try:
@@ -1504,8 +1428,7 @@ class BankdetailsDeleteView(APIView):
 # bed_allotment
 
 class BedAllotmentListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1517,8 +1440,7 @@ class BedAllotmentListView(APIView):
 
 
 class BedAllotmentDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, id):
         try:
@@ -1530,8 +1452,7 @@ class BedAllotmentDetailView(APIView):
 
 
 class BedAllotmentCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1556,8 +1477,7 @@ class BedAllotmentCreateView(APIView):
 
 
 class BedAllotmentUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, id):
         try:
@@ -1582,8 +1502,7 @@ class BedAllotmentUpdateView(APIView):
 
 
 class BedAllotmentDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, id):
         try:
@@ -1596,8 +1515,7 @@ class BedAllotmentDeleteView(APIView):
 # patient
 
 class PatientListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1609,8 +1527,7 @@ class PatientListView(APIView):
 
 
 class PatientDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, patient_code):
         try:
@@ -1622,8 +1539,7 @@ class PatientDetailView(APIView):
 
 
 class PatientCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1640,8 +1556,7 @@ class PatientCreateView(APIView):
 
 
 class PatientUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, patient_code):
         try:
@@ -1659,8 +1574,7 @@ class PatientUpdateView(APIView):
 
 
 class PatientDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, patient_code):
         try:
@@ -1668,6 +1582,159 @@ class PatientDeleteView(APIView):
             obj.delete()
             return Response({"message": "Patient deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+
+# Opd Bill Master
+class OpdBillMasterListView(APIView):
+    def get(self, request):
+        try:
+            data = OpdBillMaster.objects.all().order_by('opd_bill_name')
+            serializer = OpdBillMasterSerializer(data, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillMasterDetailView(APIView):
+    def get(self, request, opd_bill_code):
+        try:
+            obj = get_object_or_404(OpdBillMaster, opd_bill_code=opd_bill_code)
+            serializer = OpdBillMasterSerializer(obj)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillMasterCreateView(APIView):
+    def post(self, request):
+        try:
+            serializer = OpdBillMasterSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillMasterUpdateView(APIView):
+    def put(self, request, opd_bill_code):
+        try:
+            obj = get_object_or_404(OpdBillMaster, opd_bill_code=opd_bill_code)
+            serializer = OpdBillMasterSerializer(obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillMasterDeleteView(APIView):
+    def delete(self, request, opd_bill_code):
+        try:
+            obj = get_object_or_404(OpdBillMaster, opd_bill_code=opd_bill_code)
+            obj.delete()
+            return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)    
+
+
+# Opd Billing Details
+
+class OpdBillingDetailsListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            # ✅ removed 'id' because your model has no id now
+            data = OpdBillingDetails.objects.all().order_by('sort_order', 'opd_billing_code', 'opd_bill_code')
+            serializer = OpdBillingDetailsSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillingDetailsDetailView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, opd_billing_code):
+        try:
+            obj = get_object_or_404(OpdBillingDetails, opd_billing_code=opd_billing_code)
+            serializer = OpdBillingDetailsSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillingDetailsCreateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            serializer = OpdBillingDetailsSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillingDetailsUpdateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, opd_billing_code):
+        try:
+            obj = get_object_or_404(OpdBillingDetails, opd_billing_code=opd_billing_code)
+            serializer = OpdBillingDetailsSerializer(obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillingDetailsDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, opd_billing_code):
+        try:
+            obj = get_object_or_404(OpdBillingDetails, opd_billing_code=opd_billing_code)
+            obj.delete()
+            return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Opd Billing
+class OpdBillingListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 from rest_framework.views import APIView
@@ -1681,8 +1748,7 @@ from .serializers import MoodHistoryMasterSerializer
 import traceback
 
 class MoodHistoryListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1693,8 +1759,7 @@ class MoodHistoryListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class MoodHistoryCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1707,8 +1772,7 @@ class MoodHistoryCreateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class MoodHistoryUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, mood_history_code):
         try:
@@ -1722,8 +1786,7 @@ class MoodHistoryUpdateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class MoodHistoryDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, mood_history_code):
         try:
@@ -1744,8 +1807,7 @@ from .serializers import StatesSerializer
 import traceback
 
 class StatesListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1756,8 +1818,7 @@ class StatesListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class StatesCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1770,8 +1831,7 @@ class StatesCreateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class StatesUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, state_code):
         try:
@@ -1785,8 +1845,7 @@ class StatesUpdateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class StatesDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, state_code):
         try:
@@ -1812,8 +1871,7 @@ import traceback
 # LIST VIEW
 # ================================
 class DistrictsListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -1832,8 +1890,7 @@ class DistrictsListView(APIView):
 # CREATE VIEW
 # ================================
 class DistrictsCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -1868,8 +1925,7 @@ class DistrictsCreateView(APIView):
 # UPDATE VIEW
 # ================================
 class DistrictsUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, district_code):
         try:
@@ -1908,8 +1964,7 @@ class DistrictsUpdateView(APIView):
 # DELETE VIEW
 # ================================
 class DistrictsDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, district_code):
         try:
@@ -1946,8 +2001,7 @@ from .serializers import CitiesSerializer
 import traceback
 
 class CitiesListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request):
         try:
             objs = Cities.objects.all().order_by("city_code")
@@ -1957,8 +2011,7 @@ class CitiesListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CitiesCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def post(self, request):
         try:
             serializer = CitiesSerializer(data=request.data, context={"request": request})
@@ -1970,8 +2023,7 @@ class CitiesCreateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CitiesUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def put(self, request, city_code):
         try:
             obj = get_object_or_404(Cities, city_code=city_code)
@@ -1984,8 +2036,7 @@ class CitiesUpdateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class CitiesDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
     def delete(self, request, city_code):
         try:
             obj = get_object_or_404(Cities, city_code=city_code)
@@ -2001,8 +2052,7 @@ class CitiesDeleteView(APIView):
 
 
 class IcdMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -2018,8 +2068,7 @@ class IcdMasterListView(APIView):
 
 # ---------------- DETAIL ----------------
 class IcdMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, icd_code):
         try:
@@ -2035,8 +2084,7 @@ class IcdMasterDetailView(APIView):
 
 # ---------------- CREATE ----------------
 class IcdMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -2058,8 +2106,7 @@ class IcdMasterCreateView(APIView):
 
 # ---------------- UPDATE ----------------
 class IcdMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, icd_code):
         try:
@@ -2083,8 +2130,7 @@ class IcdMasterUpdateView(APIView):
 
 # ---------------- DELETE ----------------
 class IcdMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, icd_code):
         try:
@@ -2104,8 +2150,7 @@ class IcdMasterDeleteView(APIView):
 
 # ---------------- LIST ----------------
 class RoomTypeMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -2121,8 +2166,7 @@ class RoomTypeMasterListView(APIView):
 
    # ---------------- DETAIL ----------------
 class RoomTypeMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, room_type_code):
         try:
@@ -2142,8 +2186,7 @@ class RoomTypeMasterDetailView(APIView):
 
 # ---------------- CREATE ----------------
 class RoomTypeMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -2167,8 +2210,7 @@ class RoomTypeMasterCreateView(APIView):
 
 # ---------------- UPDATE ----------------
 class RoomTypeMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, room_type_code):
         try:
@@ -2201,8 +2243,7 @@ class RoomTypeMasterUpdateView(APIView):
 
 # ---------------- DELETE ----------------
 class RoomTypeMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, room_type_code):
         try:
@@ -2227,8 +2268,7 @@ from django.db.models import Max, IntegerField
 from django.db.models.functions import Cast
 # ------------------ LIST ------------------
 class BedListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -2245,8 +2285,7 @@ class BedListView(APIView):
 
 # ------------------ DETAIL ------------------
 class BedDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, bed_code):
         try:
@@ -2265,8 +2304,7 @@ class BedDetailView(APIView):
 # ------------------ CREATE ------------------
 
 class BedCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
 
@@ -2304,8 +2342,7 @@ class BedCreateView(APIView):
 
 # ------------------ UPDATE ------------------
 class BedUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, bed_code):
         try:
@@ -2331,8 +2368,7 @@ class BedUpdateView(APIView):
 
 # ------------------ DELETE ------------------
 class BedDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, bed_code):
         try:
@@ -2353,8 +2389,7 @@ class BedDeleteView(APIView):
 
 # ---------------- LIST ----------------
 class HabitMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -2370,8 +2405,7 @@ class HabitMasterListView(APIView):
 
 # ---------------- DETAIL ----------------
 class HabitMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, habit_code):
         try:
@@ -2387,8 +2421,7 @@ class HabitMasterDetailView(APIView):
 
 # ---------------- CREATE ----------------
 class HabitMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -2410,8 +2443,7 @@ class HabitMasterCreateView(APIView):
 
 # ---------------- UPDATE ----------------
 class HabitMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, habit_code):
         try:
@@ -2435,8 +2467,7 @@ class HabitMasterUpdateView(APIView):
 
 # ---------------- DELETE ----------------
 class HabitMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, habit_code):
         try:
@@ -2456,8 +2487,7 @@ class HabitMasterDeleteView(APIView):
 
 # hallucination master list
 class HallucinationMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -2473,8 +2503,7 @@ class HallucinationMasterListView(APIView):
 
 # hallucination master detail
 class HallucinationMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, hallucination_code):
         try:
@@ -2493,8 +2522,7 @@ class HallucinationMasterDetailView(APIView):
 
 # hallucination master create
 class HallucinationMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -2517,8 +2545,7 @@ class HallucinationMasterCreateView(APIView):
 
 # hallucination master update
 class HallucinationMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, hallucination_code):
         try:
@@ -2551,8 +2578,7 @@ class HallucinationMasterUpdateView(APIView):
 
 # hallucination master delete
 class HallucinationMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, hallucination_code):
         try:
@@ -2575,8 +2601,7 @@ class HallucinationMasterDeleteView(APIView):
 
 
 class HistoryMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -2591,8 +2616,7 @@ class HistoryMasterListView(APIView):
 
 
 class HistoryMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, history_code):
         try:
@@ -2607,8 +2631,7 @@ class HistoryMasterDetailView(APIView):
 
 
 class HistoryMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -2630,8 +2653,7 @@ class HistoryMasterCreateView(APIView):
 
 
 class HistoryMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, history_code):
         try:
@@ -2655,8 +2677,7 @@ class HistoryMasterUpdateView(APIView):
 
 
 class HistoryMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, history_code):
         try:
@@ -2679,8 +2700,7 @@ class HistoryMasterDeleteView(APIView):
 # mental illness master
 
 class MentalIllnessMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -2695,8 +2715,7 @@ class MentalIllnessMasterListView(APIView):
 
 
 class MentalIllnessMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, mental_illness_code):
         try:
@@ -2714,8 +2733,7 @@ class MentalIllnessMasterDetailView(APIView):
 
 
 class MentalIllnessMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -2737,8 +2755,7 @@ class MentalIllnessMasterCreateView(APIView):
 
 
 class MentalIllnessMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, mental_illness_code):
         try:
@@ -2770,8 +2787,7 @@ class MentalIllnessMasterUpdateView(APIView):
 
 
 class MentalIllnessMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, mental_illness_code):
         try:
@@ -2798,8 +2814,7 @@ class MentalIllnessMasterDeleteView(APIView):
 
 # ---------------- LIST ----------------
 class DsmMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -2815,8 +2830,7 @@ class DsmMasterListView(APIView):
 
 # ---------------- DETAIL ----------------
 class DsmMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, dsm_code):
         try:
@@ -2832,8 +2846,7 @@ class DsmMasterDetailView(APIView):
 
 # ---------------- CREATE ----------------
 class DsmMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -2855,8 +2868,7 @@ class DsmMasterCreateView(APIView):
 
 # ---------------- UPDATE ----------------
 class DsmMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, dsm_code):
         try:
@@ -2880,8 +2892,7 @@ class DsmMasterUpdateView(APIView):
 
 # ---------------- DELETE ----------------
 class DsmMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, dsm_code):
         try:
@@ -2899,8 +2910,7 @@ class DsmMasterDeleteView(APIView):
 
 # ---------------- LIST ----------------
 class PremorbidPersonalityMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -2916,8 +2926,7 @@ class PremorbidPersonalityMasterListView(APIView):
 
 # ---------------- DETAIL ----------------
 class PremorbidPersonalityMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, premorbid_personality_code):
         try:
@@ -2934,8 +2943,7 @@ class PremorbidPersonalityMasterDetailView(APIView):
 
 # ---------------- CREATE ----------------
 class PremorbidPersonalityMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
@@ -2959,8 +2967,7 @@ class PremorbidPersonalityMasterCreateView(APIView):
 
 # ---------------- UPDATE ----------------
 class PremorbidPersonalityMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, premorbid_personality_code):
         try:
@@ -2991,8 +2998,7 @@ class PremorbidPersonalityMasterUpdateView(APIView):
 
 # ---------------- DELETE ----------------
 class PremorbidPersonalityMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, premorbid_personality_code):
         try:
@@ -3011,8 +3017,7 @@ class PremorbidPersonalityMasterDeleteView(APIView):
 
 
 class PossessionMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
@@ -3027,8 +3032,7 @@ class PossessionMasterListView(APIView):
 
 
 class PossessionMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, possession_code):
         try:
@@ -3046,14 +3050,12 @@ class PossessionMasterDetailView(APIView):
 
 
 class PossessionMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def post(self, request):
         try:
             serializer = DoctorSerializer(data=request.data, context={"request": request})
             if serializer.is_valid():
-                # Agar aapke pass createdon/createdby logic hai to yahan save karein
                 serializer.save(createdon=timezone.now())
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -3061,69 +3063,98 @@ class PossessionMasterCreateView(APIView):
             traceback.print_exc()
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+# doctor
+import traceback
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
+from backend.models import Doctor
+from backend.serializers import DoctorSerializer
+
+
+# ================= LIST =================
+class DoctorListView(APIView):
+
+    def get(self, request):
+        doctors = Doctor.objects.all().order_by("doctor_name")
+        serializer = DoctorSerializer(doctors, many=True)
+        return Response(serializer.data)
+
+
+# ================= DETAILS =================
+class DoctorDetailView(APIView):
+
+    def get(self, request, doctor_code):
+        doctor = get_object_or_404(Doctor, doctor_code=doctor_code)
+        serializer = DoctorSerializer(doctor)
+        return Response(serializer.data)
+
+
+# ================= CREATE =================
+class DoctorCreateView(APIView):
+
+    def post(self, request):
+        try:
+            serializer = DoctorSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(createdon=timezone.now())
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e), "trace": traceback.format_exc()},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# ================= UPDATE =================
 class DoctorUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
     def put(self, request, doctor_code):
-        try:
-            # Primary key ya Unique field 'doctor_code' ke base par fetch karein
-            obj = get_object_or_404(Doctor, doctor_code=doctor_code)
-            serializer = DoctorSerializer(obj, data=request.data, partial=True, context={"request": request})
-            if serializer.is_valid():
-                serializer.save(updatedon=timezone.now())
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            traceback.print_exc()
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        doctor = get_object_or_404(Doctor, doctor_code=doctor_code)
 
+        serializer = DoctorSerializer(doctor, data=request.data)
+
+        if serializer.is_valid():
+            serializer.save(updatedon=timezone.now())
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ================= DELETE =================
 class DoctorDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
     def delete(self, request, doctor_code):
-        try:
-            obj = get_object_or_404(Doctor, doctor_code=doctor_code)
-            obj.delete()
-            return Response({"message": "Doctor deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            traceback.print_exc()
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        doctor = get_object_or_404(Doctor, doctor_code=doctor_code)
+        doctor.delete()
+        return Response({"message": "Doctor deleted successfully"})
 
-   
 # departments
- 
-# class DepartmentsListView(APIView):
-#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-#     permission_classes = [permissions.IsAuthenticated]
- 
-#     def get(self, request):
-#         try:
-#             data = Departments.objects.all().order_by('department_name')
-#             serializer = DepartmentsSerializer(data, many=True)
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-#         except Exception as e:
-#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
- 
-# class DepartmentsDetailView(APIView):
-#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-#     permission_classes = [permissions.IsAuthenticated]
- 
-#     def get(self, request, department_code):
-#         try:
-#             obj = get_object_or_404(Departments, department_code=department_code)
-#             serializer = DepartmentsSerializer(obj)
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-#         except Exception as e:
-#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
- 
-# class DepartmentsCreateView(APIView):
-#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-#     permission_classes = [permissions.IsAuthenticated]
- 
+
+class DepartmentsListView(APIView):
+
+    def get(self, request):
+        try:
+            data = Departments.objects.all().order_by('department_name')
+            serializer = DepartmentsSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+class DepartmentsDetailView(APIView):
+    def get(self, request, department_code):
+        try:
+            obj = get_object_or_404(Departments, department_code=department_code)
+            serializer = DepartmentsSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+#  class DepartmentsCreateView(APIView):
 #     def post(self, request):
 #         try:
 #             serializer = DepartmentsSerializer(data=request.data)
@@ -3136,16 +3167,46 @@ class DoctorDeleteView(APIView):
 #             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 #         except Exception as e:
 #             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
- 
-# class DepartmentsUpdateView(APIView):
-#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-#     permission_classes = [permissions.IsAuthenticated]
- 
+
+class DepartmentsUpdateView(APIView):
+
     def put(self, request, department_code):
         try:
             obj = get_object_or_404(Departments, department_code=department_code)
             serializer = DepartmentsSerializer(obj, data=request.data, partial=True)
+            serializer = PossessionMasterSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now()
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class PossessionMasterUpdateView(APIView):
+
+
+    def put(self, request, possession_code):
+        try:
+            obj = get_object_or_404(
+                PossessionMaster,
+                possession_code=possession_code
+            )
+
+            serializer = PossessionMasterSerializer(
+                obj,
+                data=request.data,
+                partial=True
+            )
+
             if serializer.is_valid():
                 serializer.save(
                     updatedby=request.user.id,
@@ -3181,10 +3242,8 @@ class DoctorDeleteView(APIView):
             )
 
 
-# -------------------- DELETE --------------------
-class SettingsDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class PossessionMasterDeleteView(APIView):
+
 
     def delete(self, request, setting_id):
         try:
@@ -3203,9 +3262,8 @@ class SettingsDeleteView(APIView):
 
 
 # ---------------- LIST ----------------
-class MedicineListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class FinancialyearMasterListView(APIView):
+
 
     def get(self, request):
         try:
@@ -3220,9 +3278,8 @@ class MedicineListView(APIView):
 
 
 # ---------------- DETAIL ----------------
-class MedicineDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class FinancialyearMasterDetailView(APIView):
+
 
     def get(self, request, medicine_code):
         try:
@@ -3240,9 +3297,8 @@ class MedicineDetailView(APIView):
 
 
 # ---------------- CREATE ----------------
-class MedicineCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class FinancialyearMasterCreateView(APIView):
+
 
     def post(self, request):
         try:
@@ -3271,9 +3327,8 @@ class MedicineCreateView(APIView):
 
 
 # ---------------- UPDATE ----------------
-class MedicineUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class FinancialyearMasterUpdateView(APIView):
+
 
     def put(self, request, medicine_code):
         try:
@@ -3311,9 +3366,8 @@ class MedicineUpdateView(APIView):
 
 
 # ---------------- DELETE ----------------
-class MedicineDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class FinancialyearMasterDeleteView(APIView):
+
 
     def delete(self, request, medicine_code):
         try:
@@ -3336,12 +3390,9 @@ class MedicineDeleteView(APIView):
             )
 
 
+# -------------------- LIST --------------------
+class SettingsListView(APIView):
 
-
-# ---------------- LIST ----------------
-class MedicineCategoryListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         try:
@@ -3356,10 +3407,9 @@ class MedicineCategoryListView(APIView):
             )
 
 
-# ---------------- DETAIL ----------------
-class MedicineCategoryDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# -------------------- DETAIL --------------------
+class SettingsDetailView(APIView):
+
 
     def get(self, request, medicine_cat_code):
         try:
@@ -3378,10 +3428,10 @@ class MedicineCategoryDetailView(APIView):
             )
 
 
-# ---------------- CREATE ----------------
-class MedicineCategoryCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# -------------------- CREATE --------------------
+
+class SettingsCreateView(APIView):
+
 
     def post(self, request):
         try:
@@ -3410,10 +3460,9 @@ class MedicineCategoryCreateView(APIView):
             )
 
 
-# ---------------- UPDATE ----------------
-class MedicineCategoryUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# -------------------- UPDATE --------------------
+class SettingsUpdateView(APIView):
+
 
     def put(self, request, medicine_cat_code):
         try:
@@ -3433,28 +3482,28 @@ class MedicineCategoryUpdateView(APIView):
                     updatedby=request.user.id,
                     updatedon=timezone.now()
                 )
-
-                return Response(
-                    serializer.data,
-                    status=status.HTTP_200_OK
-                )
-
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
+ 
+class DepartmentsDeleteView(APIView):
+
+ 
+    def delete(self, request, department_code):
+        try:
+            obj = get_object_or_404(Departments, department_code=department_code)
+            obj.delete()
+            return Response({"message": "Department deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# ---------------- DELETE ----------------
-class MedicineCategoryDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
+# -------------------- DELETE --------------------
+class SettingsDeleteView(APIView):
+
 
     def delete(self, request, medicine_cat_code):
         try:
@@ -3479,9 +3528,9 @@ class MedicineCategoryDeleteView(APIView):
 
 
 
-class AppointmentTypeMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# ---------------- LIST ----------------
+class MedicineListView(APIView):
+
 
     def get(self, request):
         try:
@@ -3499,9 +3548,8 @@ class AppointmentTypeMasterListView(APIView):
 
 
 # ---------------- DETAIL ----------------
-class AppointmentTypeMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class MedicineDetailView(APIView):
+
 
     def get(self, request, appointment_type_code):
         try:
@@ -3520,9 +3568,8 @@ class AppointmentTypeMasterDetailView(APIView):
 
 
 # ---------------- CREATE ----------------
-class AppointmentTypeMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class MedicineCreateView(APIView):
+
 
     def post(self, request):
         try:
@@ -3551,9 +3598,8 @@ class AppointmentTypeMasterCreateView(APIView):
 
 
 # ---------------- UPDATE ----------------
-class AppointmentTypeMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class MedicineUpdateView(APIView):
+
 
     def put(self, request, appointment_type_code):
         try:
@@ -3589,9 +3635,8 @@ class AppointmentTypeMasterUpdateView(APIView):
 
 
 # ---------------- DELETE ----------------
-class AppointmentTypeMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class MedicineDeleteView(APIView):
+
 
     def delete(self, request, appointment_type_code):
         try:
@@ -3614,9 +3659,9 @@ class AppointmentTypeMasterDeleteView(APIView):
 
 
 
-class AppointmentListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# ---------------- LIST ----------------
+class MedicineCategoryListView(APIView):
+
 
     def get(self, request):
         try:
@@ -3632,9 +3677,8 @@ class AppointmentListView(APIView):
 
 
 # ---------------- DETAIL ----------------
-class AppointmentDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class MedicineCategoryDetailView(APIView):
+
 
     def get(self, request, appointment_code):
         try:
@@ -3654,9 +3698,8 @@ class AppointmentDetailView(APIView):
 
 
 # ---------------- CREATE ----------------
-class AppointmentCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class MedicineCategoryCreateView(APIView):
+
 
     def post(self, request):
         try:
@@ -3681,9 +3724,8 @@ class AppointmentCreateView(APIView):
             )
 
 # ---------------- UPDATE ----------------
-class AppointmentUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class MedicineCategoryUpdateView(APIView):
+
 
     def put(self, request, appointment_code):
         try:
@@ -3719,9 +3761,8 @@ class AppointmentUpdateView(APIView):
 
 
 # ---------------- DELETE ----------------
-class AppointmentDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class MedicineCategoryDeleteView(APIView):
+
 
     def delete(self, request, appointment_code):
         try:
@@ -3745,8 +3786,6 @@ class AppointmentDeleteView(APIView):
 
 
 
-
-
 # # ---------------- LIST ----------------
 # class TransactionsListView(APIView):
 #     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
@@ -3757,12 +3796,6 @@ class AppointmentDeleteView(APIView):
 #             data = Transactions.objects.all().order_by('-transaction_date')
 #             serializer = TransactionsSerializer(data, many=True)
 #             return Response(serializer.data, status=status.HTTP_200_OK)
-
-#         except Exception as e:
-#             return Response(
-#                 {"error": str(e)},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
 
 
 # # ---------------- DETAIL ----------------
@@ -3775,15 +3808,6 @@ class AppointmentDeleteView(APIView):
 #             obj = get_object_or_404(
 #                 Transactions,
 #                 transaction_code=transaction_code
-#             )
-
-#             serializer = TransactionsSerializer(obj)
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-
-#         except Exception as e:
-#             return Response(
-#                 {"error": str(e)},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
 #             )
 
 
@@ -3868,14 +3892,46 @@ class AppointmentDeleteView(APIView):
 #                 {"error": str(e)},
 #                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
 #             )            
+# class DoctorListView(APIView):
+#     def get(self, request):
+#         try:
+#             doctors = Doctor.objects.all().order_by('-doctor_code')
+#             serializer = DoctorSerializer(doctors, many=True)
+#             return Response(serializer.data, status=status.HTTP_200_OK)
 
-class DoctorListView(APIView):
-    permission_classes = [AllowAny]
+#         except Exception as e:
+#             return Response(
+#                 {"error": str(e)},
+#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
+#             )
+
+class AppointmentTypeMasterListView(APIView):
+
  
     def get(self, request):
         try:
-            doctors = Doctor.objects.all().order_by('-doctor_code')
-            serializer = DoctorSerializer(doctors, many=True)
+            data = AppointmentTypeMaster.objects.all().order_by(
+                'appointment_type_name'
+            )
+            serializer = AppointmentTypeMasterSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+ 
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# ---------------- DETAIL ----------------
+class AppointmentTypeMasterDetailView(APIView):
+
+    def get(self, request, appointment_type_code):
+        try:
+            obj = get_object_or_404(
+                AppointmentTypeMaster,
+                appointment_type_code=appointment_type_code
+            )
+            serializer = AppointmentTypeMasterSerializer(obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
  
         except Exception as e:
@@ -3885,67 +3941,101 @@ class DoctorListView(APIView):
             )
  
  
-class PossessionMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+# ---------------- CREATE ----------------
+class AppointmentTypeMasterCreateView(APIView):
 
-    def put(self, request, possession_code):
+ 
+    def post(self, request):
+        try:
+            serializer = AppointmentTypeMasterSerializer(data=request.data)
+ 
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now()
+                )
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
+ 
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+ 
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+ 
+ 
+# ---------------- UPDATE ----------------
+class AppointmentTypeMasterUpdateView(APIView):
+
+ 
+    def put(self, request, appointment_type_code):
         try:
             obj = get_object_or_404(
-                PossessionMaster,
-                possession_code=possession_code
+                AppointmentTypeMaster,
+                appointment_type_code=appointment_type_code
             )
-
-            serializer = PossessionMasterSerializer(
-                obj,
-                data=request.data,
-                partial=True
+ 
+            serializer = AppointmentTypeMasterSerializer(
+                obj, data=request.data, partial=True
             )
-
+ 
             if serializer.is_valid():
                 serializer.save(
                     updatedby=request.user.id,
                     updatedon=timezone.now()
                 )
-                return Response(serializer.data, status=status.HTTP_200_OK)
-
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_200_OK
+                )
+ 
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+ 
         except Exception as e:
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+ 
+ 
+# ---------------- DELETE ----------------
+class AppointmentTypeMasterDeleteView(APIView):
 
-class PossessionMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def delete(self, request, possession_code):
+ 
+    def delete(self, request, appointment_type_code):
         try:
             obj = get_object_or_404(
-                PossessionMaster,
-                possession_code=possession_code
+                AppointmentTypeMaster,
+                appointment_type_code=appointment_type_code
             )
             obj.delete()
-
+ 
             return Response(
-                {"message": "Possession deleted successfully"},
+                {"message": "Appointment type deleted successfully"},
                 status=status.HTTP_204_NO_CONTENT
             )
-
+ 
         except Exception as e:
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            )        
+ 
 
 
 
-# ---------------- LIST ----------------
-class FinancialyearMasterListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class AppointmentListView(APIView):
+
 
     def get(self, request):
         try:
@@ -3958,9 +4048,8 @@ class FinancialyearMasterListView(APIView):
 
 
 # ---------------- DETAIL ----------------
-class FinancialyearMasterDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class AppointmentDetailView(APIView):
+
 
     def get(self, request, financialyear_code):
         try:
@@ -3976,9 +4065,8 @@ class FinancialyearMasterDetailView(APIView):
 
 
 # ---------------- CREATE ----------------
-class FinancialyearMasterCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class AppointmentCreateView(APIView):
+
 
     def post(self, request):
         try:
@@ -4000,9 +4088,8 @@ class FinancialyearMasterCreateView(APIView):
 
 
 # ---------------- UPDATE ----------------
-class FinancialyearMasterUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class AppointmentUpdateView(APIView):
+
 
     def put(self, request, financialyear_code):
         try:
@@ -4032,9 +4119,8 @@ class FinancialyearMasterUpdateView(APIView):
 
 
 # ---------------- DELETE ----------------
-class FinancialyearMasterDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+class AppointmentDeleteView(APIView):
+
 
     def delete(self, request, financialyear_code):
         try:
@@ -4056,11 +4142,31 @@ class FinancialyearMasterDeleteView(APIView):
 
 # -------------------- LIST --------------------
 class SettingsListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request):
         try:
+            data = OpdBilling.objects.all().order_by("sort_order", "opd_billing_code")
+            serializer = OpdBillingSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillingDetailView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, opd_billing_code):
+        try:
+            obj = get_object_or_404(OpdBilling, opd_billing_code=opd_billing_code)
+            serializer = OpdBillingSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillingCreateView(APIView):
             data = Settings.objects.all().order_by('setting_name')
             serializer = SettingsSerializer(data, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -4073,8 +4179,7 @@ class SettingsListView(APIView):
 
 # -------------------- DETAIL --------------------
 class SettingsDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def get(self, request, setting_id):
         try:
@@ -4091,10 +4196,60 @@ class SettingsDetailView(APIView):
 # -------------------- CREATE --------------------
 
 class SettingsCreateView(APIView):
+
+
+    def post(self, request):
+        try:
+            serializer = OpdBillingSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillingUpdateView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
-    def post(self, request):
+    def put(self, request, opd_billing_code):
+        try:
+            obj = get_object_or_404(OpdBilling, opd_billing_code=opd_billing_code)
+            serializer = OpdBillingSerializer(obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except IntegrityError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class OpdBillingDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, opd_billing_code):
+        try:
+            obj = get_object_or_404(OpdBilling, opd_billing_code=opd_billing_code)
+            obj.delete()
+            return Response({"message": "Deleted successfully"}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)        
         serializer = SettingsSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -4129,8 +4284,7 @@ class SettingsCreateView(APIView):
 
 # -------------------- UPDATE --------------------
 class SettingsUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def put(self, request, setting_id):
         try:
@@ -4155,8 +4309,7 @@ class SettingsUpdateView(APIView):
 
 # -------------------- DELETE --------------------
 class SettingsDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+
 
     def delete(self, request, setting_id):
         try:

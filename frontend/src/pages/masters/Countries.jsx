@@ -81,8 +81,10 @@ const Countries = () => {
 
     const payload = { ...formData };
 
-    if (payload.sort_order === "" || payload.sort_order === null) {
-      delete payload.sort_order;
+  if (payload.sort_order === "" || payload.sort_order === null || payload.sort_order === undefined) {
+      payload.sort_order = null; 
+    } else {
+      payload.sort_order = Number(payload.sort_order);
     }
 
     const result = isEdit
@@ -125,7 +127,7 @@ const Countries = () => {
     <div className="app-container">
       {/* SUCCESS/ERROR MODAL (Updated to ModuleMst style) */}
       {modal.visible && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
             <div className="mb-4 flex justify-center">
               {modal.type === "success" ? (
@@ -262,7 +264,7 @@ const Countries = () => {
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
               <button type="submit" className="btn-primary px-12 py-3">
-                {isEdit ? "Update Country" : "Save Country"}
+                {isEdit ? "Update" : "Save"}
               </button>
               <button
                 type="button"
@@ -302,10 +304,13 @@ const Countries = () => {
                 {paginatedData.length > 0 ? (
                   [...paginatedData]
                     .sort((a, b) => {
-                      const sa = a.sort_order ?? 999;
-                      const sb = b.sort_order ?? 999;
-                      return Number(sa) - Number(sb);
-                    })
+                        // Treat null, undefined, or empty strings as a very high number (999)
+                        const sa = (a.sort_order === null || a.sort_order === "" || a.sort_order === undefined) 
+                                  ? 999 : Number(a.sort_order);
+                        const sb = (b.sort_order === null || b.sort_order === "" || b.sort_order === undefined) 
+                                  ? 999 : Number(b.sort_order);
+                        return sa - sb;
+                      })
                     .map((item) => (
                       <tr
                         key={item.country_code}
