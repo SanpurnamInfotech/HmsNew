@@ -37,9 +37,11 @@ import MedicineCategory from "../pages/masters/MedicineCategory.jsx";
 import MedicineMst from "../pages/masters/MedicineMst.jsx";
 import Possation from "../pages/masters/PossessionMaster.jsx";
 import FinancialYearMst from "../pages/masters/FinancialYearMst.jsx";
-
-
-
+import SettingsMst from "../pages/masters/SettingsMst.jsx";
+import AccountMst from "../pages/masters/AccountMst.jsx";
+import UsertypeMst from "../pages/masters/UsertypeMst.jsx";
+import Hospital_detailsMst from "../pages/masters/Hospital_detailsMst.jsx";
+import DoctorMst from "../pages/masters/DoctorMst.jsx";
 
 export const adminRoutes = [
   { path: "dashboard", label: "Dashboard", component: Dashboard },
@@ -80,6 +82,12 @@ export const adminRoutes = [
   { path: "medicine", label: "Medicine" , component: MedicineMst },
   { path: "posssation", label: "Possation", component: Possation },
   { path: "financial_year", label: "financial year", component: FinancialYearMst },
+  { path: "settings", label: "Settings", component: SettingsMst },
+  { path: "accounts", label: "Accounts Master", component: AccountMst },
+  { path: "usertype", label: "Usertype Master", component: UsertypeMst },
+  { path: "hospital", label: "Hospital Master", component: Hospital_detailsMst },
+  { path: "doctor", label: "Doctor", component: DoctorMst },
+
 
  
 
