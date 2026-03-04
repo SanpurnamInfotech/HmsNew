@@ -37,6 +37,10 @@ import MedicineCategory from "../pages/masters/MedicineCategory.jsx";
 import MedicineMst from "../pages/masters/MedicineMst.jsx";
 import Possation from "../pages/masters/PossessionMaster.jsx";
 import FinancialYearMst from "../pages/masters/FinancialYearMst.jsx";
+import AppointmentMst from "../pages/masters/AppointmentMst.jsx";
+import EctMst from "../pages/masters/EctMst.jsx";
+import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.jsx";
+import FollowUpMst from "../pages/masters/FollowUpMst.jsx";
 
 
 
@@ -80,6 +84,11 @@ export const adminRoutes = [
   { path: "medicine", label: "Medicine" , component: MedicineMst },
   { path: "posssation", label: "Possation", component: Possation },
   { path: "financial_year", label: "financial year", component: FinancialYearMst },
+  { path: "appointment", label: "Appointment", component: AppointmentMst},
+  { path: "appointment-type-master", label: "Appointment Type Master", component: AppointmentTypeMasterMst },
+  { path: "ect", label: "ECT", component: EctMst },
+  { path: "follow-up", label: "Follow Up", component: FollowUpMst },
+
 
  
 

@@ -812,3 +812,17 @@ class AppointmentSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Transactions
 #         fields = "__all__"                         
+
+class EctSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Ect
+        fields = "__all__"
+        
+
+
+class FollowUpSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FollowUp
+        fields = "__all__"        

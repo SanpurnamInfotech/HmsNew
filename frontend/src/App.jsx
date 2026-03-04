@@ -1,12 +1,15 @@
-import './App.css'
+import './App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
+
 import AdminLayout from './components/layers/admin/AdminLayout';
 import PrivateRoute from './auth/PrivateRoute';
 import Login from './auth/Login';
 import Register from './auth/Register';
 
+import { ThemeProvider } from './theme/ThemeContext.jsx';
 import { adminRoutes } from './routes/routeConfig';
-<<<<<<< HEAD
+
+// Masters
 import IcdMasterMst from "./pages/masters/IcdMasterMst.jsx";
 import RoomTypeMasterMst from "./pages/masters/RoomTypeMasterMst";
 import BedMaster from "./pages/masters/BedMaster"; 
@@ -23,10 +26,6 @@ import MedicineCategory from './pages/masters/MedicineCategory';
 import MedicineMst from './pages/masters/MedicineMst';
 import AppointmentTypeMasterMst from './pages/masters/AppointmentTypeMasterMst';
 import AppointmentMst from './pages/masters/AppointmentMst';
-// import TransactionsMst from './pages/masters/TransactionsMst';
-=======
-import { ThemeProvider } from './theme/ThemeContext.jsx'; 
->>>>>>> f5d956bf2e438942ab1353fffa7750e23ae84a50
 
 import ComplaintMaster from './pages/masters/ComplaintMaster.jsx';
 import ExpensesMst from './pages/masters/ExpensesMst.jsx';
@@ -37,34 +36,21 @@ import MoodHistoryMst from './pages/masters/MoodHistoryMst.jsx';
 import StatesMst from './pages/masters/StatesMst.jsx';
 import DistrictsMst from './pages/masters/DistrictsMst.jsx';
 import CitiesMst from './pages/masters/CitiesMst.jsx';
-import DoctorMst from './pages/masters/DoctorMst.jsx';
-
-
-
+import DoctorMst from './pages/masters/DoctorMst.jsx'
+import EctMst from './pages/masters/EctMst.jsx'
+import FollowUpMst from './pages/masters/FollowUpMst.jsx'
 
 function App() {
   return (
-    // Wrap the entire application or just the routes in the Provider
     <ThemeProvider>
       <div className="app-container">
         <Routes>
 
-          {/* Auth Routes */}
+          {/* Auth */}
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin/register" element={<Register />} />
 
-<<<<<<< HEAD
-        {/* Protected Admin Routes */}
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute>
-              <AdminLayout />
-            </PrivateRoute>
-          }
-        >
-=======
-          {/* Protected Admin Routes */}
+          {/* Protected Admin Layout */}
           <Route
             path="/admin"
             element={
@@ -73,12 +59,10 @@ function App() {
               </PrivateRoute>
             }
           >
-
-            {/* Default Page */}
+            {/* default */}
             <Route index element={<Navigate to="dashboard" replace />} />
->>>>>>> f5d956bf2e438942ab1353fffa7750e23ae84a50
 
-            {/* Dynamic Routes */}
+            {/* dashboard + other dynamic routes */}
             {adminRoutes.map((route, index) => {
               const Component = route.component;
               return (
@@ -89,57 +73,43 @@ function App() {
                 />
               );
             })}
+
+            {/* Masters (all under /admin) */}
+            <Route path="icd-master" element={<IcdMasterMst />} />
+            <Route path="room-type-master" element={<RoomTypeMasterMst />} />
+            <Route path="bed" element={<BedMaster />} />
+            <Route path="habit-master" element={<HabitMaster />} />
+            <Route path="hallucination-master" element={<HallucinationMaster />} />
+            <Route path="history-master" element={<HistoryMaster />} />
+            <Route path="mental-illness-master" element={<MentalIllnessMaster />} />
+            <Route path="dsm-master" element={<DsmMaster />} />
+            <Route path="premorbid-personality-master" element={<PremorbidPersonalityMst />} />
+            <Route path="possession-master" element={<PossessionMaster />} />
+            <Route path="financialyear-master" element={<FinancialYearMst />} />
+            <Route path="settings" element={<SettingsMst />} />
+            <Route path="medicine-category" element={<MedicineCategory />} />
+            <Route path="medicine" element={<MedicineMst />} />
+            <Route path="appointment-type-master" element={<AppointmentTypeMasterMst />} />
+            <Route path="appointment" element={<AppointmentMst />} />
+
+            <Route path="complaints" element={<ComplaintMaster />} />
+            <Route path="expenses" element={<ExpensesMst />} />
+            <Route path="mood_history" element={<MoodHistoryMst />} />
+            <Route path="states" element={<StatesMst />} />
+            <Route path="districts" element={<DistrictsMst />} />
+            <Route path="cities" element={<CitiesMst />} />
+            <Route path="doctors" element={<DoctorMst />} />
+            <Route path="mse" element={<MseMaster />} />
+            <Route path="thought_content_master" element={<ThoughtContentMaster />} />
+            <Route path="noticeboard" element={<Noticeboard />} />
+            <Route path="ect" element={<EctMst/>} />
+            <Route path="follow-up" element={<FollowUpMst/>} />
+            
+
           </Route>
 
-<<<<<<< HEAD
-          <Route path="icd-master" element={<IcdMasterMst />} />
-          <Route path="room-type-master" element={<RoomTypeMasterMst />} />
-           <Route path="bed" element={<BedMaster />} />
-           <Route path="habit-master" element={<HabitMaster />} />
-           <Route path="hallucination-master" element={<HallucinationMaster />} />
-           <Route path="history-master" element={<HistoryMaster />} />
-           <Route path="mental-illness-master" element={<MentalIllnessMaster />} />
-           <Route path="dsm-master" element={<DsmMaster />} />
-           <Route path="premorbid-personality-master"element={<PremorbidPersonalityMst />}/>
-           <Route path="possession-master"element={<PossessionMaster />}/>
-           <Route path="financialyear-master"element={<FinancialYearMst />}/>
-           <Route path="settings"element={<SettingsMst />}/>
-           <Route path="medicine-category" element={<MedicineCategory/>}/>
-           <Route path="medicine" element={<MedicineMst/>}/>
-           <Route path="appointment-type-master" element={<AppointmentTypeMasterMst/>}/>
-           <Route path="appointment" element={<AppointmentMst/>}/>
-           <Route path="complaints" element={<ComplaintMaster />} />
-           <Route path="expenses" element={<ExpensesMst />} />
-           <Route path="mood_history" element={<MoodHistoryMst />} />
-           <Route path="states" element={<StatesMst/>} />
-            <Route path="districts" element={<DistrictsMst/>} />
-           <Route path="cities" element={<CitiesMst/>} />
-           <Route path="doctors" element={<DoctorMst/>} />
-           <Route path="icd-master" element={<IcdMasterMst />} />
-          <Route path="room-type-master" element={<RoomTypeMasterMst />} />
-           <Route path="bed" element={<BedMaster />} />
-           <Route path="habit-master" element={<HabitMaster />} />
-           <Route path="hallucination-master" element={<HallucinationMaster />} />
-           <Route path="history-master" element={<HistoryMaster />} />
-           <Route path="mental-illness-master" element={<MentalIllnessMaster />} />
-           <Route path="dsm-master" element={<DsmMaster />} />
-           <Route path="premorbid-personality-master"element={<PremorbidPersonalityMst />}/>
-           <Route path="possession-master"element={<PossessionMaster />}/>
-           <Route path="financialyear-master"element={<FinancialYearMst />}/>
-           <Route path="settings"element={<SettingsMst />}/>
-           <Route path="medicine-category" element={<MedicineCategory/>}/>
-           <Route path="medicine" element={<MedicineMst/>}/>
-           <Route path="appointment-type-master" element={<AppointmentTypeMasterMst/>}/>
-           <Route path="appointment" element={<AppointmentMst/>}/>
-           <Route path="mse" element={<MseMaster />} />
-           <Route path="thought_content_master" element={<ThoughtContentMaster />} />
-           <Route path="noticeboard" element={<Noticeboard />} />
-            {/* <Route path="transactions" element={<TransactionsMst/>}/> */}
-        </Route>
-=======
-          {/* Root Redirect */}
+          {/* Root */}
           <Route path="/" element={<Navigate to="/admin/login" replace />} />
->>>>>>> f5d956bf2e438942ab1353fffa7750e23ae84a50
 
         </Routes>
       </div>
