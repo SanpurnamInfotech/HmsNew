@@ -16,7 +16,7 @@ import {
 
 /* =========================
    Reusable Searchable Select
-   (same behavior like EmployeeMaster)
+   (Styled for Dark/Light external CSS)
    ========================= */
 const SearchableSelect = ({
   value,
@@ -24,8 +24,6 @@ const SearchableSelect = ({
   options = [],
   placeholder = "Select",
   disabled = false,
-  className = "form-input",
-  panelWidth = "w-full",
 }) => {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -48,74 +46,60 @@ const SearchableSelect = ({
 
   useEffect(() => {
     const onDoc = (e) => {
-      if (!wrapRef.current) return;
-      if (!wrapRef.current.contains(e.target)) setOpen(false);
+      if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false);
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
 
-  useEffect(() => {
-    if (!open) setQ("");
-  }, [open]);
-
   return (
     <div className="relative" ref={wrapRef}>
       <button
         type="button"
-        className={`${className} text-left flex items-center justify-between ${
-          disabled ? "opacity-70 cursor-not-allowed" : ""
+        className={`form-input w-full text-left flex items-center justify-between ${
+          disabled ? "opacity-50 cursor-not-allowed" : ""
         }`}
         disabled={disabled}
         onClick={() => !disabled && setOpen((s) => !s)}
       >
-        <span className={`${selectedLabel ? "text-gray-900" : "text-gray-400"}`}>
+        <span className={selectedLabel ? "" : "opacity-40"}>
           {selectedLabel || placeholder}
         </span>
-        <span className="ml-3 text-gray-500">▾</span>
+        <span className="opacity-50">▾</span>
       </button>
 
-      {open && !disabled && (
-        <div
-          className={`absolute z-50 mt-2 ${panelWidth} rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden`}
-        >
-          <div className="p-3 border-b border-gray-100">
+      {open && (
+        <div className="absolute z-50 mt-2 w-full rounded-xl border border-emerald-500/20 bg-surface shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150" 
+             style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-color)" }}>
+          <div className="p-3 border-b" style={{ borderColor: "var(--border-color)" }}>
             <input
               autoFocus
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className="form-input w-full text-sm"
               placeholder="Search..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
-
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-60 overflow-y-auto">
             {filtered.length > 0 ? (
               filtered.map((o) => (
                 <button
                   key={String(o.value)}
                   type="button"
-                  className={`group w-full text-left px-4 py-3 flex items-center justify-between
-                    hover:bg-blue-900 hover:text-white
-                    ${String(o.value) === String(value) ? "bg-emerald-50" : ""}
+                  className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between
+                    ${String(o.value) === String(value) ? "bg-emerald-500/10 text-emerald-500" : "hover:bg-emerald-500/5"}
                   `}
                   onClick={() => {
                     onChange(o.value);
                     setOpen(false);
                   }}
                 >
-                  <span className="text-gray-800 group-hover:text-white">
-                    {o.label}
-                  </span>
-                  {String(o.value) === String(value) && (
-                    <span className="text-emerald-600 font-semibold">✓</span>
-                  )}
+                  <span>{o.label}</span>
+                  {String(o.value) === String(value) && <FaCheckCircle size={12} />}
                 </button>
               ))
             ) : (
-              <div className="px-4 py-6 text-sm text-gray-500">
-                No results found
-              </div>
+              <div className="px-4 py-6 text-center opacity-40 text-xs uppercase font-bold tracking-widest">No Results</div>
             )}
           </div>
         </div>
@@ -125,17 +109,16 @@ const SearchableSelect = ({
 };
 
 const BankDetails = () => {
-  const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud("bankdetails/");
+  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud("bankdetails/");
 
-  // dropdowns
+  // Dropdowns
   const { data: employeeData } = useCrud("employee_master/");
-  const { data: financialyearDataRaw } = useCrud("financialyear_master/");
+  const { data: financialyearDataRaw } = useCrud("financialyear-master/");
   const { data: companyData } = useCrud("company_master/");
 
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   const [formData, setFormData] = useState({
     bank_code: "",
@@ -147,582 +130,243 @@ const BankDetails = () => {
     bank_ifsc: "",
     bank_accountno: "",
     bank_ddpayableaddress: "",
-    financialyear_code: "", // ✅ NOT required
+    financialyear_code: "",
     company_code: "",
     status: 1,
     sort_order: "",
   });
 
-  const [modal, setModal] = useState({
-    message: "",
-    visible: false,
-    type: "success",
-  });
+  const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
 
-  // ✅ Sort exactly like EmployeeMaster
-  const sortedBankDetailies = useMemo(() => {
+  /* ================= TABLE LOGIC ================= */
+  const sortedData = useMemo(() => {
     const list = Array.isArray(data) ? [...data] : [];
-
-    const getOrder = (row) => {
-      const raw = row?.sort_order;
-      const n = Number(raw);
-      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
-    };
-
-    list.sort((a, b) => {
-      const ao = getOrder(a);
-      const bo = getOrder(b);
-      if (ao !== bo) return ao - bo;
-
-      const ac = (a?.bank_code || "").toString();
-      const bc = (b?.bank_code || "").toString();
-      return ac.localeCompare(bc);
-    });
-
-    return list;
+    return list.sort((a, b) => (Number(a.sort_order || 999) - Number(b.sort_order || 999)));
   }, [data]);
 
   const {
-    search,
-    setSearch,
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    setItemsPerPage,
-    paginatedData,
-    effectiveItemsPerPage,
-    filteredData,
-    totalPages,
-  } = useTable(sortedBankDetailies);
+    search, setSearch, currentPage, setCurrentPage, itemsPerPage, setItemsPerPage,
+    paginatedData, effectiveItemsPerPage, filteredData, totalPages,
+  } = useTable(sortedData);
 
-  const showModalMsg = (message, type = "success") =>
-    setModal({ message, visible: true, type });
+  /* ================= OPTIONS MAPPING ================= */
+  const employeeOptions = useMemo(() => (employeeData || []).map(e => ({
+    value: e.employee_code,
+    label: `${e.employee_firstname} ${e.employee_lastname || ""}`.trim()
+  })), [employeeData]);
 
-  /* ✅ FIX: normalize financialyear API response */
-  const financialyearList = useMemo(() => {
-    if (Array.isArray(financialyearDataRaw)) return financialyearDataRaw;
-    if (Array.isArray(financialyearDataRaw?.results)) return financialyearDataRaw.results;
-    if (Array.isArray(financialyearDataRaw?.data)) return financialyearDataRaw.data;
-    return [];
+  const fyOptions = useMemo(() => {
+    const rawList = Array.isArray(financialyearDataRaw) ? financialyearDataRaw : (financialyearDataRaw?.data || []);
+    return rawList.map(fy => ({ value: fy.financialyear_code, label: fy.financialyear_name }));
   }, [financialyearDataRaw]);
 
-  /* ===== options for searchable dropdowns ===== */
-  const employeeOptions = useMemo(
-    () =>
-      (employeeData || []).map((e) => ({
-        value: e.employee_code, // ✅ REQUIRED
-        label:
-          `${[
-            e.employee_firstname,
-          ]
-            .filter(Boolean)
-            .join(" ")}`.trim() + (e.employee_lastname ? ` ${e.employee_lastname}` : ""),
-      })),
-    [employeeData]
-  );
+  const companyOptions = useMemo(() => (companyData || []).map(c => ({
+    value: c.company_code,
+    label: c.company_name
+  })), [companyData]);
 
-  const fyOptions = useMemo(
-    () =>
-      (financialyearList || []).map((fy) => ({
-        value: fy.financialyear_code, // ✅ REQUIRED
-        label: fy.financialyear_name || fy.financialyear_code,
-      })),
-    [financialyearList]
-  );
-
-  const companyOptions = useMemo(
-    () =>
-      (companyData || []).map((c) => ({
-        value: c.company_code, // ✅ REQUIRED
-        label: `${c.company_name}`,
-      })),
-    [companyData]
-  );
-
+  /* ================= ACTIONS ================= */
   const resetForm = () => {
     setShowForm(false);
     setIsEdit(false);
-    setSelected(null);
+    setSelectedRow(null);
     setFormData({
-      bank_code: "",
-      bank_name: "",
-      employee_code: "",
-      bank_address: "",
-      bank_phone: "",
-      bank_branch: "",
-      bank_ifsc: "",
-      bank_accountno: "",
-      bank_ddpayableaddress: "",
-      financialyear_code: "",
-      company_code: "",
-      status: 1,
-      sort_order: "",
+      bank_code: "", bank_name: "", employee_code: "", bank_address: "",
+      bank_phone: "", bank_branch: "", bank_ifsc: "", bank_accountno: "",
+      bank_ddpayableaddress: "", financialyear_code: "", company_code: "",
+      status: 1, sort_order: "",
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const payload = {
-      ...formData,
+    const payload = { 
+      ...formData, 
       status: Number(formData.status),
-      sort_order:
-        formData.sort_order === "" ||
-        formData.sort_order === null ||
-        formData.sort_order === undefined
-          ? null
-          : Number(formData.sort_order),
-
-      // ✅ NOT required fields -> send null if empty
-      employee_code: formData.employee_code || null,
-      financialyear_code: formData.financialyear_code || null,
-      company_code: formData.company_code || null,
-
-      bank_address: formData.bank_address || null,
-      bank_phone: formData.bank_phone || null,
-      bank_branch: formData.bank_branch || null,
-      bank_ifsc: formData.bank_ifsc || null,
-      bank_accountno: formData.bank_accountno || null,
-      bank_ddpayableaddress: formData.bank_ddpayableaddress || null,
+      sort_order: formData.sort_order ? Number(formData.sort_order) : null 
     };
 
-    const result = isEdit
-      ? await updateItem(`bankdetails/update/${formData.bank_code}/`, payload)
-      : await createItem(`bankdetails/create/`, payload);
+    const actionPath = isEdit ? `bankdetails/update/${formData.bank_code}/` : `bankdetails/create/`;
+    const result = isEdit ? await updateItem(actionPath, payload) : await createItem(actionPath, payload);
 
     if (result.success) {
-      showModalMsg(
-        `Bank Details ${isEdit ? "updated" : "created"} successfully!`
-      );
+      setModal({ visible: true, message: `Bank ${isEdit ? "updated" : "created"} successfully!`, type: "success" });
       resetForm();
       refresh();
     } else {
-      showModalMsg(result.error || "Operation failed!", "error");
+      setModal({ visible: true, message: result.error || "Operation failed!", type: "error" });
     }
   };
 
   const handleDelete = async () => {
-    if (!selected) return;
-    const result = await deleteItem(`bankdetails/delete/${selected.bank_code}/`);
+    if (!selectedRow) return;
+    const result = await deleteItem(`bankdetails/delete/${selectedRow.bank_code}/`);
     if (result.success) {
-      showModalMsg("Bank deleted successfully!");
-      setSelected(null);
+      setModal({ visible: true, message: "Bank deleted successfully!", type: "success" });
+      setSelectedRow(null);
       refresh();
     } else {
-      showModalMsg(result.error || "Delete failed!", "error");
+      setModal({ visible: true, message: result.error || "Delete failed!", type: "error" });
     }
   };
 
-  const statusBadge = (s) => {
-    const isActive = Number(s) === 1;
-    return (
-      <span
-        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-          isActive
-            ? "bg-green-100 text-green-700"
-            : "bg-red-100 text-red-700"
-        }`}
-      >
-        {isActive ? "Active" : "Inactive"}
-      </span>
-    );
-  };
-
-  if (loading)
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Loading Bank Details...</p>
-        </div>
-      </div>
-    );
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+    </div>
+  );
 
   return (
     <div className="app-container">
+      {/* GLOBAL MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body">
-              <div className="modal-icon-container">
-                {modal.type === "success" ? (
-                  <div className="modal-icon-success">
-                    <FaCheckCircle />
-                  </div>
-                ) : (
-                  <div className="modal-icon-error">
-                    <FaTimesCircle />
-                  </div>
-                )}
-              </div>
-              <h3
-                className={`modal-title ${
-                  modal.type === "success"
-                    ? "modal-title-success"
-                    : "modal-title-error"
-                }`}
-              >
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-              <p className="modal-message mb-6">{modal.message}</p>
-              <button
-                className="btn-primary w-full"
-                onClick={() => setModal({ ...modal, visible: false })}
-              >
-                OK
-              </button>
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
             </div>
+            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            <button className="btn-primary w-full justify-center py-3" onClick={() => setModal({ ...modal, visible: false })}>Continue</button>
           </div>
         </div>
       )}
 
+      {/* HEADER */}
       <div className="section-header">
-        <h4 className="text-xl font-bold text-gray-800">Bank Details</h4>
+        <h4 className="page-title">Bank Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
-            <button
-              className="btn-primary"
-              onClick={() => {
-                setIsEdit(false);
-                setSelected(null);
-                setShowForm(true);
-              }}
-            >
-              <FaPlus size={14} /> Add New
-            </button>
-
-            {selected && (
+            <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus size={14} /> Add New</button>
+            {selectedRow && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
-                <button
-                  className="btn-warning"
-                  onClick={() => {
-                    setFormData({ ...selected });
-                    setIsEdit(true);
-                    setShowForm(true);
-                  }}
-                >
-                  <FaEdit size={14} /> Edit
-                </button>
-                <button className="btn-danger" onClick={handleDelete}>
-                  <FaTrash size={14} /> Delete
-                </button>
+                <button className="btn-warning" onClick={() => { setFormData(selectedRow); setIsEdit(true); setShowForm(true); }}><FaEdit size={14} /> Edit</button>
+                <button className="btn-danger" onClick={handleDelete}><FaTrash size={14} /> Delete</button>
               </div>
             )}
           </div>
         )}
       </div>
 
+      {/* FORM (2-COLUMN GRID) */}
       {showForm && (
-        <div className="form-container">
-          <div className="mb-8 border-b border-gray-50 pb-5">
-            <h6 className="text-lg font-bold text-gray-800">
-              {isEdit ? "Update Bank Info" : "Add New Bank"}
-            </h6>
-            <div className="border-b border-gray-200 mt-3 mb-6"></div>
-          </div>
-
-          <form className="grid grid-cols-1 gap-y-10" onSubmit={handleSubmit}>
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">
-                Information
-              </h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Bank Code</label>
-                  <input
-                    className={`form-input ${
-                      isEdit ? "form-input-disabled" : ""
-                    }`}
-                    value={formData.bank_code || ""}
-                    disabled={isEdit}
-                    required
-                    maxLength={45}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        bank_code: e.target.value.toUpperCase(),
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Bank Name</label>
-                  <input
-                    className="form-input"
-                    value={formData.bank_name || ""}
-                    required
-                    maxLength={100}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bank_name: e.target.value })
-                    }
-                  />
-                </div>
-
-              </div>
+        <div className="form-container animate-in zoom-in-95 duration-200">
+          <h6 className="form-section-title uppercase tracking-tighter">
+            {isEdit ? "Update Bank Information" : "Create Bank Profile"}
+          </h6>
+          <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
+            
+            {/* INFORMATION SECTION */}
+            <div className="md:col-span-2"><h6 className="form-label text-emerald-600">Basic Info</h6></div>
+            <div className="space-y-1.5">
+              <label className="form-label">Bank Code</label>
+              <input className="form-input w-full" value={formData.bank_code} disabled={isEdit} required onChange={e => setFormData({ ...formData, bank_code: e.target.value.toUpperCase() })} placeholder="E.G. HDFC01" />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Bank Name</label>
+              <input className="form-input w-full" value={formData.bank_name} required onChange={e => setFormData({ ...formData, bank_name: e.target.value })} placeholder="E.G. HDFC Bank" />
             </div>
 
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">
-                Employee Details 
-              </h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Employee</label>
-                  <SearchableSelect
-                    value={formData.employee_code || ""}
-                    disabled={!!formData.employee_code}
-                    placeholder="-- Select --"
-                    options={employeeOptions}
-                    onChange={(val) =>
-                      setFormData({ ...formData, employee_code: val })
-                    }
-                  />
-                </div>
-
-                {/* ✅ Financial Year NOT required */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Financial Year</label>
-                  <SearchableSelect
-                    value={formData.financialyear_code || ""}
-                    disabled={!!formData.financialyear_code}
-                    placeholder="-- Select --"
-                    options={fyOptions}
-                    onChange={(val) =>
-                      setFormData({ ...formData, financialyear_code: val })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Company</label>
-                  <SearchableSelect
-                    value={formData.company_code || ""}
-                    disabled={!!formData.company_code}
-                    placeholder="-- Select --"
-                    options={companyOptions}
-                    onChange={(val) =>
-                      setFormData({ ...formData, company_code: val })
-                    }
-                  />
-                </div>
-              </div>
+            {/* RELATIONS SECTION */}
+            <div className="md:col-span-2 mt-4"><h6 className="form-label text-emerald-600">Associations</h6></div>
+            <div className="space-y-1.5">
+              <label className="form-label">Employee</label>
+              <SearchableSelect value={formData.employee_code} options={employeeOptions} onChange={val => setFormData({ ...formData, employee_code: val })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Financial Year</label>
+              <SearchableSelect value={formData.financialyear_code} options={fyOptions} onChange={val => setFormData({ ...formData, financialyear_code: val })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Company</label>
+              <SearchableSelect value={formData.company_code} options={companyOptions} onChange={val => setFormData({ ...formData, company_code: val })} />
             </div>
 
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">
-                Bank Contact Details
-              </h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Branch</label>
-                  <input
-                    className="form-input"
-                    value={formData.bank_branch || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bank_branch: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">IFSC</label>
-                  <input
-                    className="form-input"
-                    value={formData.bank_ifsc || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        bank_ifsc: e.target.value.toUpperCase(),
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Phone</label>
-                  <input
-                    className="form-input"
-                    value={formData.bank_phone || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bank_phone: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Account No</label>
-                  <input
-                    className="form-input"
-                    value={formData.bank_accountno || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        bank_accountno: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">DD Payable Address</label>
-                  <input
-                    className="form-input"
-                    value={formData.bank_ddpayableaddress || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        bank_ddpayableaddress: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Bank Address</label>
-                  <input
-                    className="form-input"
-                    value={formData.bank_address || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        bank_address: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Status</label>
-                  <select
-                    className="form-input"
-                    value={Number(formData.status)}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        status: Number(e.target.value),
-                      })
-                    }
-                  >
-                    <option value={1}>Active</option>
-                    <option value={0}>Inactive</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Sort Order</label>
-                  <input
-                    className="form-input"
-                    type="number"
-                    value={formData.sort_order ?? ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sort_order: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
+            {/* CONTACT/TECH SECTION */}
+            <div className="md:col-span-2 mt-4"><h6 className="form-label text-emerald-600">Bank Details</h6></div>
+            <div className="space-y-1.5">
+              <label className="form-label">Branch</label>
+              <input className="form-input w-full" value={formData.bank_branch} onChange={e => setFormData({ ...formData, bank_branch: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">IFSC Code</label>
+              <input className="form-input w-full" value={formData.bank_ifsc} onChange={e => setFormData({ ...formData, bank_ifsc: e.target.value.toUpperCase() })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Account No</label>
+              <input className="form-input w-full" value={formData.bank_accountno} onChange={e => setFormData({ ...formData, bank_accountno: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Status</label>
+              <select className="form-input w-full cursor-pointer" style={{ colorScheme: "dark" }} value={formData.status} onChange={e => setFormData({ ...formData, status: parseInt(e.target.value) })}>
+                <option value={1}>Active</option>
+                <option value={0}>Inactive</option>
+              </select>
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button className="btn-primary px-10">
-                {isEdit ? "Update" : "Save"}
-              </button>
-              <button type="button" className="btn-ghost" onClick={resetForm}>
-                Cancel
-              </button>
+            <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update" : "Save"}</button>
+              <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
         </div>
       )}
 
+      {/* TABLE */}
       {!showForm && (
-        <div className="data-table-container">
-          <TableToolbar
-            itemsPerPage={itemsPerPage}
-            setItemsPerPage={setItemsPerPage}
-            search={search}
-            setSearch={setSearch}
-            setCurrentPage={setCurrentPage}
-          />
-
+        <div className="data-table-container animate-in fade-in duration-500">
+          <TableToolbar itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} />
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="table-header-row">
+                <tr>
                   <th className="text-admin-th w-16"></th>
-                  <th className="text-admin-th">Bank Code</th>
+                  <th className="text-admin-th">Code</th>
                   <th className="text-admin-th">Bank Name</th>
+                  <th className="text-admin-th">Branch</th>
                   <th className="text-admin-th">IFSC</th>
                   <th className="text-admin-th">Account No</th>
-                  <th className="text-admin-th">Status</th>
+                  <th className="text-admin-th text-center">Status</th>
                 </tr>
               </thead>
-
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
-                  paginatedData.map((x) => (
-                    <tr
-                      key={x.bank_code}
-                      onClick={() =>
-                        setSelected(
-                          selected?.bank_code === x.bank_code ? null : x
-                        )
-                      }
-                      className={`table-row ${
-                        selected?.bank_code === x.bank_code
-                          ? "table-row-active"
-                          : "table-row-hover"
-                      }`}
-                    >
-                      <td className="text-admin-td">
-                        <div
-                          className={`selection-indicator rounded-full ${
-                            selected?.bank_code === x.bank_code
-                              ? "selection-indicator-active"
-                              : "selection-indicator-inactive"
-                          }`}
-                        >
-                          {selected?.bank_code === x.bank_code && (
-                            <div className="selection-dot rounded-full" />
-                          )}
+                  paginatedData.map((row) => (
+                    <tr key={row.bank_code} onClick={() => setSelectedRow(selectedRow?.bank_code === row.bank_code ? null : row)}
+                      className={`group cursor-pointer transition-colors ${selectedRow?.bank_code === row.bank_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}>
+                      <td className="px-6 py-4">
+                        <div className={`selection-indicator ${selectedRow?.bank_code === row.bank_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
+                          {selectedRow?.bank_code === row.bank_code && <div className="selection-dot" />}
                         </div>
                       </td>
-                      <td className="text-admin-td">{x.bank_code}</td>
-                      <td className="text-admin-td">{x.bank_name}</td>
-                      <td className="text-admin-td">{x.bank_ifsc || "-"}</td>
-                      <td className="text-admin-td">{x.bank_accountno || "-"}</td>
-                      <td className="text-admin-td">{statusBadge(x.status)}</td>
+                      <td className="text-admin-td">{row.bank_code}</td>
+                      <td className="text-admin-td">{row.bank_name}</td>
+                      <td className="text-admin-td">{row.bank_branch || "N/A"}</td>
+                      <td className="text-admin-td">{row.bank_ifsc || "-"}</td>
+                      <td className="text-admin-td">{row.bank_accountno || "-"}</td>
+                      <td className="text-admin-td ">
+                        <span className={`badge ${row.status === 1 ? "badge-success" : "badge-danger"}`}>
+                          {row.status === 1 ? "Active" : "Inactive"}
+                        </span>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="table-td py-20 text-center">
-                      <div className="empty-state-container">
-                        <FaUniversity size={48} className="mb-4 text-gray-400" />
-                        <p className="text-xl font-bold text-gray-500">
-                          No bank details found
-                        </p>
-                      </div>
+                    <td colSpan="6" className="px-6 py-24 text-center">
+                      <FaUniversity size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No Bank Details</p>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-
-          <Pagination
-            totalEntries={filteredData.length}
-            itemsPerPage={effectiveItemsPerPage}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            totalPages={totalPages}
-          />
+          <div className="pagination-container">
+            <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+          </div>
         </div>
       )}
     </div>

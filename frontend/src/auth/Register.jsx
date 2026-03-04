@@ -52,13 +52,16 @@ const Register = () => {
         username: form.username,
         email: form.email,
         password: form.password,
+        mobile_no: form.mobile_no, 
       });
 
       setSuccess("Success! Redirecting...");
       
-      if (res.data.access && res.data.refresh) {
+      const { access, refresh, ...userData } = res.data;
+
+      if (access && refresh) {
           if (login) {
-              login(res.data.access, res.data.refresh, form.username);
+              login(access, refresh, userData);
           }
           setTimeout(() => navigate("/admin/dashboard"), 1200);
       } else {
@@ -73,35 +76,44 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 px-4 py-8 font-sans">
-      <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500" />
+    <div className="min-h-screen w-full flex items-center justify-center px-4 py-8 font-sans transition-colors duration-300" style={{ backgroundColor: "var(--bg-app)" }}>
+      <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: "var(--primary-accent)" }} />
       
-      {/* Reduced width to max-w-md to match standard Login size */}
-      <div className="max-w-md w-full">
-        {/* Compact Header */}
+      <div className="max-w-md w-full animate-in fade-in zoom-in-95 duration-500">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-600 text-white shadow-lg mb-3">
-            <UserPlus className="w-6 h-6" />
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl text-white shadow-lg mb-4 transition-transform hover:-rotate-3" style={{ backgroundColor: "var(--primary-accent)" }}>
+            <UserPlus className="w-7 h-7" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900">Admin Registration</h2>
+          <h2 className="text-2xl font-black tracking-tight uppercase" style={{ color: "var(--text-title)" }}>Admin Registration</h2>
+          <p className="text-sm font-medium mt-1 opacity-60" style={{ color: "var(--text-muted)" }}>Create your management account</p>
         </div>
 
-        {/* Compact Card */}
-        <div className="bg-white p-6 rounded-[2rem] shadow-xl shadow-slate-200/50 border border-slate-100">
-          {error && <div className="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-xs font-bold">{error}</div>}
-          {success && <div className="mb-4 p-3 rounded-lg bg-emerald-50 text-emerald-600 text-xs font-bold">{success}</div>}
+        <div className="form-container shadow-2xl relative overflow-hidden">
+           <div className="absolute -top-24 -left-24 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
+          {error && (
+            <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-bold text-center animate-shake">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold text-center">
+              {success}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
-            <div>
-              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1 ml-1">Username</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="space-y-1">
+              <label className="form-label block ml-1">Username</label>
+              <div className="relative group">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40 group-focus-within:opacity-100 transition-opacity" />
                 <input
                   name="username"
                   type="text"
                   required
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500"
+                  autoComplete="off"
+                  className="form-input w-full pl-12 bg-transparent outline-none"
                   placeholder="admin_user"
                   value={form.username}
                   onChange={handleChange}
@@ -110,15 +122,16 @@ const Register = () => {
             </div>
 
             {/* Email */}
-            <div>
-              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1 ml-1">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <div className="space-y-1">
+              <label className="form-label block ml-1">Email</label>
+              <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40 group-focus-within:opacity-100 transition-opacity" />
                 <input
                   name="email"
                   type="email"
                   required
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500"
+                  autoComplete="off"
+                  className="form-input w-full pl-12 bg-transparent outline-none"
                   placeholder="admin@mail.com"
                   value={form.email}
                   onChange={handleChange}
@@ -126,32 +139,49 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Password Grid - Compact */}
+            {/* Mobile No. */}
+            <div className="space-y-1">
+              <label className="form-label block ml-1">Mobile No.</label>
+              <div className="relative group">
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40 group-focus-within:opacity-100 transition-opacity" />
+                <input
+                  name="mobile_no"
+                  type="text"
+                  autoComplete="off"
+                  className="form-input w-full pl-12 bg-transparent outline-none"
+                  placeholder="98XXXXXXXX"
+                  value={form.mobile_no}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+
+            {/* Password Fields */}
             
-              <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1 ml-1">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <div className="space-y-1">
+                <label className="form-label block ml-1">Password</label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40 group-focus-within:opacity-100 transition-opacity" />
                   <input
                     name="password"
                     type={showPassword ? "text" : "password"}
                     required
-                    className="block w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500"
+                    className="form-input w-full pl-11 bg-transparent outline-none"
                     placeholder="••••"
                     value={form.password}
                     onChange={handleChange}
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1 ml-1">Confirm</label>
-                <div className="relative">
-                  <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <div className="space-y-1">
+                <label className="form-label block ml-1">Confirm</label>
+                <div className="relative group">
+                  <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 opacity-40 group-focus-within:opacity-100 transition-opacity" />
                   <input
                     name="confirmPassword"
                     type={showPassword ? "text" : "password"}
                     required
-                    className="block w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500"
+                    className="form-input w-full pl-11 pr-10 bg-transparent outline-none"
                     placeholder="••••"
                     value={form.confirmPassword}
                     onChange={handleChange}
@@ -159,27 +189,11 @@ const Register = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 opacity-40 hover:opacity-100 transition-opacity"
+                    style={{ color: "var(--text-main)" }}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
-                </div>
-              </div>
-            
-
-            {/* Mobile */}
-            <div>
-              <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 mb-1 ml-1">Mobile (Optional)</label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  name="mobile_no"
-                  type="text"
-                  className="block w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-500"
-                  placeholder="9876543210"
-                  value={form.mobile_no}
-                  onChange={handleChange}
-                />
               </div>
             </div>
 
@@ -187,22 +201,34 @@ const Register = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 flex justify-center items-center py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-md transition-all active:scale-[0.98] disabled:opacity-70"
+              className="btn-primary w-full justify-center py-3.5 mt-2 text-sm uppercase tracking-widest shadow-emerald-500/20"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Register"}
+              {loading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  Creating...
+                </>
+              ) : (
+                "Register Account"
+              )}
             </button>
           </form>
 
-          {/* Footer Link */}
-          <div className="mt-6 pt-4 border-t border-slate-50 text-center">
-            <p className="text-xs text-slate-500 font-medium">
+          <div className="mt-8 pt-6 border-t text-center" style={{ borderColor: "var(--border-color)" }}>
+            <p className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
               Already have an account?{" "}
-              <Link to="/admin/login" className="text-emerald-600 font-bold hover:underline">
+              <Link 
+                to="/admin/login" 
+                className="font-bold transition-colors hover:underline underline-offset-4"
+                style={{ color: "var(--primary-accent)" }}
+              >
                 Sign In
               </Link>
             </p>
           </div>
         </div>
+        
+
       </div>
     </div>
   );

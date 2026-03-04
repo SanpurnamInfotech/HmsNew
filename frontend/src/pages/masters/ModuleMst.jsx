@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import api from "../../utils/domain"; 
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaChevronDown, FaChevronUp, FaSearch } from 'react-icons/fa';
+import { 
+  FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, 
+  FaChevronDown, FaChevronUp, FaSearch, FaLayerGroup 
+} from 'react-icons/fa';
+import { adminRoutes } from "../../routes/routeConfig";  
 
 const ModuleMst = () => {
   /* ================= DATA FETCHING ================= */
@@ -29,6 +33,16 @@ const ModuleMst = () => {
   });
   const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
 
+  /* ================= SORTING LOGIC ================= */
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      const seqA = parseInt(a.sequence) || 999;
+      const seqB = parseInt(b.sequence) || 999;
+      return seqA - seqB;
+    });
+  }, [data]);
+
   /* ================= TABLE LOGIC ================= */
   const { 
     search, setSearch, 
@@ -38,81 +52,28 @@ const ModuleMst = () => {
     effectiveItemsPerPage, 
     filteredData,
     totalPages 
-  } = useTable(data);
+  } = useTable(sortedData);
 
   /* ================= EFFECTS ================= */
   useEffect(() => {
     fetchUserTypes();
-    fetchAvailableUrls(); 
+
+    const formattedRoutes = adminRoutes.map(route => ({
+      label: route.label,
+      value: `/admin/${route.path}` 
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+    setUrlOptions(formattedRoutes);
   }, []);
 
   useEffect(() => {
     if (isEdit && formData.module_code) {
-      fetchModulePermissions(formData.module_code);
+      fetchModulePermissions();
     }
   }, [isEdit, formData.module_code]);
 
-  /* Add this inside your component */
-const fetchAvailableUrls = async () => {
-  try {
-    const response = await api.get("available_urls/"); 
-    // This will now show all URLs currently registered in your Engine tables
-    setUrlOptions(response.data || []);
-  } catch (error) {
-    console.error("Error fetching engine URLs:", error);
-  }
-};
-
-/* Use this in your form JSX */
-<div className="space-y-1 relative">
-  <label className="text-xs font-bold text-gray-500 uppercase">Navigation URL</label>
-  <div 
-    className="w-full border rounded-lg p-2.5 flex justify-between items-center cursor-pointer bg-gray-50 hover:bg-white border-gray-200 transition-all"
-    onClick={() => setShowUrlDropdown(!showUrlDropdown)}
-  >
-    <span className={formData.url ? "text-gray-900" : "text-gray-400"}>
-      {formData.url || "Select Existing Path"}
-    </span>
-    <FaChevronDown size={10} className={`transition-transform ${showUrlDropdown ? 'rotate-180' : ''}`} />
-  </div>
-
-  {showUrlDropdown && (
-    <div className="absolute z-50 w-full mt-1 bg-white border rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
-      <div className="p-2 border-b bg-gray-50 flex items-center gap-2">
-        <FaSearch className="text-gray-400" size={12} />
-        <input 
-          className="w-full bg-transparent outline-none text-sm" 
-          placeholder="Search registered engine paths..." 
-          value={urlSearchTerm}
-          onChange={(e) => setUrlSearchTerm(e.target.value)}
-        />
-      </div>
-      <div className="max-h-48 overflow-y-auto">
-        {urlOptions
-          .filter(u => u.label.toLowerCase().includes(urlSearchTerm.toLowerCase()) || u.value.toLowerCase().includes(urlSearchTerm.toLowerCase()))
-          .map(u => (
-            <div 
-              key={u.value} 
-              className="px-4 py-3 hover:bg-green-50 cursor-pointer flex justify-between items-center border-b border-gray-50 last:border-0"
-              onClick={() => { 
-                setFormData({...formData, url: u.value}); 
-                setShowUrlDropdown(false); 
-              }}
-            >
-              <div className="flex flex-col">
-                <span className="font-semibold text-gray-700 text-sm">{u.label}</span>
-                <span className="text-[10px] font-mono text-gray-400">{u.value}</span>
-              </div>
-            </div>
-          ))}
-          {urlOptions.length === 0 && (
-            <div className="p-4 text-center text-xs text-gray-400">No paths found in Engine Tables</div>
-          )}
-      </div>
-    </div>
-  )}
-</div>
-
+  /* ================= API CALLS ================= */
   const fetchUserTypes = async () => {
     try {
       const response = await api.get("usertypes/"); 
@@ -123,12 +84,11 @@ const fetchAvailableUrls = async () => {
     }
   };
 
-  const fetchModulePermissions = async (code) => {
+  const fetchModulePermissions = async () => {
     try {
-      const response = await api.get(`${MODULE_PATH}/permissions/${code}/`);
+      const response = await api.get(`universal-permissions/?module=${formData.module_code}`);
       setPermissionsData(response.data || {});
     } catch (error) {
-      console.error("Error fetching permissions:", error);
       setPermissionsData({});
     }
   };
@@ -149,11 +109,6 @@ const fetchAvailableUrls = async () => {
   /* ================= CRUD OPERATIONS ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.url) {
-        showModal("Navigation URL is required", "error");
-        return;
-    }
-
     const finalPayload = { ...formData, ...permissionsData };
     const actionPath = isEdit 
       ? `${MODULE_PATH}/update/${formData.module_code}/` 
@@ -185,45 +140,57 @@ const fetchAvailableUrls = async () => {
   };
 
   if (loading) return (
-    <div className="loading-overlay">
-      <div className="loading-spinner-container">
-        <div className="loading-spinner"></div>
-        <p className="loading-text">Loading Engine Modules...</p>
-      </div>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
     </div>
   );
 
   return (
     <div className="app-container">
+      {/* SUCCESS/ERROR MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body">
-              <div className="modal-icon-container">
-                {modal.type === "success" 
-                  ? <div className="modal-icon-success"><FaCheckCircle /></div> 
-                  : <div className="modal-icon-error"><FaTimesCircle /></div>
-                }
-              </div>
-              <h3 className={`modal-title ${modal.type === "success" ? "modal-title-success" : "modal-title-error"}`}>
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-              <p className="modal-message mb-6">{modal.message}</p>
-              <button className="btn-primary w-full" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? (
+                <FaCheckCircle className="text-6xl text-emerald-500" />
+              ) : (
+                <FaTimesCircle className="text-6xl text-rose-500" />
+              )}
             </div>
+            
+            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            
+            <button
+              className="btn-primary w-full justify-center py-3"
+              onClick={() => setModal({ ...modal, visible: false })}
+            >
+              Continue
+            </button>
           </div>
         </div>
       )}
 
+      {/* HEADER */}
       <div className="section-header">
-        <h4 className="text-xl font-bold text-gray-800">Module Master</h4>
+        <h4 className="page-title">Module Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
-            <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus size={14} /> Add New</button>
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
+              <FaPlus size={14} /> Add New
+            </button>
             {selectedModule && (
-              <div className="flex items-center gap-2">
-                <button className="btn-warning" onClick={() => { setFormData({...selectedModule}); setIsEdit(true); setShowForm(true); }}><FaEdit size={14} /> Edit</button>
-                <button className="btn-danger" onClick={handleDelete}><FaTrash size={14} /> Delete</button>
+              <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
+                <button className="btn-warning" onClick={() => { setFormData({...selectedModule}); setIsEdit(true); setShowForm(true); }}>
+                  <FaEdit size={14} /> Edit
+                </button>
+                <button className="btn-danger" onClick={handleDelete}>
+                  <FaTrash size={14} /> Delete
+                </button>
               </div>
             )}
           </div>
@@ -231,39 +198,70 @@ const fetchAvailableUrls = async () => {
       </div>
 
       {showForm && (
-        <div className="form-container">
-          <h6 className="text-lg font-bold text-gray-800 mb-6">{isEdit ? "Update Module Profile" : "Add New Module"}</h6>
+        <div className="form-container animate-in zoom-in-95 duration-200">
+          <h6 className="form-section-title uppercase tracking-tighter">{isEdit ? "Update Module Profile" : "Add New Module"}</h6>
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
               <label className="form-label">Module Code</label>
-              <input className={`form-input ${isEdit ? "form-input-disabled" : ""}`} value={formData.module_code} disabled={isEdit} required onChange={e => setFormData({ ...formData, module_code: e.target.value.toUpperCase() })} />
+              <input 
+                className="form-input w-full" 
+                value={formData.module_code} 
+                disabled={isEdit} 
+                required 
+                onChange={e => setFormData({ ...formData, module_code: e.target.value.toUpperCase().replace(/\s/g, '_') })} 
+                placeholder="E.G. MOD_HR_SYSTEM"
+              />
             </div>
             <div className="space-y-1.5">
               <label className="form-label">Module Name</label>
-              <input className="form-input" value={formData.module_name} required onChange={e => setFormData({ ...formData, module_name: e.target.value })} />
+              <input className="form-input w-full" value={formData.module_name} required onChange={e => setFormData({ ...formData, module_name: e.target.value })} placeholder="E.G. Human Resources" />
             </div>
 
-            {/* DYNAMIC URL DROPDOWN */}
+            {/* URL SELECTOR - Fixed for Dark Mode */}
             <div className="space-y-1.5 relative">
-              <label className="form-label">URL Path</label>
-              <div className="form-input flex justify-between items-center cursor-pointer bg-white" onClick={() => setShowUrlDropdown(!showUrlDropdown)}>
-                <span className={formData.url ? "text-gray-800" : "text-gray-400"}>{formData.url || "Select Navigation Path"}</span>
-                {showUrlDropdown ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
+              <label className="form-label">URL Path (Optional)</label>
+              <div 
+                className="form-input w-full flex justify-between items-center cursor-pointer select-none" 
+                onClick={() => setShowUrlDropdown(!showUrlDropdown)}
+              >
+                <span className={formData.url ? "opacity-100" : "opacity-40"}>{formData.url || "Select Navigation Path"}</span>
+                <div className="flex items-center gap-2">
+                   {formData.url && <FaTimesCircle className="text-rose-400 hover:scale-110 transition-transform" onClick={(e) => { e.stopPropagation(); setFormData({...formData, url: ""}); }} />}
+                   {showUrlDropdown ? <FaChevronUp size={12} className="text-emerald-500" /> : <FaChevronDown size={12} />}
+                </div>
               </div>
+
+              {/* Dropdown Menu - Linked to CSS variables */}
               {showUrlDropdown && (
-                <div className="absolute z-20 w-full mt-1 bg-white border rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1">
-                    <div className="p-2 border-b bg-gray-50 flex items-center gap-2">
-                        <FaSearch className="text-gray-400" size={12} />
-                        <input type="text" className="w-full bg-transparent border-none text-sm outline-none" placeholder="Search system path..." value={urlSearchTerm} onChange={(e) => setUrlSearchTerm(e.target.value)} />
+                <div className="absolute z-50 w-full mt-2 rounded-2xl shadow-2xl border overflow-hidden animate-in fade-in slide-in-from-top-2"
+                     style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-color)" }}>
+                    <div className="p-3 border-b flex items-center gap-3" style={{ backgroundColor: "var(--bg-hover)", borderColor: "var(--border-color)" }}>
+                        <FaSearch className="text-emerald-500" size={14} />
+                        <input 
+                          type="text" 
+                          autoFocus 
+                          className="w-full bg-transparent border-none text-sm outline-none placeholder:opacity-50" 
+                          placeholder="Search routes..." 
+                          value={urlSearchTerm} 
+                          onChange={(e) => setUrlSearchTerm(e.target.value)} 
+                        />
                     </div>
-                    <div className="max-h-48 overflow-y-auto">
-                        {urlOptions.filter(u => u.label.toLowerCase().includes(urlSearchTerm.toLowerCase()) || u.value.toLowerCase().includes(urlSearchTerm.toLowerCase())).map(u => (
-                            <div key={u.value} className="px-4 py-2 text-sm hover:bg-green-50 cursor-pointer flex justify-between items-center" onClick={() => { setFormData({...formData, url: u.value}); setShowUrlDropdown(false); }}>
-                                <span className="font-medium">{u.label}</span>
-                                <span className="text-[10px] text-gray-400 font-mono">{u.value}</span>
+                    <div className="max-h-56 overflow-y-auto custom-scrollbar">
+                        {urlOptions.filter(u => u.label.toLowerCase().includes(urlSearchTerm.toLowerCase())).length > 0 ? (
+                          urlOptions.filter(u => u.label.toLowerCase().includes(urlSearchTerm.toLowerCase())).map(u => (
+                            <div 
+                              key={u.value} 
+                              className="px-5 py-3 hover:bg-emerald-500/10 cursor-pointer transition-colors border-b last:border-0"
+                              style={{ borderColor: "var(--border-color)" }}
+                              onClick={() => { setFormData({...formData, url: u.value}); setShowUrlDropdown(false); }}
+                            >
+                                <div className="text-sm font-bold tracking-tight">{u.label}</div>
+                                <div className="text-[10px] opacity-50 font-mono mt-0.5 italic">{u.value}</div>
                             </div>
-                        ))}
-                        {urlOptions.length === 0 && <div className="p-4 text-center text-xs text-gray-400 italic">No system paths found</div>}
+                          ))
+                        ) : (
+                          <div className="p-8 text-center opacity-40 text-xs italic">No matching routes</div>
+                        )}
                     </div>
                 </div>
               )}
@@ -271,54 +269,71 @@ const fetchAvailableUrls = async () => {
 
             <div className="space-y-1.5">
               <label className="form-label">Icon Class</label>
-              <input className="form-input" value={formData.icon} placeholder="bi bi-list" onChange={e => setFormData({ ...formData, icon: e.target.value })} />
+              <input className="form-input w-full" value={formData.icon} placeholder="bi bi-list" onChange={e => setFormData({ ...formData, icon: e.target.value })} />
             </div>
             <div className="space-y-1.5">
-              <label className="form-label">Sequence</label>
-              <input className="form-input" type="number" value={formData.sequence} onChange={e => setFormData({ ...formData, sequence: e.target.value })} />
+              <label className="form-label">Sequence (Optional)</label>
+              <input className="form-input w-full" type="number" value={formData.sequence} placeholder="E.G. 1" onChange={e => setFormData({ ...formData, sequence: e.target.value })} />
             </div>
             <div className="space-y-1.5">
               <label className="form-label">Status</label>
-              <select className="form-input" value={formData.status} onChange={e => setFormData({ ...formData, status: Number(e.target.value) })}>
+              <select className="form-input w-full cursor-pointer appearance-none" style={{ colorScheme: "dark" }} value={formData.status} onChange={e => setFormData({...formData, status: parseInt(e.target.value)})}>
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
               </select>
             </div>
 
+            {/* PERMISSIONS SECTION */}
             <div className="md:col-span-2 mt-4">
-              <h6 className="text-sm font-bold text-green-700 mb-3 uppercase tracking-wider">Role-Based Permissions</h6>
-              <div className="overflow-x-auto rounded-xl border border-gray-100 shadow-sm bg-gray-50/50">
+              <h6 className="form-label mb-4 block">Module Permissions</h6>
+              <div className="overflow-hidden rounded-2xl border" style={{ borderColor: "var(--border-color)" }}>
                 <table className="w-full text-sm text-left">
-                  <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+                  <thead className="text-[10px] uppercase font-black" style={{ backgroundColor: "var(--bg-hover)", color: "var(--text-muted)" }}>
                     <tr>
-                      <th className="px-4 py-3">User Role</th>
-                      <th className="px-4 py-3 text-center">All</th>
-                      <th className="px-4 py-3 text-center">Read</th>
-                      <th className="px-4 py-3 text-center">Write</th>
-                      <th className="px-4 py-3 text-center">Update</th>
+                      <th className="px-6 py-4">User Role</th>
+                      <th className="px-4 py-4 text-center">Full Access</th>
+                      <th className="px-4 py-4 text-center">Read</th>
+                      <th className="px-4 py-4 text-center">Write</th>
+                      <th className="px-4 py-4 text-center">Update</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                     {userTypes.map((utype) => {
-                      const uId = utype.usertype_id;
-                      const isAllChecked = permissionsData[`readPermission${uId}`] === "Yes" &&
-                                           permissionsData[`writePermission${uId}`] === "Yes" &&
-                                           permissionsData[`updatePermission${uId}`] === "Yes";
+                      const uCode = utype.usertype_code; 
+                      const isAllChecked = 
+                        permissionsData[`readPermission${uCode}`] === "Yes" &&
+                        permissionsData[`writePermission${uCode}`] === "Yes" &&
+                        permissionsData[`updatePermission${uCode}`] === "Yes";
+
                       return (
-                        <tr key={uId} className="hover:bg-white transition-colors">
-                          <td className="px-4 py-3 font-semibold text-gray-700">{utype.usertype_name}</td>
-                          <td className="px-4 py-3 text-center">
-                            <input type="checkbox" className="form-checkbox h-4 w-4 text-green-600 rounded" checked={isAllChecked}
+                        <tr key={uCode} className="hover:bg-emerald-500/5 transition-colors">
+                          <td className="px-6 py-4 font-bold opacity-90">{uCode}</td>
+                          <td className="px-4 py-4 text-center">
+                            <input 
+                              type="checkbox" 
+                              className="w-4 h-4 rounded accent-emerald-500 cursor-pointer" 
+                              checked={isAllChecked}
                               onChange={(e) => {
                                 const val = e.target.checked ? "Yes" : "No";
-                                setPermissionsData(p => ({...p, [`readPermission${uId}`]: val, [`writePermission${uId}`]: val, [`updatePermission${uId}`]: val }));
+                                setPermissionsData(prev => ({
+                                  ...prev, 
+                                  [`readPermission${uCode}`]: val, 
+                                  [`writePermission${uCode}`]: val, 
+                                  [`updatePermission${uCode}`]: val 
+                                }));
                               }} 
                             />
                           </td>
-                          {['read', 'write', 'update'].map(type => (
-                            <td key={type} className="px-4 py-3 text-center">
-                              <input type="checkbox" className="form-checkbox h-4 w-4 text-green-600 rounded" checked={permissionsData[`${type}Permission${uId}`] === "Yes"}
-                                onChange={(e) => setPermissionsData(p => ({...p, [`${type}Permission${uId}`]: e.target.checked ? "Yes" : "No"}))}
+                          {['read', 'write', 'update'].map(permType => (
+                            <td key={permType} className="px-4 py-4 text-center">
+                              <input 
+                                type="checkbox" 
+                                className="w-4 h-4 rounded accent-emerald-500 cursor-pointer" 
+                                checked={permissionsData[`${permType}Permission${uCode}`] === "Yes"}
+                                onChange={(e) => setPermissionsData(prev => ({
+                                  ...prev, 
+                                  [`${permType}Permission${uCode}`]: e.target.checked ? "Yes" : "No"
+                                }))}
                               />
                             </td>
                           ))}
@@ -330,51 +345,66 @@ const fetchAvailableUrls = async () => {
               </div>
             </div>
 
-            <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button className="btn-primary px-10">{isEdit ? "Update" : "Save"}</button>
+            <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update" : "Save"}</button>
               <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
         </div>
       )}
 
+      {/* TABLE SECTION */}
       {!showForm && (
-        <div className="data-table-container">
+        <div className="data-table-container animate-in fade-in duration-500">
           <TableToolbar itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} />
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="table-header-row">
-                  <th className="table-th w-16"></th>
-                  <th className="table-th">Code</th>
-                  <th className="table-th">Module Name</th>
-                  <th className="table-th">Endpoint</th>
-                  <th className="table-th text-center">Status</th>
+                <tr>
+                  <th className="text-admin-th w-16"></th>
+                  <th className="text-admin-th">Code</th>
+                  <th className="text-admin-th">Module Name</th>
+                  <th className="text-admin-th">Endpoint</th>
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
-                {paginatedData.map((m) => (
-                  <tr key={m.module_code} onClick={() => setSelectedModule(selectedModule?.module_code === m.module_code ? null : m)} 
-                      className={`table-row ${selectedModule?.module_code === m.module_code ? "table-row-active" : "table-row-hover"}`}>
-                    <td className="table-td text-center">
-                        <div className={`selection-indicator ${selectedModule?.module_code === m.module_code ? "selection-indicator-active" : "selection-indicator-inactive"}`}>
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((m) => (
+                  <tr 
+                    key={m.module_code} 
+                    onClick={() => setSelectedModule(selectedModule?.module_code === m.module_code ? null : m)} 
+                    className={`group cursor-pointer transition-colors ${selectedModule?.module_code === m.module_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}
+                  >
+                    <td className="px-6 py-4">
+                        <div className={`selection-indicator ${selectedModule?.module_code === m.module_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
                             {selectedModule?.module_code === m.module_code && <div className="selection-dot" />}
                         </div>
                     </td>
-                    <td className="table-td text-admin-id">{m.module_code}</td>
-                    <td className="table-td font-medium">{m.module_name}</td>
-                    <td className="table-td text-gray-500 italic text-xs">{m.url || 'N/A'}</td>
-                    <td className="table-td text-center">
-                      <span className={`badge ${m.status === 1 ? 'badge-success' : 'bg-red-50 text-red-600'}`}>
+                    <td className="text-admin-td">{m.module_code}</td>
+                    <td className="text-admin-td">{m.module_name}</td>
+                    <td className="text-admin-td">{m.url || 'N/A'}</td>
+                    <td className="text-admin-td">
+                      <span className={`badge ${m.status === 1 ? 'badge-success' : 'badge-danger'}`}>
                         {m.status === 1 ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                   </tr>
-                ))}
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-24 text-center">
+                      <FaLayerGroup size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No modules found</p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
-          <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+          <div className="pagination-container">
+            <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+          </div>
         </div>
       )}
     </div>

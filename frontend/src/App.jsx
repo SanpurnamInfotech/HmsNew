@@ -1,6 +1,5 @@
 import './App.css'
-import './styles/sidebar.css';
-import Countries from './pages/masters/Countries';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './components/layers/admin/AdminLayout';
 import PrivateRoute from './auth/PrivateRoute';
 import Login from './auth/Login';
@@ -25,6 +24,8 @@ import OpdBillMaster from "./pages/masters/OpdBillMaster";
 import OpdBillingDetails from "./pages/masters/OpdBillingDetails";
 import OpdBilling from "./pages/masters/OpdBilling";
 
+import { adminRoutes } from './routes/routeConfig';
+import { ThemeProvider } from './theme/ThemeContext.jsx'; 
 
 
 
@@ -81,6 +82,48 @@ function App() {
       </Routes>
     </div>
   )
+    // Wrap the entire application or just the routes in the Provider
+    <ThemeProvider>
+      <div className="app-container">
+        <Routes>
+
+          {/* Auth Routes */}
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/register" element={<Register />} />
+
+          {/* Protected Admin Routes */}
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <AdminLayout />
+              </PrivateRoute>
+            }
+          >
+
+            {/* Default Page */}
+            <Route index element={<Navigate to="dashboard" replace />} />
+
+            {/* Dynamic Routes */}
+            {adminRoutes.map((route, index) => {
+              const Component = route.component;
+              return (
+                <Route
+                  key={index}
+                  path={route.path}
+                  element={<Component />}
+                />
+              );
+            })}
+          </Route>
+
+          {/* Root Redirect */}
+          <Route path="/" element={<Navigate to="/admin/login" replace />} />
+
+        </Routes>
+      </div>
+    </ThemeProvider>
+  );
 }
 
 export default App;
