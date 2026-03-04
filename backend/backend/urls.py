@@ -164,6 +164,8 @@ urlpatterns = [
     path('api/cities/create/', CitiesCreateView.as_view(), name='cities-create'),
     path('api/cities/update/<str:city_code>/', CitiesUpdateView.as_view(), name='cities-update'),
     path('api/cities/delete/<str:city_code>/', CitiesDeleteView.as_view(), name='cities-delete'),
+
+
     path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
     path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
     path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='mood-history-update'),
@@ -286,7 +288,24 @@ urlpatterns = [
     # path('api/transactions/delete/<str:transaction_code>/', TransactionsDeleteView.as_view(), name='transactions-delete'),
     # path('api/transactions/<str:transaction_code>/', TransactionsDetailView.as_view(), name='transactions-detail'),
 
+    path('api/account/',AccountListView.as_view(),name='account-list'),
+    path('api/account/create/',AccountCreateView.as_view(),name='account-create'),
+    path('api/account/update/<str:account_code>/',AccountUpdateView.as_view(),name='account-update'),
+    path('api/account/delete/<str:account_code>/',AccountDeleteView.as_view(),name='account-delete'),
+    path('api/account/<str:account_code>/',AccountDetailView.as_view(),name='account-detail' ),
 
+    
+    path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
+    path('api/doctors/<str:doctor_code>/', DoctorDetailView.as_view(), name='doctors-detail'),
+    path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
+    path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
+    path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
+
+
+    path('api/hospital/',HospitalListView.as_view(),name='hospital-list'),
+    path('api/hospital/create/',HospitalCreateView.as_view(),name='hospital-create'),
+    path('api/hospital/update/<str:hospital_code>/',HospitalUpdateView.as_view(),name='hospital-update'),
+    path('api/hospital/delete/<str:hospital_code>/',HospitalDeleteView.as_view(),name='hospital-delete'),
     path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
     path('api/doctors/<str:doctor_code>/', DoctorDetailView.as_view(), name='doctors-detail'),
     path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
@@ -294,6 +313,8 @@ urlpatterns = [
     path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
 
 ]
+
+
 
 
 
