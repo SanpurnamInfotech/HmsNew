@@ -270,7 +270,11 @@ urlpatterns = [
     # path('api/transactions/<str:transaction_code>/', TransactionsDetailView.as_view(), name='transactions-detail'),
 
 
-
+    path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
+    path('api/doctors/<str:doctor_code>/', DoctorDetailView.as_view(), name='doctors-detail'),
+    path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
+    path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
+    path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
 
 ]
 
