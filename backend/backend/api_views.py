@@ -2942,42 +2942,42 @@ class DoctorDeleteView(APIView):
 class DepartmentsListView(APIView):
 
  
-    def get(self, request):
-        try:
-            data = Departments.objects.all().order_by('department_name')
-            serializer = DepartmentsSerializer(data, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     def get(self, request):
+#         try:
+#             data = Departments.objects.all().order_by('department_name')
+#             serializer = DepartmentsSerializer(data, many=True)
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
  
 class DepartmentsDetailView(APIView):
 
  
-    def get(self, request, department_code):
-        try:
-            obj = get_object_or_404(Departments, department_code=department_code)
-            serializer = DepartmentsSerializer(obj)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     def get(self, request, department_code):
+#         try:
+#             obj = get_object_or_404(Departments, department_code=department_code)
+#             serializer = DepartmentsSerializer(obj)
+#             return Response(serializer.data, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
  
 class DepartmentsCreateView(APIView):
 
  
-    def post(self, request):
-        try:
-            serializer = DepartmentsSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(
-                    createdby=request.user.id,
-                    createdon=timezone.now(),
-                )
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     def post(self, request):
+#         try:
+#             serializer = DepartmentsSerializer(data=request.data)
+#             if serializer.is_valid():
+#                 serializer.save(
+#                     createdby=request.user.id,
+#                     createdon=timezone.now(),
+#                 )
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
  
 class DepartmentsUpdateView(APIView):
@@ -3026,6 +3026,25 @@ class PossessionMasterUpdateView(APIView):
                     updatedon=timezone.now()
                 )
                 return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
+ 
+# class DepartmentsDeleteView(APIView):
+#     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+#     permission_classes = [permissions.IsAuthenticated]
+ 
+#     def delete(self, request, department_code):
+#         try:
+#             obj = get_object_or_404(Departments, department_code=department_code)
+#             obj.delete()
+#             return Response({"message": "Department deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
+ 
+ 
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -3037,252 +3056,6 @@ class PossessionMasterUpdateView(APIView):
 
 
 class PossessionMasterDeleteView(APIView):
-
-
-    def delete(self, request, possession_code):
-        try:
-            obj = get_object_or_404(
-                PossessionMaster,
-                possession_code=possession_code
-            )
-            obj.delete()
-
-            return Response(
-                {"message": "Possession deleted successfully"},
-                status=status.HTTP_204_NO_CONTENT
-            )
-
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-
-
-# ---------------- LIST ----------------
-class FinancialyearMasterListView(APIView):
-
-
-    def get(self, request):
-        try:
-            data = FinancialyearMaster.objects.all().order_by('start_year')
-            serializer = FinancialyearMasterSerializer(data, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# ---------------- DETAIL ----------------
-class FinancialyearMasterDetailView(APIView):
-
-
-    def get(self, request, financialyear_code):
-        try:
-            obj = get_object_or_404(
-                FinancialyearMaster,
-                financialyear_code=financialyear_code
-            )
-            serializer = FinancialyearMasterSerializer(obj)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# ---------------- CREATE ----------------
-class FinancialyearMasterCreateView(APIView):
-
-
-    def post(self, request):
-        try:
-            serializer = FinancialyearMasterSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(
-                    createdby=request.user.id,
-                    createdon=timezone.now()
-                )
-                return Response(serializer.data,
-                                status=status.HTTP_201_CREATED)
-
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({"error": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# ---------------- UPDATE ----------------
-class FinancialyearMasterUpdateView(APIView):
-
-
-    def put(self, request, financialyear_code):
-        try:
-            obj = get_object_or_404(
-                FinancialyearMaster,
-                financialyear_code=financialyear_code
-            )
-
-            serializer = FinancialyearMasterSerializer(
-                obj, data=request.data, partial=True
-            )
-
-            if serializer.is_valid():
-                serializer.save(
-                    updatedby=request.user.id,
-                    updatedon=timezone.now()
-                )
-                return Response(serializer.data,
-                                status=status.HTTP_200_OK)
-
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({"error": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-# ---------------- DELETE ----------------
-class FinancialyearMasterDeleteView(APIView):
-
-
-    def delete(self, request, financialyear_code):
-        try:
-            obj = get_object_or_404(
-                FinancialyearMaster,
-                financialyear_code=financialyear_code
-            )
-            obj.delete()
-            return Response(
-                {"message": "Financial year deleted successfully"},
-                status=status.HTTP_204_NO_CONTENT
-            )
-        except Exception as e:
-            return Response({"error": str(e)},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)        
-        
-        
-
-
-# -------------------- LIST --------------------
-class SettingsListView(APIView):
-
-
-    def get(self, request):
-        try:
-            data = Settings.objects.all().order_by('setting_name')
-            serializer = SettingsSerializer(data, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-# -------------------- DETAIL --------------------
-class SettingsDetailView(APIView):
-
-
-    def get(self, request, setting_id):
-        try:
-            obj = get_object_or_404(Settings, setting_id=setting_id)
-            serializer = SettingsSerializer(obj)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-# -------------------- CREATE --------------------
-
-class SettingsCreateView(APIView):
-
-
-    def post(self, request):
-        serializer = SettingsSerializer(data=request.data)
-
-        if serializer.is_valid():
-
-            with transaction.atomic():
-
-                last_setting = (
-                    Settings.objects
-                    .select_for_update()
-                    .order_by("setting_id")
-                    .last()
-                )
-
-                if not last_setting:
-                    next_id = 1
-                else:
-                    next_id = last_setting.setting_id + 1
-
-                obj = serializer.save(
-                    setting_id=next_id,
-                    createdby=request.user.id,
-                    createdon=timezone.now()
-                )
-
-            return Response(
-                SettingsSerializer(obj).data,
-                status=status.HTTP_201_CREATED
-            )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# -------------------- UPDATE --------------------
-class SettingsUpdateView(APIView):
-
-
-    def put(self, request, setting_id):
-        try:
-            obj = get_object_or_404(Settings, setting_id=setting_id)
-            serializer = SettingsSerializer(obj, data=request.data, partial=True)
-
-            if serializer.is_valid():
-                serializer.save(
-                    updatedby=request.user.id,
-                    updatedon=timezone.now()
-                )
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
- 
-class DepartmentsDeleteView(APIView):
-
- 
-    def delete(self, request, department_code):
-        try:
-            obj = get_object_or_404(Departments, department_code=department_code)
-            obj.delete()
-            return Response({"message": "Department deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
- 
- 
-
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-# -------------------- DELETE --------------------
-class SettingsDeleteView(APIView):
 
 
     def delete(self, request, setting_id):
@@ -3302,7 +3075,7 @@ class SettingsDeleteView(APIView):
 
 
 # ---------------- LIST ----------------
-class MedicineListView(APIView):
+class FinancialyearMasterListView(APIView):
 
 
     def get(self, request):
@@ -3318,7 +3091,7 @@ class MedicineListView(APIView):
 
 
 # ---------------- DETAIL ----------------
-class MedicineDetailView(APIView):
+class FinancialyearMasterDetailView(APIView):
 
 
     def get(self, request, medicine_code):
@@ -3337,7 +3110,7 @@ class MedicineDetailView(APIView):
 
 
 # ---------------- CREATE ----------------
-class MedicineCreateView(APIView):
+class FinancialyearMasterCreateView(APIView):
 
 
     def post(self, request):
@@ -3367,7 +3140,7 @@ class MedicineCreateView(APIView):
 
 
 # ---------------- UPDATE ----------------
-class MedicineUpdateView(APIView):
+class FinancialyearMasterUpdateView(APIView):
 
 
     def put(self, request, medicine_code):
@@ -3406,7 +3179,7 @@ class MedicineUpdateView(APIView):
 
 
 # ---------------- DELETE ----------------
-class MedicineDeleteView(APIView):
+class FinancialyearMasterDeleteView(APIView):
 
 
     def delete(self, request, medicine_code):
@@ -3430,10 +3203,8 @@ class MedicineDeleteView(APIView):
             )
 
 
-
-
-# ---------------- LIST ----------------
-class MedicineCategoryListView(APIView):
+# -------------------- LIST --------------------
+class SettingsListView(APIView):
 
 
     def get(self, request):
@@ -3449,8 +3220,8 @@ class MedicineCategoryListView(APIView):
             )
 
 
-# ---------------- DETAIL ----------------
-class MedicineCategoryDetailView(APIView):
+# -------------------- DETAIL --------------------
+class SettingsDetailView(APIView):
 
 
     def get(self, request, medicine_cat_code):
@@ -3470,8 +3241,9 @@ class MedicineCategoryDetailView(APIView):
             )
 
 
-# ---------------- CREATE ----------------
-class MedicineCategoryCreateView(APIView):
+# -------------------- CREATE --------------------
+
+class SettingsCreateView(APIView):
 
 
     def post(self, request):
@@ -3501,8 +3273,8 @@ class MedicineCategoryCreateView(APIView):
             )
 
 
-# ---------------- UPDATE ----------------
-class MedicineCategoryUpdateView(APIView):
+# -------------------- UPDATE --------------------
+class SettingsUpdateView(APIView):
 
 
     def put(self, request, medicine_cat_code):
@@ -3523,6 +3295,25 @@ class MedicineCategoryUpdateView(APIView):
                     updatedby=request.user.id,
                     updatedon=timezone.now()
                 )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
+ 
+class DepartmentsDeleteView(APIView):
+
+ 
+    def delete(self, request, department_code):
+        try:
+            obj = get_object_or_404(Departments, department_code=department_code)
+            obj.delete()
+            return Response({"message": "Department deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+ 
+ 
+ 
 
                 return Response(
                     serializer.data,
@@ -3541,8 +3332,8 @@ class MedicineCategoryUpdateView(APIView):
             )
 
 
-# ---------------- DELETE ----------------
-class MedicineCategoryDeleteView(APIView):
+# -------------------- DELETE --------------------
+class SettingsDeleteView(APIView):
 
 
     def delete(self, request, medicine_cat_code):
@@ -3568,7 +3359,8 @@ class MedicineCategoryDeleteView(APIView):
 
 
 
-class AppointmentTypeMasterListView(APIView):
+# ---------------- LIST ----------------
+class MedicineListView(APIView):
 
 
     def get(self, request):
@@ -3587,7 +3379,7 @@ class AppointmentTypeMasterListView(APIView):
 
 
 # ---------------- DETAIL ----------------
-class AppointmentTypeMasterDetailView(APIView):
+class MedicineDetailView(APIView):
 
 
     def get(self, request, appointment_type_code):
@@ -3607,7 +3399,7 @@ class AppointmentTypeMasterDetailView(APIView):
 
 
 # ---------------- CREATE ----------------
-class AppointmentTypeMasterCreateView(APIView):
+class MedicineCreateView(APIView):
 
 
     def post(self, request):
@@ -3637,7 +3429,7 @@ class AppointmentTypeMasterCreateView(APIView):
 
 
 # ---------------- UPDATE ----------------
-class AppointmentTypeMasterUpdateView(APIView):
+class MedicineUpdateView(APIView):
 
 
     def put(self, request, appointment_type_code):
@@ -3674,7 +3466,7 @@ class AppointmentTypeMasterUpdateView(APIView):
 
 
 # ---------------- DELETE ----------------
-class AppointmentTypeMasterDeleteView(APIView):
+class MedicineDeleteView(APIView):
 
 
     def delete(self, request, appointment_type_code):
@@ -3698,7 +3490,8 @@ class AppointmentTypeMasterDeleteView(APIView):
 
 
 
-class AppointmentListView(APIView):
+# ---------------- LIST ----------------
+class MedicineCategoryListView(APIView):
 
 
     def get(self, request):
@@ -3715,7 +3508,7 @@ class AppointmentListView(APIView):
 
 
 # ---------------- DETAIL ----------------
-class AppointmentDetailView(APIView):
+class MedicineCategoryDetailView(APIView):
 
 
     def get(self, request, appointment_code):
@@ -3736,7 +3529,7 @@ class AppointmentDetailView(APIView):
 
 
 # ---------------- CREATE ----------------
-class AppointmentCreateView(APIView):
+class MedicineCategoryCreateView(APIView):
 
 
     def post(self, request):
@@ -3762,7 +3555,7 @@ class AppointmentCreateView(APIView):
             )
 
 # ---------------- UPDATE ----------------
-class AppointmentUpdateView(APIView):
+class MedicineCategoryUpdateView(APIView):
 
 
     def put(self, request, appointment_code):
@@ -3799,7 +3592,7 @@ class AppointmentUpdateView(APIView):
 
 
 # ---------------- DELETE ----------------
-class AppointmentDeleteView(APIView):
+class MedicineCategoryDeleteView(APIView):
 
 
     def delete(self, request, appointment_code):
@@ -3824,6 +3617,8 @@ class AppointmentDeleteView(APIView):
 
 
 
+class AppointmentTypeMasterListView(APIView):
+
 
 
 # # ---------------- LIST ----------------
@@ -3837,11 +3632,9 @@ class AppointmentDeleteView(APIView):
 #             serializer = TransactionsSerializer(data, many=True)
 #             return Response(serializer.data, status=status.HTTP_200_OK)
 
-#         except Exception as e:
-#             return Response(
-#                 {"error": str(e)},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
+# ---------------- DETAIL ----------------
+class AppointmentTypeMasterDetailView(APIView):
+
 
 
 # # ---------------- DETAIL ----------------
@@ -3856,8 +3649,9 @@ class AppointmentDeleteView(APIView):
 #                 transaction_code=transaction_code
 #             )
 
-#             serializer = TransactionsSerializer(obj)
-#             return Response(serializer.data, status=status.HTTP_200_OK)
+# ---------------- CREATE ----------------
+class AppointmentTypeMasterCreateView(APIView):
+
 
 #         except Exception as e:
 #             return Response(
@@ -3947,3 +3741,301 @@ class AppointmentDeleteView(APIView):
 #                 {"error": str(e)},
 #                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
 #             )            
+
+class DoctorListView(APIView):
+    permission_classes = [AllowAny]
+ 
+    def get(self, request):
+        try:
+            doctors = Doctor.objects.all().order_by('-doctor_code')
+            serializer = DoctorSerializer(doctors, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+ 
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# ---------------- UPDATE ----------------
+class AppointmentTypeMasterUpdateView(APIView):
+
+
+    def put(self, request, possession_code):
+        try:
+            obj = get_object_or_404(
+                PossessionMaster,
+                possession_code=possession_code
+            )
+
+            serializer = PossessionMasterSerializer(
+                obj,
+                data=request.data,
+                partial=True
+            )
+
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now()
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# ---------------- DELETE ----------------
+class AppointmentTypeMasterDeleteView(APIView):
+
+
+    def delete(self, request, possession_code):
+        try:
+            obj = get_object_or_404(
+                PossessionMaster,
+                possession_code=possession_code
+            )
+            obj.delete()
+
+            return Response(
+                {"message": "Possession deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+
+class AppointmentListView(APIView):
+
+
+    def get(self, request):
+        try:
+            data = FinancialyearMaster.objects.all().order_by('start_year')
+            serializer = FinancialyearMasterSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- DETAIL ----------------
+class AppointmentDetailView(APIView):
+
+
+    def get(self, request, financialyear_code):
+        try:
+            obj = get_object_or_404(
+                FinancialyearMaster,
+                financialyear_code=financialyear_code
+            )
+            serializer = FinancialyearMasterSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- CREATE ----------------
+class AppointmentCreateView(APIView):
+
+
+    def post(self, request):
+        try:
+            serializer = FinancialyearMasterSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now()
+                )
+                return Response(serializer.data,
+                                status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- UPDATE ----------------
+class AppointmentUpdateView(APIView):
+
+
+    def put(self, request, financialyear_code):
+        try:
+            obj = get_object_or_404(
+                FinancialyearMaster,
+                financialyear_code=financialyear_code
+            )
+
+            serializer = FinancialyearMasterSerializer(
+                obj, data=request.data, partial=True
+            )
+
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now()
+                )
+                return Response(serializer.data,
+                                status=status.HTTP_200_OK)
+
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# ---------------- DELETE ----------------
+class AppointmentDeleteView(APIView):
+
+
+    def delete(self, request, financialyear_code):
+        try:
+            obj = get_object_or_404(
+                FinancialyearMaster,
+                financialyear_code=financialyear_code
+            )
+            obj.delete()
+            return Response(
+                {"message": "Financial year deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Exception as e:
+            return Response({"error": str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)        
+        
+        
+
+
+# -------------------- LIST --------------------
+class SettingsListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            data = Settings.objects.all().order_by('setting_name')
+            serializer = SettingsSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# -------------------- DETAIL --------------------
+class SettingsDetailView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, setting_id):
+        try:
+            obj = get_object_or_404(Settings, setting_id=setting_id)
+            serializer = SettingsSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# -------------------- CREATE --------------------
+
+class SettingsCreateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        serializer = SettingsSerializer(data=request.data)
+
+        if serializer.is_valid():
+
+            with transaction.atomic():
+
+                last_setting = (
+                    Settings.objects
+                    .select_for_update()
+                    .order_by("setting_id")
+                    .last()
+                )
+
+                if not last_setting:
+                    next_id = 1
+                else:
+                    next_id = last_setting.setting_id + 1
+
+                obj = serializer.save(
+                    setting_id=next_id,
+                    createdby=request.user.id,
+                    createdon=timezone.now()
+                )
+
+            return Response(
+                SettingsSerializer(obj).data,
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# -------------------- UPDATE --------------------
+class SettingsUpdateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, setting_id):
+        try:
+            obj = get_object_or_404(Settings, setting_id=setting_id)
+            serializer = SettingsSerializer(obj, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now()
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# -------------------- DELETE --------------------
+class SettingsDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, setting_id):
+        try:
+            obj = get_object_or_404(Settings, setting_id=setting_id)
+            obj.delete()
+            return Response(
+                {"message": "Setting deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

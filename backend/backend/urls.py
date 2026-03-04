@@ -84,11 +84,11 @@ urlpatterns = [
     path('api/relation_master/update/<str:relation_code>/', RelationMasterUpdateView.as_view(), name='relation-update'),
     path('api/relation_master/delete/<str:relation_code>/', RelationMasterDeleteView.as_view(), name='relation-delete'),
 
-    path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
-    path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
-    path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
-    path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
-    path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
+    # path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
+    # path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
+    # path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
+    # path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
+    # path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
 
     path('api/blood_group_master/', BloodGroupMasterListView.as_view(), name='blood-group-master-list'),
     path('api/blood_group_master/detail/<str:blood_group_code>/', BloodGroupMasterDetailView.as_view(), name='blood-group-master-detail'),

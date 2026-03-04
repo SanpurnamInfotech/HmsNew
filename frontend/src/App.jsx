@@ -9,6 +9,8 @@ import { adminRoutes } from './routes/routeConfig';
 import { ThemeProvider } from './theme/ThemeContext.jsx'; 
 
 
+
+
 function App() {
   return (
     // Wrap the entire application or just the routes in the Provider

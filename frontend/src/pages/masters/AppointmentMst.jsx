@@ -78,7 +78,7 @@ const AppointmentMst = () => {
 
   useEffect(() => {
   api.get("patient/").then(res => setPatients(res.data || []));
-  api.get("doctor/").then(res => setDoctors(res.data || []));
+  api.get("doctors/").then(res => setDoctors(res.data || []));
   api.get("appointment-type-master/").then(res => setAppointmentTypes(res.data || []));
 }, []);
 
