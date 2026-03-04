@@ -803,7 +803,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
 #         model = Transactions
 #         fields = "__all__"                         
 
-<<<<<<< HEAD
 from rest_framework import serializers
 from .models import Account
 from django.utils import timezone
@@ -911,7 +910,6 @@ class HospitalDetailsSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError("Hospital name is required")
         return value.strip()
-=======
 class EctSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -925,4 +923,3 @@ class FollowUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = FollowUp
         fields = "__all__"        
->>>>>>> ganesh-1

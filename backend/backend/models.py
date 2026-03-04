@@ -1073,7 +1073,6 @@ class Appointment(models.Model):
 #         managed = False
 #         db_table = 'transactions'        
 
-<<<<<<< HEAD
 
 class Account(models.Model):
     account_code = models.CharField(unique=True, max_length=45)
@@ -1125,7 +1124,6 @@ class OpdCasesheet(models.Model):
     bp_dia = models.IntegerField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')        
     sort_order = models.IntegerField(blank=True, null=True)
-=======
                 
 
 class Ect(models.Model):
@@ -1143,7 +1141,6 @@ class Ect(models.Model):
     visit_type = models.CharField(max_length=10, blank=True, null=True, db_comment='IPD or OPD')
     sort_order = models.IntegerField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True)
->>>>>>> ganesh-1
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
     updatedon = models.DateTimeField(blank=True, null=True)
@@ -1151,9 +1148,7 @@ class Ect(models.Model):
 
     class Meta:
         managed = False
-<<<<<<< HEAD
         db_table = 'opd_casesheet'
-=======
         db_table = 'ect'
 
 
@@ -1188,4 +1183,3 @@ class FollowUp(models.Model):
     class Meta:
         managed = False
         db_table = 'follow_up'
->>>>>>> ganesh-1

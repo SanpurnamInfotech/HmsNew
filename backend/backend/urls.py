@@ -132,9 +132,9 @@ urlpatterns = [
    path('api/opd_billing_details/update/<str:opd_billing_code>/', OpdBillingDetailsUpdateView.as_view(), name='opd-billing-details-update'),
    path('api/opd_billing_details/delete/<str:opd_billing_code>/', OpdBillingDetailsDeleteView.as_view(), name='opd-billing-details-delete'),
 
-   path("api/opd_billing/", OpdBillingListView.as_view(), name="opd-billing-list"),
+#    path("api/opd_billing/", OpdBillingListView.as_view(), name="opd-billing-list"),
    path("api/opd_billing/detail/<str:opd_billing_code>/", OpdBillingDetailView.as_view(), name="opd-billing-detail"),
-   path("api/opd_billing/create/", OpdBillingCreateView.as_view(), name="opd-billing-create"),
+#    path("api/opd_billing/create/", OpdBillingCreateView.as_view(), name="opd-billing-create"),
    path("api/opd_billing/update/<str:opd_billing_code>/", OpdBillingUpdateView.as_view(), name="opd-billing-update"),
    path("api/opd_billing/delete/<str:opd_billing_code>/", OpdBillingDeleteView.as_view(), name="opd-billing-delete"),
     path('api/settings/', SettingsListView.as_view(), name='settings-list'),
@@ -292,7 +292,7 @@ urlpatterns = [
      path('api/ect/<str:ect_code>/', EctDetailView.as_view(), name='ect-detail'),
      
      path('api/ect/update/<str:ect_code>/', EctUpdateView.as_view(), name='ect-update'),
-     path('api/ect/delete/<str:ect_code>/', EctDeleteView.as_view(), name='ect-delete'),
+    #  path('api/ect/delete/<str:ect_code>/', EctDeleteView.as_view(), name='ect-delete'),
 
 
 
