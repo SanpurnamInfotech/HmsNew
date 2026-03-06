@@ -37,7 +37,6 @@ import SettingsMst from "../pages/masters/SettingsMst.jsx";
 import AccountMst from "../pages/masters/AccountMst.jsx";
 import UsertypeMst from "../pages/masters/UsertypeMst.jsx";
 import Hospital_detailsMst from "../pages/masters/Hospital_detailsMst.jsx";
-import DoctorMst from "../pages/masters/DoctorMst.jsx";
 import ComplaintMaster from "../pages/masters/ComplaintMaster.jsx";
 import MseMaster from "../pages/masters/MseMaster.jsx";
 import ExpensesMst from "../pages/masters/ExpensesMst.jsx";
@@ -47,7 +46,6 @@ import DoctorMst from "../pages/masters/DoctorMst.jsx";
 import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.jsx";
 import AppointmentMst from "../pages/masters/AppointmentMst.jsx";
 import EctMst from "../pages/masters/EctMst.jsx";
-import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.jsx";
 import FollowUpMst from "../pages/masters/FollowUpMst.jsx";
 
 
@@ -109,8 +107,6 @@ export const adminRoutes = [
   { path: "mse-master", label: "MSE Master", component: MseMaster },
   { path: "thought-content-master", label: "Thought Content Master", component: ThoughtContentMaster },
   { path: "noticeboard", label: "Noticeboard", component: Noticeboard },
-  { path: "doctors", label: "Doctors Master", component: DoctorMst },
-  { path: "appointment-type-master", label: "Appointment Type MasterMst", component: AppointmentTypeMasterMst},
 
  
   
