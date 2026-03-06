@@ -129,12 +129,7 @@ path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name
     path('api/prescription-report/', PrescriptionReportView.as_view(), name='prescription-report'),
     # path('api/prescription-pdf/', PrescriptionPDFView.as_view(), name='prescription-pdf'),
     
-    path('api/settings/', SettingsListView.as_view(), name='settings-list'),
-    path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
-    path('api/settings/update/<int:setting_id>/', SettingsUpdateView.as_view(), name='settings-update'),
-    path('api/settings/delete/<int:setting_id>/', SettingsDeleteView.as_view(), name='settings-delete'),
-    path('api/settings/<int:setting_id>/', SettingsDetailView.as_view(), name='settings-detail'),
-
+  
     
     path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
     path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
@@ -282,9 +277,8 @@ path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name
      path('api/ect/', EctListView.as_view(), name='ect-list'),
      path('api/ect/create/', EctCreateView.as_view(), name='ect-create'),
      path('api/ect/<str:ect_code>/', EctDetailView.as_view(), name='ect-detail'),
-     
-     path('api/ect/update/<str:ect_code>/', EctUpdateView.as_view(), name='ect-update'),
-    #  path('api/ect/delete/<str:ect_code>/', EctDeleteView.as_view(), name='ect-delete'),
+      path('api/ect/update/<str:ect_code>/', EctUpdateView.as_view(), name='ect-update'),
+     path('api/ect/delete/<str:ect_code>/', EctDeleteView.as_view(), name='ect-delete'),
 
 
 
