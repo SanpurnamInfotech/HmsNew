@@ -33,6 +33,11 @@ import MedicineCategory from "../pages/masters/MedicineCategory.jsx";
 import MedicineMst from "../pages/masters/MedicineMst.jsx";
 import Possation from "../pages/masters/PossessionMaster.jsx";
 import FinancialYearMst from "../pages/masters/FinancialYearMst.jsx";
+import SettingsMst from "../pages/masters/SettingsMst.jsx";
+import AccountMst from "../pages/masters/AccountMst.jsx";
+import UsertypeMst from "../pages/masters/UsertypeMst.jsx";
+import Hospital_detailsMst from "../pages/masters/Hospital_detailsMst.jsx";
+import DoctorMst from "../pages/masters/DoctorMst.jsx";
 import ComplaintMaster from "../pages/masters/ComplaintMaster.jsx";
 import MseMaster from "../pages/masters/MseMaster.jsx";
 import ExpensesMst from "../pages/masters/ExpensesMst.jsx";
@@ -40,6 +45,10 @@ import ThoughtContentMaster from "../pages/masters/thought_content_master.jsx";
 import Noticeboard from "../pages/masters/noticeboard.jsx";
 import DoctorMst from "../pages/masters/DoctorMst.jsx";
 import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.jsx";
+import AppointmentMst from "../pages/masters/AppointmentMst.jsx";
+import EctMst from "../pages/masters/EctMst.jsx";
+import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.jsx";
+import FollowUpMst from "../pages/masters/FollowUpMst.jsx";
 
 
 
@@ -79,6 +88,17 @@ export const adminRoutes = [
   { path: "medicine", label: "Medicine" , component: MedicineMst },
   { path: "posssation", label: "Possation", component: Possation },
   { path: "financial_year", label: "financial year", component: FinancialYearMst },
+  { path: "settings", label: "Settings", component: SettingsMst },
+  { path: "accounts", label: "Accounts Master", component: AccountMst },
+  { path: "usertype", label: "Usertype Master", component: UsertypeMst },
+  { path: "hospital", label: "Hospital Master", component: Hospital_detailsMst },
+  { path: "doctor", label: "Doctor", component: DoctorMst },
+  { path: "appointment", label: "Appointment", component: AppointmentMst},
+  { path: "appointment-type-master", label: "Appointment Type Master", component: AppointmentTypeMasterMst },
+  { path: "ect", label: "ECT", component: EctMst },
+  { path: "follow-up", label: "Follow Up", component: FollowUpMst },
+
+
 
   { path: "complaints", label: "Complaint Master", component: ComplaintMaster },
   { path: "expenses", label: "Expenses Master", component: ExpensesMst },
