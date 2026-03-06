@@ -3529,7 +3529,69 @@ class MedicineCategoryUpdateView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+# ---------------- LIST ----------------
+class MedicineListView(APIView):
 
+
+    def get(self, request):
+        try:
+            data = Medicine.objects.all().order_by('sort_order')
+            serializer = MedicineSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# ---------------- DETAIL ----------------
+class MedicineDetailView(APIView):
+
+
+    def get(self, request, medicine_code):
+        try:
+            obj = get_object_or_404(
+                Medicine,
+                medicine_code=medicine_code
+            )
+            serializer = MedicineSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# ---------------- CREATE ----------------
+class MedicineCreateView(APIView):
+
+
+    def post(self, request):
+        try:
+            serializer = MedicineSerializer(data=request.data)
+
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now()
+                )
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
+
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 # ---------------- DELETE ----------------
 class MedicineCategoryDeleteView(APIView):
 
