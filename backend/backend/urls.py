@@ -97,10 +97,10 @@ urlpatterns = [
     path('api/blood_group_master/delete/<str:blood_group_code>/', BloodGroupMasterDeleteView.as_view(), name='blood-group-master-delete'),
 
     path("api/blood_donor/", BloodDonorListView.as_view(), name="blood-donor-list"),
-    path("api/blood_donor/detail/<int:pk>/", BloodDonorDetailView.as_view(), name="blood-donor-detail"),
+    path("api/blood_donor/detail/<str:blood_group_code>/", BloodDonorDetailView.as_view(), name="blood-donor-detail"),
     path("api/blood_donor/create/", BloodDonorCreateView.as_view(), name="blood-donor-create"),
-    path("api/blood_donor/update/<int:pk>/", BloodDonorUpdateView.as_view(), name="blood-donor-update"),
-    path("api/blood_donor/delete/<int:pk>/", BloodDonorDeleteView.as_view(), name="blood-donor-delete"),
+    path("api/blood_donor/update/<str:blood_group_code>/", BloodDonorUpdateView.as_view(), name="blood-donor-update"),
+    path("api/blood_donor/delete/<str:blood_group_code>/", BloodDonorDeleteView.as_view(), name="blood-donor-delete"),
 
     path('api/bankdetails/', BankdetailsListView.as_view(), name='bankdetails-list'),
     path('api/bankdetails/detail/<str:bank_code>/', BankdetailsDetailView.as_view(), name='bankdetails-detail'),
@@ -152,6 +152,8 @@ urlpatterns = [
     path('api/cities/create/', CitiesCreateView.as_view(), name='cities-create'),
     path('api/cities/update/<str:city_code>/', CitiesUpdateView.as_view(), name='cities-update'),
     path('api/cities/delete/<str:city_code>/', CitiesDeleteView.as_view(), name='cities-delete'),
+
+
     path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
     path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
     path('api/mood-history/update/<str:mood_history_code>/', MoodHistoryUpdateView.as_view(), name='mood-history-update'),
@@ -190,8 +192,6 @@ urlpatterns = [
     path('api/hallucination-master/delete/<str:hallucination_code>/', HallucinationMasterDeleteView.as_view(), name='hallucination-master-delete'),
     path('api/hallucination-master/<str:hallucination_code>/', HallucinationMasterDetailView.as_view(), name='hallucination-master-detail'),
     path('api/hallucination-master/', HallucinationMasterListView.as_view(), name='hallucination-master-list'),
-
-
     
     path('api/history-master/', HistoryMasterListView.as_view()),
     path('api/history-master/create/', HistoryMasterCreateView.as_view()),
@@ -273,8 +273,43 @@ urlpatterns = [
     # path('api/transactions/update/<str:transaction_code>/', TransactionsUpdateView.as_view(), name='transactions-update'),
     # path('api/transactions/delete/<str:transaction_code>/', TransactionsDeleteView.as_view(), name='transactions-delete'),
     # path('api/transactions/<str:transaction_code>/', TransactionsDetailView.as_view(), name='transactions-detail'),
+    
+    
+     path('api/ect/', EctListView.as_view(), name='ect-list'),
+     path('api/ect/create/', EctCreateView.as_view(), name='ect-create'),
+     path('api/ect/<str:ect_code>/', EctDetailView.as_view(), name='ect-detail'),
+     
+     path('api/ect/update/<str:ect_code>/', EctUpdateView.as_view(), name='ect-update'),
+    #  path('api/ect/delete/<str:ect_code>/', EctDeleteView.as_view(), name='ect-delete'),
 
 
+
+    
+    path('api/follow-up/', FollowUpListView.as_view(), name='followup-list'),
+    path('api/follow-up/create/', FollowUpCreateView.as_view(), name='followup-create'),
+    path('api/follow-up/<str:follow_up_code>/', FollowUpDetailView.as_view(), name='followup-detail'),
+    path('api/follow-up/update/<str:follow_up_code>/', FollowUpUpdateView.as_view(), name='followup-update'),
+    path('api/follow-up/delete/<str:follow_up_code>/', FollowUpDeleteView.as_view(), name='followup-delete'),
+
+
+    path('api/account/',AccountListView.as_view(),name='account-list'),
+    path('api/account/create/',AccountCreateView.as_view(),name='account-create'),
+    path('api/account/update/<str:account_code>/',AccountUpdateView.as_view(),name='account-update'),
+    path('api/account/delete/<str:account_code>/',AccountDeleteView.as_view(),name='account-delete'),
+    path('api/account/<str:account_code>/',AccountDetailView.as_view(),name='account-detail' ),
+
+    
+    path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
+    path('api/doctors/<str:doctor_code>/', DoctorDetailView.as_view(), name='doctors-detail'),
+    path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
+    path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
+    path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
+
+
+    path('api/hospital/',HospitalListView.as_view(),name='hospital-list'),
+    path('api/hospital/create/',HospitalCreateView.as_view(),name='hospital-create'),
+    path('api/hospital/update/<str:hospital_code>/',HospitalUpdateView.as_view(),name='hospital-update'),
+    path('api/hospital/delete/<str:hospital_code>/',HospitalDeleteView.as_view(),name='hospital-delete'),
     path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
     path('api/doctors/<str:doctor_code>/', DoctorDetailView.as_view(), name='doctors-detail'),
     path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
@@ -289,6 +324,8 @@ urlpatterns = [
 
 
 ]
+
+
 
 
 

@@ -26,10 +26,7 @@ class UsersSerializer(serializers.ModelSerializer):
         model = Users
         fields = '__all__'  
 
-class UsertypeMasterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UsertypeMaster
-        fields = '__all__'  
+
 
 class PermissionsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -215,6 +212,21 @@ class PatientSerializer(serializers.ModelSerializer):
         extra_kwargs = {
     "hospital_code": {"required": False, "allow_null": True},
 }
+        
+class OpdBillMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpdBillMaster
+        fields = '__all__'
+        
+class OpdBillingDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpdBillingDetails
+        fields = "__all__"
+
+class OpdBillingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpdBilling
+        fields = "__all__"                        
 
         
 
@@ -243,10 +255,7 @@ class IpdRegistrationSerializer(serializers.ModelSerializer):
             'updated_by',
         )
 
-# class DoctorSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Doctor
-#         fields = '__all__'
+
 
 class PatientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -644,6 +653,7 @@ from rest_framework import serializers
 from .models import Doctor
 from django.utils import timezone
 
+
 class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
@@ -666,32 +676,12 @@ class DoctorSerializer(serializers.ModelSerializer):
         return value.strip()
 
     def create(self, validated_data):
-        request = self.context.get('request')
-        validated_data['createdon'] = timezone.now()
-        validated_data['updatedon'] = timezone.now()
-        
-        if request and hasattr(request, 'user'):
-            try:
-                # User ID save karne ke liye
-                validated_data['createdby'] = request.user.id
-                validated_data['updatedby'] = request.user.id
-            except Exception:
-                pass
+        validated_data["createdon"] = timezone.now()
         return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        request = self.context.get('request')
-        validated_data['updatedon'] = timezone.now()
-        
-        if request and hasattr(request, 'user'):
-            try:
-                # Update ke waqt sirf updatedby change hoga
-                validated_data['updatedby'] = request.user.id
-            except Exception:
-                pass
+        validated_data["updatedon"] = timezone.now()
         return super().update(instance, validated_data)
-    
-
 
 class IcdMasterSerializer(serializers.ModelSerializer):
 
@@ -852,9 +842,123 @@ class AppointmentSerializer(serializers.ModelSerializer):
 #         model = Transactions
 #         fields = "__all__"                         
 
+from rest_framework import serializers
+from .models import Account
+from django.utils import timezone
+
+
+class AccountSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Account
+        fields = "__all__"
+        read_only_fields = ["createdon", "createdby", "updatedon", "updatedby"]
+
+    # ================= VALIDATIONS =================
+
+    def validate_account_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Account code is required.")
+        return value.strip()
+
+    def validate_account_number(self, value):
+        if not value:
+            raise serializers.ValidationError("Account number is required.")
+        return value.strip()
+
+    # ================= CREATE =================
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+
+        return super().create(validated_data)
+
+    # ================= UPDATE =================
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+
+        validated_data['updatedon'] = timezone.now()
+
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+
+        return super().update(instance, validated_data)
+
+
+from rest_framework import serializers
+from backend.models import UsertypeMaster
+
+
+class UsertypeMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UsertypeMaster
+        fields = [
+            "usertype_code",
+            "usertype_name",
+            "isactive",
+            "createdby",
+            "createdon",
+            "updatedby",
+            "updatedon",
+        ]
+        read_only_fields = [
+            "usertype_code",
+            "createdby",
+            "createdon",
+            "updatedby",
+            "updatedon",
+        ]
+
+from rest_framework import serializers
+from backend.models import HospitalDetails
+
+
 class HospitalDetailsSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = HospitalDetails
-        fields = '__all__'
+        fields = "__all__"
+        read_only_fields = [
+            "createdon",
+            "createdby",
+            "updatedon",
+            "updatedby",
+        ]
+
+    def validate_hospital_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Hospital code is required")
+        return value.strip()
+
+    def validate_hospital_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Hospital name is required")
+        return value.strip()
+class EctSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Ect
+        fields = "__all__"
         
-# Serializer for Header with Nested Items
+
+
+class FollowUpSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FollowUp
+        fields = "__all__"        
