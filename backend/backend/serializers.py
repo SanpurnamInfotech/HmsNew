@@ -79,38 +79,80 @@ class PatientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = "__all__"
+
+
         
 class DepartmentsSerializer(serializers.ModelSerializer):  
     class Meta:
         model = Departments
         fields = "__all__"
+        read_only_fields = ['department_code', 'createdon', 'createdby', 'updatedon', 'updatedby']
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            last_dept = Departments.objects.select_for_update().order_by('department_code').last()
+            
+            if not last_dept or not last_dept.department_code:
+                new_num = 1
+            else:
+                try:
+                    # Extracts number from 'DEPT000001' -> 1, then increments
+                    last_id_numeric = last_dept.department_code.replace("DEPT", "")
+                    new_num = int(last_id_numeric) + 1
+                except (ValueError, TypeError):
+                    new_num = 1
+            
+            # Formats to DEPT + 6 digits (e.g., DEPT000001)
+            validated_data['department_code'] = f"DEPT{new_num:06d}"
+            
+            return super().create(validated_data)
         
 
+from rest_framework import serializers
+from .models import PrescriptionHeader, PrescriptionItems, Patient, Doctor
 
 class PrescriptionItemsSerializer(serializers.ModelSerializer):
+    # Dynamically fetch medicine name from the related Medicine model
     medicine_name = serializers.ReadOnlyField(source='medicine_code.medicine_name')
 
     class Meta:
         model = PrescriptionItems
         fields = ['medicine_code', 'medicine_name', 'dosage', 'duration', 'instructions', 'status']
 
-class PrescriptionHeaderSerializer(serializers.ModelSerializer):
-    # Using 'items' to represent the child records
-    items = PrescriptionItemsSerializer(many=True, source='prescriptionitems_set', required=False)
-    patient_name = serializers.ReadOnlyField(source='patient_code.patient_name')
-    doctor_name = serializers.ReadOnlyField(source='doctor_code.doctor_name')
+class PrescriptionReportSerializer(serializers.ModelSerializer):
+    # source='prescriptionitems_set' works because of the ForeignKey in PrescriptionItems
+    items = PrescriptionItemsSerializer(many=True, read_only=True, source='prescriptionitems_set')
+    doctor_details = serializers.SerializerMethodField()
+    patient_details = serializers.SerializerMethodField()
 
     class Meta:
         model = PrescriptionHeader
         fields = '__all__'
 
-    def create(self, validated_data):
-        items_data = self.context.get('request').data.get('items', [])
-        with transaction.atomic():
-            prescription = PrescriptionHeader.objects.create(**validated_data)
-            for item in items_data:
-                PrescriptionItems.objects.create(prescription_code=prescription, **item)
-        return prescription
+    def get_doctor_details(self, obj):
+        # Dynamically fetch doctor from the Doctor model using the code from header
+        doc = Doctor.objects.filter(doctor_code=obj.doctor_code).first()
+        if doc:
+            return {
+                "name": doc.doctor_name,
+                "degree": doc.qualification,
+                "mobile": doc.mobile
+            }
+        return None
+
+    def get_patient_details(self, obj):
+        # Dynamically fetch patient using patient_code
+        patient = Patient.objects.filter(patient_code=obj.patient_code).first()
+        if patient:
+            # Map gender integer to text
+            gender_map = {1: "Male", 2: "Female", 3: "Other"}
+            return {
+                "full_name": f"{patient.patient_first_name} {patient.patient_last_name}",
+                "age": patient.age,
+                "sex": gender_map.get(patient.gender, "Unknown"),
+                "mobile": patient.mobile
+            }
+        return None
         
 class AdvicemasterSerializer(serializers.ModelSerializer):  
     class Meta:
@@ -137,10 +179,7 @@ class RelationMasterSerializer(serializers.ModelSerializer):
         model = RelationMaster
         fields = '__all__'
 
-class DepartmentsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Departments
-        fields = '__all__'
+
 
 class BloodGroupMasterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -812,3 +851,10 @@ class AppointmentSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Transactions
 #         fields = "__all__"                         
+
+class HospitalDetailsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HospitalDetails
+        fields = '__all__'
+        
+# Serializer for Header with Nested Items

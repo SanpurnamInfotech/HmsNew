@@ -84,11 +84,11 @@ urlpatterns = [
     path('api/relation_master/update/<str:relation_code>/', RelationMasterUpdateView.as_view(), name='relation-update'),
     path('api/relation_master/delete/<str:relation_code>/', RelationMasterDeleteView.as_view(), name='relation-delete'),
 
-    # path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
-    # path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
-    # path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
-    # path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
-    # path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
+    path('api/departments/', DepartmentsListView.as_view(), name='departments-list'),
+    path('api/departments/detail/<str:department_code>/', DepartmentsDetailView.as_view(), name='departments-detail'),
+    path('api/departments/create/', DepartmentsCreateView.as_view(), name='departments-create'),
+    path('api/departments/update/<str:department_code>/', DepartmentsUpdateView.as_view(), name='departments-update'),
+    path('api/departments/delete/<str:department_code>/', DepartmentsDeleteView.as_view(), name='departments-delete'),
 
     path('api/blood_group_master/', BloodGroupMasterListView.as_view(), name='blood-group-master-list'),
     path('api/blood_group_master/detail/<str:blood_group_code>/', BloodGroupMasterDetailView.as_view(), name='blood-group-master-detail'),
@@ -119,6 +119,11 @@ urlpatterns = [
     path('api/patient/create/', PatientCreateView.as_view(), name='patient-create'),
     path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
     path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
+    
+    path('api/patient-dates/<str:patient_code>/', PatientPrescriptionDatesView.as_view(), name='patient-dates'),
+    
+    path('api/prescription-report/', PrescriptionReportView.as_view(), name='prescription-report'),
+    # path('api/prescription-pdf/', PrescriptionPDFView.as_view(), name='prescription-pdf'),
     
     path('api/settings/', SettingsListView.as_view(), name='settings-list'),
     path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
@@ -275,6 +280,13 @@ urlpatterns = [
     path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
     path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
     path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
+    
+    path('api/hospital_details/', HospitalDetailsListView.as_view(), name='hospital_details_list'),
+    # path('api/hospital_details/<str:hospital__detailscode>/', Hospital_detailsDetailView.as_view(), name='hospital_details_detail'),
+    path('api/hospital_details/create/', HospitalDetailsCreateView.as_view(), name='hospital_details_create'),
+    path('api/hospital_details/update/<str:hospital_details_code>/', HospitalDetailsUpdateView.as_view(), name='hospital_details_update'),
+    path('api/hospital_details/delete/<str:hospital_details_code>/', HospitalDetailsDeleteView.as_view(), name='hospital_details_delete'),
+
 
 ]
 

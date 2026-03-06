@@ -262,6 +262,8 @@ class Cities(models.Model):
         managed = False
         db_table = 'cities'
         
+        
+        
 class MaritalStatusMaster(models.Model):
     marital_status_code = models.CharField(unique=True, max_length=45)
     marital_status_name = models.CharField(max_length=100)
@@ -275,12 +277,12 @@ class MaritalStatusMaster(models.Model):
     class Meta:
         managed = False
         db_table = 'marital_status_master'
-        
+  
 class Departments(models.Model):
-    department_code = models.CharField(unique=True, max_length=25)
+    department_code = models.CharField(unique=True, max_length=45)
     department_name = models.CharField(max_length=100)
-    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code')
-    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code')
+    financialyear_code = models.CharField(max_length=45)
+    company_code = models.CharField(max_length=45)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -327,21 +329,6 @@ class Medicine(models.Model):
         managed = False
         db_table = 'medicine'
         
-class Departments(models.Model):
-    department_code = models.CharField(unique=True, max_length=25)
-    department_name = models.CharField(max_length=100)
-    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code')
-    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code')
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
-    sort_order = models.IntegerField(blank=True, null=True)
-    createdon = models.DateTimeField(blank=True, null=True)
-    createdby = models.IntegerField(blank=True, null=True)
-    updatedon = models.DateTimeField(blank=True, null=True)
-    updatedby = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'departments'
         
 class Doctor(models.Model):
     doctor_code = models.CharField(unique=True, max_length=45)
@@ -373,6 +360,7 @@ class Doctor(models.Model):
     class Meta:
         managed = False
         db_table = 'doctor'
+        
 class Patient(models.Model):
     uhid = models.CharField(max_length=14)
     patient_code = models.CharField(unique=True, max_length=45)
@@ -420,7 +408,6 @@ class Patient(models.Model):
         managed = False
         db_table = 'patient'        
 
-        db_table = 'patient'
 
 class IpdServices(models.Model):
     service_id = models.CharField(max_length=50)
@@ -457,14 +444,16 @@ class PrescriptionItems(models.Model):
         
 class PrescriptionHeader(models.Model):
     prescription_code = models.CharField(unique=True, max_length=45)
-    prescription_name = models.CharField(max_length=225)
-    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
-    doctor_code = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctor_code', to_field='doctor_code')
-    prescription_date = models.DateTimeField(blank=True, null=True)
-    diagnosis = models.TextField()
-    symptoms = models.TextField()
+    appointment_code = models.CharField(max_length=45, blank=True, null=True)
+    patient_code = models.CharField(max_length=45)
+    doctor_code = models.CharField(max_length=45)
+    prescription_date = models.DateField(blank=True, null=True)
+    diagnosis = models.TextField(blank=True, null=True)
+    symptoms = models.TextField(blank=True, null=True)
+    case_history = models.TextField(blank=True, null=True)
     next_visit_date = models.DateField(blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    pdf_file_path = models.CharField(max_length=255, blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)
