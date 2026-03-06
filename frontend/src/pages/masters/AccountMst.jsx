@@ -17,7 +17,7 @@ const AccountMst = () => {
   const { data, loading, refresh, createItem, updateItem, deleteItem } =
     useCrud(`${ACCOUNT_PATH}/`);
 
-  const { data: banks } = useCrud("bankdetails/");
+ const { data: banks } = useCrud("bankdetails/");
 
   /* ================= UI STATE ================= */
   const [showForm, setShowForm] = useState(false);
@@ -85,7 +85,7 @@ const AccountMst = () => {
   }, [banks, bankSearch]);
 
   const selectedBankCode =
-    banks?.find((b) => b.bank_code === formData.bank_code)?.bank_code ||
+    banks.find((b) => b.bank_code === formData.bank_code)?.bank_code ||
     "Select Bank Code";
 
   /* ================= SUBMIT ================= */
