@@ -17,7 +17,6 @@ import {
 
 /* =========================
    Reusable Searchable Select
-   (Theme-aware)
    ========================= */
 const SearchableSelect = ({
   value,
@@ -26,6 +25,7 @@ const SearchableSelect = ({
   placeholder = "Select",
   disabled = false,
   className = "form-input",
+  error = false,
 }) => {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
@@ -59,7 +59,7 @@ const SearchableSelect = ({
         type="button"
         className={`${className} w-full text-left flex items-center justify-between ${
           disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-        }`}
+        } ${error ? "border-rose-500 ring-1 ring-rose-500" : ""}`}
         disabled={disabled}
         onClick={() => !disabled && setOpen((s) => !s)}
       >
@@ -70,7 +70,7 @@ const SearchableSelect = ({
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border bg-(--bg-surface) border-(--border-color)shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
+        <div className="absolute z-50 mt-2 w-full rounded-xl border bg-(--bg-surface) border-(--border-color) shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150">
           <div className="p-3 border-b border-(--border-color)">
             <input
               autoFocus
@@ -128,6 +128,17 @@ const BedAllotment = () => {
 
   const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
 
+  /* ================= SORTING LOGIC ================= */
+  // Sort data by sort_order ascending (blanks/nulls go to end)
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      const sa = (a.sort_order === null || a.sort_order === "" || a.sort_order === undefined) ? 9999 : Number(a.sort_order);
+      const sb = (b.sort_order === null || b.sort_order === "" || b.sort_order === undefined) ? 9999 : Number(b.sort_order);
+      return sa - sb;
+    });
+  }, [data]);
+
   /* ================= TABLE LOGIC ================= */
   const {
     search,
@@ -140,7 +151,7 @@ const BedAllotment = () => {
     effectiveItemsPerPage,
     filteredData,
     totalPages,
-  } = useTable(data || []);
+  } = useTable(sortedData);
 
   const resetForm = () => {
     setShowForm(false);
@@ -160,12 +171,20 @@ const BedAllotment = () => {
   /* ================= ACTIONS ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.bed_code || !formData.patient_code) {
+        showModal("Please select both a Bed and a Patient.", "error");
+        return;
+    }
+
     const actionPath = isEdit ? `${PATH}/update/${formData.id}/` : `${PATH}/create/`;
     
+    // Applying the same sort_order processing as Departments
     const payload = { 
         ...formData, 
-        sort_order: formData.sort_order || null 
+        sort_order: (formData.sort_order === "" || formData.sort_order === null) ? null : Number(formData.sort_order)
     };
+    
     if (!isEdit) delete payload.id;
 
     const result = isEdit ? await updateItem(actionPath, payload) : await createItem(actionPath, payload);
@@ -227,6 +246,7 @@ const BedAllotment = () => {
                     ...selectedRow,
                     allotment_timestamp: selectedRow.allotment_timestamp?.slice(0, 16) || "",
                     discharge_timestamp: selectedRow.discharge_timestamp?.slice(0, 16) || "",
+                    sort_order: selectedRow.sort_order ?? ""
                   });
                   setIsEdit(true);
                   setShowForm(true);
@@ -238,7 +258,7 @@ const BedAllotment = () => {
         )}
       </div>
 
-      {/* FORM - 2 COLUMNS */}
+      {/* FORM */}
       {showForm && (
         <div className="form-container animate-in zoom-in-95 duration-200">
           <h6 className="form-section-title uppercase tracking-tighter">
@@ -246,7 +266,7 @@ const BedAllotment = () => {
           </h6>
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <label className="form-label">Bed</label>
+              <label className="form-label">Bed <span className="text-rose-500">*</span></label>
               <SearchableSelect
                 value={formData.bed_code}
                 options={bedOptions}
@@ -256,7 +276,7 @@ const BedAllotment = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="form-label">Patient</label>
+              <label className="form-label">Patient <span className="text-rose-500">*</span></label>
               <SearchableSelect
                 value={formData.patient_code}
                 options={patientOptions}
@@ -266,8 +286,9 @@ const BedAllotment = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="form-label">Allotment Date & Time</label>
+              <label className="form-label">Allotment Date & Time <span className="text-rose-500">*</span></label>
               <input
+                required
                 type="datetime-local"
                 className="form-input w-full"
                 value={formData.allotment_timestamp}
@@ -276,8 +297,9 @@ const BedAllotment = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="form-label">Discharge Date & Time</label>
+              <label className="form-label">Discharge Date & Time <span className="text-rose-500">*</span></label>
               <input
+                required
                 type="datetime-local"
                 className="form-input w-full"
                 value={formData.discharge_timestamp}
@@ -291,6 +313,7 @@ const BedAllotment = () => {
                 type="number"
                 className="form-input w-full"
                 value={formData.sort_order}
+                placeholder="E.G. 1"
                 onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
               />
             </div>
@@ -343,9 +366,9 @@ const BedAllotment = () => {
                           {selectedRow?.id === item.id && <div className="selection-dot" />}
                         </div>
                       </td>
-                      <td className="text-admin-td font-bold">{item.bed_code}</td>
+                      <td className="text-admin-td">{item.bed_code}</td>
                       <td className="text-admin-td">{item.patient_code}</td>
-                      <td className="text-admin-td text-xs opacity-60">
+                      <td className="text-admin-td">
                         {item.allotment_timestamp ? new Date(item.allotment_timestamp).toLocaleString() : "-"}
                       </td>
                       <td className="text-admin-td">

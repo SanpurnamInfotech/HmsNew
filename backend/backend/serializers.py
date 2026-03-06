@@ -166,6 +166,35 @@ class EmployeeMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeMaster
         fields = '__all__'
+        # Make employee_code read-only to prevent updates from changing it
+        read_only_fields = ['employee_code', 'createdon', 'createdby', 'updatedon', 'updatedby']
+        
+    def create(self, validated_data):
+        with transaction.atomic():
+            last_emp = EmployeeMaster.objects.select_for_update().order_by('employee_code').last()
+            
+            if not last_emp or not last_emp.employee_code:
+                new_num = 1
+            else:
+                try:
+                    # Extracts number from 'EMP000001' -> 1, then increments
+                    last_id_numeric = last_emp.employee_code.replace("EMP", "")
+                    new_num = int(last_id_numeric) + 1
+                except (ValueError, TypeError):
+                    new_num = 1
+            
+            # Formats to EMP + 6 digits (e.g., EMP000001)
+            validated_data['employee_code'] = f"EMP{new_num:06d}"
+            
+            return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        # Ensure employee_code is never changed during an update
+        validated_data.pop('employee_code', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
 
 class MaritalStatusMasterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -843,9 +872,7 @@ class TransactionsSerializer(serializers.ModelSerializer):
         model = Transactions
         fields = "__all__"                         
 
-from rest_framework import serializers
-from .models import Account
-from django.utils import timezone
+
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -900,33 +927,6 @@ class AccountSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-from rest_framework import serializers
-from backend.models import UsertypeMaster
-
-
-class UsertypeMasterSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = UsertypeMaster
-        fields = [
-            "usertype_code",
-            "usertype_name",
-            "isactive",
-            "createdby",
-            "createdon",
-            "updatedby",
-            "updatedon",
-        ]
-        read_only_fields = [
-            "usertype_code",
-            "createdby",
-            "createdon",
-            "updatedby",
-            "updatedon",
-        ]
-
-from rest_framework import serializers
-from backend.models import HospitalDetails
 
 
 class HospitalDetailsSerializer(serializers.ModelSerializer):
@@ -963,3 +963,21 @@ class FollowUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = FollowUp
         fields = "__all__"        
+
+
+
+class UsertypeMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UsertypeMaster
+        fields = "__all__"                         
+class DivisionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Division
+        fields = "__all__"                         
+class DesignationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Designation
+        fields = "__all__"                         

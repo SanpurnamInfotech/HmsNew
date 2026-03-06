@@ -23,24 +23,17 @@ const RelationMaster = () => {
 
   /* ================= SORTING LOGIC ================= */
   const sortedData = useMemo(() => {
-    const list = Array.isArray(data) ? [...data] : [];
-
-    const getOrder = (row) => {
-      const n = Number(row?.sort_order);
-      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
-    };
-
-    list.sort((a, b) => {
-      const ao = getOrder(a);
-      const bo = getOrder(b);
-      if (ao !== bo) return ao - bo;
-
-      const ac = (a?.relation_code || "").toString();
-      const bc = (b?.relation_code || "").toString();
-      return ac.localeCompare(bc);
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      // Consistent sorting logic: blanks/nulls go to the end (9999)
+      const sa = (a.sort_order === null || a.sort_order === "" || a.sort_order === undefined) ? 9999 : Number(a.sort_order);
+      const sb = (b.sort_order === null || b.sort_order === "" || b.sort_order === undefined) ? 9999 : Number(b.sort_order);
+      
+      if (sa !== sb) return sa - sb;
+      
+      // Secondary sort by code if sort_order is identical
+      return (a.relation_code || "").localeCompare(b.relation_code || "");
     });
-
-    return list;
   }, [data]);
 
   /* ================= TABLE ================= */
@@ -81,7 +74,8 @@ const RelationMaster = () => {
     const payload = {
       ...formData,
       status: Number(formData.status),
-      sort_order: formData.sort_order === "" ? null : Number(formData.sort_order),
+      // Corrected sort_order processing for DB
+      sort_order: (formData.sort_order === "" || formData.sort_order === null) ? null : Number(formData.sort_order),
     };
 
     const result = isEdit
@@ -97,7 +91,7 @@ const RelationMaster = () => {
     }
   };
 
-  /* ================= DELETE (No Confirm) ================= */
+  /* ================= DELETE ================= */
   const handleDelete = async () => {
     if (!selectedRow) return;
 
@@ -156,7 +150,7 @@ const RelationMaster = () => {
                 <button
                   className="btn-warning"
                   onClick={() => {
-                    setFormData({ ...selectedRow });
+                    setFormData({ ...selectedRow, sort_order: selectedRow.sort_order ?? "" });
                     setIsEdit(true);
                     setShowForm(true);
                   }}
@@ -172,7 +166,7 @@ const RelationMaster = () => {
         )}
       </div>
 
-      {/* FORM (2-COLUMN GRID) */}
+      {/* FORM */}
       {showForm && (
         <div className="form-container animate-in zoom-in-95 duration-200">
           <h6 className="form-section-title uppercase tracking-tighter">
@@ -181,7 +175,7 @@ const RelationMaster = () => {
 
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
-              <label className="form-label">Relation Code</label>
+              <label className="form-label">Relation Code <span className="text-rose-500">*</span></label>
               <input
                 className="form-input w-full"
                 value={formData.relation_code}
@@ -193,7 +187,7 @@ const RelationMaster = () => {
             </div>
 
             <div className="space-y-1.5">
-              <label className="form-label">Relation Name</label>
+              <label className="form-label">Relation Name <span className="text-rose-500">*</span></label>
               <input
                 className="form-input w-full"
                 value={formData.relation_name}
@@ -208,7 +202,7 @@ const RelationMaster = () => {
               <input
                 className="form-input w-full"
                 type="number"
-                value={formData.sort_order ?? ""}
+                value={formData.sort_order}
                 placeholder="E.G. 1"
                 onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
               />
@@ -228,7 +222,7 @@ const RelationMaster = () => {
             </div>
 
             <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
-              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update " : "Save "}</button>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update" : "Save"}</button>
               <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>

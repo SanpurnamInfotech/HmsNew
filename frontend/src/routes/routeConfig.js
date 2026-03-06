@@ -46,6 +46,7 @@ import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.
 import AppointmentMst from "../pages/masters/AppointmentMst.jsx";
 import EctMst from "../pages/masters/EctMst.jsx";
 import FollowUpMst from "../pages/masters/FollowUpMst.jsx";
+import DoctorMst from "../pages/masters/DoctorMst.jsx"
 
 
 

@@ -23,20 +23,17 @@ const MaritalStatusMaster = () => {
 
   /* ================= SORTING LOGIC ================= */
   const sortedMaritalStatuses = useMemo(() => {
-    const list = Array.isArray(data) ? [...data] : [];
-    const getOrder = (row) => {
-      const n = Number(row?.sort_order);
-      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
-    };
-
-    list.sort((a, b) => {
-      const ao = getOrder(a);
-      const bo = getOrder(b);
-      if (ao !== bo) return ao - bo;
-      return (a?.marital_status_code || "").toString().localeCompare((b?.marital_status_code || "").toString());
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      // Consistent sort_order logic: Blanks/Nulls go to the bottom (999)
+      const sa = (a.sort_order === null || a.sort_order === "" || a.sort_order === undefined) ? 999 : Number(a.sort_order);
+      const sb = (b.sort_order === null || b.sort_order === "" || b.sort_order === undefined) ? 999 : Number(b.sort_order);
+      
+      if (sa !== sb) return sa - sb;
+      
+      // Secondary sort by name
+      return (a.marital_status_name || "").localeCompare(b.marital_status_name || "");
     });
-
-    return list;
   }, [data]);
 
   /* ================= TABLE ================= */
@@ -72,7 +69,8 @@ const MaritalStatusMaster = () => {
     const payload = {
       ...formData,
       status: Number(formData.status),
-      sort_order: formData.sort_order === "" ? null : Number(formData.sort_order),
+      // Standardized sort_order processing for DB
+      sort_order: (formData.sort_order === "" || formData.sort_order === null) ? null : Number(formData.sort_order),
     };
 
     const actionPath = isEdit
@@ -92,7 +90,7 @@ const MaritalStatusMaster = () => {
     }
   };
 
-  /* ================= DELETE (Confirm Msg Removed) ================= */
+  /* ================= DELETE ================= */
   const handleDelete = async () => {
     if (!selected) return;
     const result = await deleteItem(`${PATH}/delete/${selected.marital_status_code}/`);
@@ -149,7 +147,8 @@ const MaritalStatusMaster = () => {
                 <button
                   className="btn-warning"
                   onClick={() => {
-                    setFormData({ ...selected });
+                    // Standardized: convert null DB values to empty string for React input
+                    setFormData({ ...selected, sort_order: selected.sort_order ?? "" });
                     setIsEdit(true);
                     setShowForm(true);
                   }}
@@ -165,7 +164,7 @@ const MaritalStatusMaster = () => {
         )}
       </div>
 
-      {/* FORM SECTION (2 COLUMNS) */}
+      {/* FORM SECTION */}
       {showForm && (
         <div className="form-container animate-in zoom-in-95 duration-200">
           <h6 className="form-section-title uppercase tracking-tighter">
@@ -203,7 +202,7 @@ const MaritalStatusMaster = () => {
               <input
                 className="form-input w-full"
                 type="number"
-                value={formData.sort_order ?? ""}
+                value={formData.sort_order}
                 placeholder="Eg. 1"
                 onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })}
               />

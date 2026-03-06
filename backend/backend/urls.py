@@ -21,11 +21,7 @@ urlpatterns = [
 
    
     
-    path('api/usertypes/', UserTypeListView.as_view(), name='usertype-list'),
-    path('api/usertypes/create/', UserTypeCreateView.as_view(), name='usertype-create'),
-    path('api/usertypes/<int:usertype_code>/', UserTypeDetailView.as_view(), name='usertype-detail'),
-    path('api/usertypes/update/<int:usertype_code>/', UserTypeUpdateView.as_view(), name='usertype-update'),
-    path('api/usertypes/delete/<int:usertype_code>/', UserTypeDeleteView.as_view(), name='usertype-delete'),
+
     
     path("api/engine-module/", EngineModuleListView.as_view()),
     path("api/engine-module/create/", EngineModuleCreateView.as_view()),
@@ -326,6 +322,26 @@ path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name
     path('api/hospital_details/update/<str:hospital_details_code>/', HospitalDetailsUpdateView.as_view(), name='hospital_details_update'),
     path('api/hospital_details/delete/<str:hospital_details_code>/', HospitalDetailsDeleteView.as_view(), name='hospital_details_delete'),
 
+
+    path('api/divisions/', DivisionListView.as_view(), name='division-list'),
+    path('api/divisions/create/', DivisionCreateView.as_view(), name='division-create'),
+    path('api/divisions/<str:division_code>/', DivisionDetailView.as_view(), name='division-detail'),
+    path('api/divisions/update/<str:division_code>/', DivisionUpdateView.as_view(), name='division-update'),
+    path('api/divisions/delete/<str:division_code>/', DivisionDeleteView.as_view(), name='division-delete'),
+
+    # --- Designation URLs ---
+    path('api/designations/', DesignationListView.as_view(), name='designation-list'),
+    path('api/designations/create/', DesignationCreateView.as_view(), name='designation-create'),
+    path('api/designations/<str:designation_code>/', DesignationDetailView.as_view(), name='designation-detail'),
+    path('api/designations/update/<str:designation_code>/', DesignationUpdateView.as_view(), name='designation-update'),
+    path('api/designations/delete/<str:designation_code>/', DesignationDeleteView.as_view(), name='designation-delete'),
+
+    # --- UsertypeMaster URLs ---
+    path('api/usertypes/', UsertypeMasterListView.as_view(), name='usertype-list'),
+    path('api/usertypes/create/', UsertypeMasterCreateView.as_view(), name='usertype-create'),
+    path('api/usertypes/<str:usertype_code>/', UsertypeMasterDetailView.as_view(), name='usertype-detail'),
+    path('api/usertypes/update/<str:usertype_code>/', UsertypeMasterUpdateView.as_view(), name='usertype-update'),
+    path('api/usertypes/delete/<str:usertype_code>/', UsertypeMasterDeleteView.as_view(), name='usertype-delete'),
 
 ]
 
