@@ -46,6 +46,8 @@ import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.
 import AppointmentMst from "../pages/masters/AppointmentMst.jsx";
 import EctMst from "../pages/masters/EctMst.jsx";
 import FollowUpMst from "../pages/masters/FollowUpMst.jsx";
+import TransactionsMst from "../pages/masters/TransactionsMst.jsx";
+import BedMaster from "../pages/masters/BedMaster.jsx";
 
 
 
@@ -81,14 +83,14 @@ export const adminRoutes = [
   { path: "icd_master", label:"ICD Master", component:IcdMasterMst},
   { path: "dsm_master", label:"DSM Master", component:DsmMaster},
   { path: "room_type", label: "Room Type Master", component:RoomTypeMasterMst},
-  { path: "habit", label: "Habit Master", component:HabitMaster},
+  { path: "habit", label: "Habit Master", component:HabitMaster}, 
   { path: "hallucination", label:"Hallucination Master", component:HallucinationMaster},
   { path :"history", label:"History Master", component:HistoryMaster}, 
   { path :" mental_illness", label: "Mental Illness Master", component:MentalIllnessMaster},
-  { path: "medicine_category", label: "Medicine_category", component: MedicineCategory },
+  { path: "medicine-category", label: "Medicine_category", component: MedicineCategory },
   { path: "medicine", label: "Medicine" , component: MedicineMst },
   { path: "posssation", label: "Possation", component: Possation },
-  { path: "financial_year", label: "financial year", component: FinancialYearMst },
+  { path: "financialyear-master", label: "financial year", component: FinancialYearMst },
   { path: "settings", label: "Settings", component: SettingsMst },
   { path: "accounts", label: "Accounts Master", component: AccountMst },
   { path: "usertype", label: "Usertype Master", component: UsertypeMst },
@@ -109,6 +111,8 @@ export const adminRoutes = [
 
  
   
+  { path: "transactions", label: "Transactions", component: TransactionsMst },
+  { path: "bed", label: "Bed", component: BedMaster },
   
 ];
 
