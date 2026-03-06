@@ -39,6 +39,11 @@ import CitiesMst from './pages/masters/CitiesMst.jsx';
 import DoctorMst from './pages/masters/DoctorMst.jsx'
 import EctMst from './pages/masters/EctMst.jsx'
 import FollowUpMst from './pages/masters/FollowUpMst.jsx'
+import PatientMst from './pages/masters/PatientMst.jsx';
+import TransactionsMst from './pages/masters/TransactionsMst';
+
+
+
 
 function App() {
   return (
@@ -91,6 +96,7 @@ function App() {
             <Route path="medicine" element={<MedicineMst />} />
             <Route path="appointment-type-master" element={<AppointmentTypeMasterMst />} />
             <Route path="appointment" element={<AppointmentMst />} />
+            <Route path="patient" element={<PatientMst />} />
 
             <Route path="complaints" element={<ComplaintMaster />} />
             <Route path="expenses" element={<ExpensesMst />} />
@@ -104,6 +110,11 @@ function App() {
             <Route path="noticeboard" element={<Noticeboard />} />
             <Route path="ect" element={<EctMst/>} />
             <Route path="follow-up" element={<FollowUpMst/>} />
+            <Route path="patient" element={<PatientMst/>} />
+            <Route path="transactions" element={<TransactionsMst/>} />
+
+
+           
             
 
           </Route>

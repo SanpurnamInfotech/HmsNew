@@ -115,10 +115,14 @@ urlpatterns = [
     path("api/bed_allotment/delete/<int:id>/", BedAllotmentDeleteView.as_view(), name="bed-allotment-delete"),
 
     path('api/patient/', PatientListView.as_view(), name='patient-list'),
-    path('api/patient/detail/<str:patient_code>/', PatientDetailView.as_view(), name='patient-detail'),
-    path('api/patient/create/', PatientCreateView.as_view(), name='patient-create'),
-    path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
-    path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
+
+path('api/patient/detail/<str:patient_code>/', PatientDetailView.as_view(), name='patient-detail'),
+
+path('api/patient/create/', PatientCreateView.as_view(), name='patient-create'),
+
+path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
+
+path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
     
     path('api/settings/', SettingsListView.as_view(), name='settings-list'),
     path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
@@ -261,11 +265,11 @@ urlpatterns = [
     path('api/appointment/delete/<str:appointment_code>/',AppointmentDeleteView.as_view(),name='appointment-delete'),
     
     
-    # path('api/transactions/', TransactionsListView.as_view(), name='transactions-list'),
-    # path('api/transactions/create/', TransactionsCreateView.as_view(), name='transactions-create'),
-    # path('api/transactions/update/<str:transaction_code>/', TransactionsUpdateView.as_view(), name='transactions-update'),
-    # path('api/transactions/delete/<str:transaction_code>/', TransactionsDeleteView.as_view(), name='transactions-delete'),
-    # path('api/transactions/<str:transaction_code>/', TransactionsDetailView.as_view(), name='transactions-detail'),
+    path('api/transactions/', TransactionsListView.as_view(), name='transactions-list'),
+    path('api/transactions/create/', TransactionsCreateView.as_view(), name='transactions-create'),
+    path('api/transactions/update/<str:transaction_code>/', TransactionsUpdateView.as_view(), name='transactions-update'),
+    path('api/transactions/delete/<str:transaction_code>/', TransactionsDeleteView.as_view(), name='transactions-delete'),
+    path('api/transactions/<str:transaction_code>/', TransactionsDetailView.as_view(), name='transactions-detail'),
     
     
      path('api/ect/', EctListView.as_view(), name='ect-list'),

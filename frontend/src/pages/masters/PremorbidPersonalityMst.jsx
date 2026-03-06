@@ -1,18 +1,25 @@
 import React, { useState } from "react";
-import { useCrud, useTable, Pagination, TableToolbar } 
-  from "../../components/common/BaseCRUD";
+import {
+  useCrud,
+  useTable,
+  Pagination,
+  TableToolbar
+} from "../../components/common/BaseCRUD";
 
-import { 
-  FaPlus, FaEdit, FaTrash, 
-  FaCheckCircle, FaTimesCircle 
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCheckCircle,
+  FaTimesCircle
 } from "react-icons/fa";
 
 const PremorbidPersonalityMst = () => {
 
-  const API_PATH = "premorbid-personality-master";
+  const PATH = "premorbid-personality-master";
 
   const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud(`${API_PATH}/`);
+    useCrud(`${PATH}/`);
 
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -32,14 +39,17 @@ const PremorbidPersonalityMst = () => {
   });
 
   const {
-    search, setSearch,
-    currentPage, setCurrentPage,
-    itemsPerPage, setItemsPerPage,
+    search,
+    setSearch,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
     paginatedData,
     effectiveItemsPerPage,
     filteredData,
     totalPages
-  } = useTable(data);
+  } = useTable(data || []);
 
   const showModal = (message, type = "success") =>
     setModal({ message, visible: true, type });
@@ -48,6 +58,7 @@ const PremorbidPersonalityMst = () => {
     setShowForm(false);
     setIsEdit(false);
     setSelectedItem(null);
+
     setFormData({
       premorbid_personality_code: "",
       premorbid_personality_name: "",
@@ -57,24 +68,27 @@ const PremorbidPersonalityMst = () => {
   };
 
   const handleSubmit = async (e) => {
+
     e.preventDefault();
 
     const actionPath = isEdit
-      ? `${API_PATH}/update/${formData.premorbid_personality_code}/`
-      : `${API_PATH}/create/`;
+      ? `${PATH}/update/${formData.premorbid_personality_code}/`
+      : `${PATH}/create/`;
 
     const payload = { ...formData };
- 
-if (payload.sort_order === "" || payload.sort_order === null) {
-  delete payload.sort_order;
-}
- 
-const result = isEdit
-  ? await updateItem(actionPath, payload)
-  : await createItem(actionPath, payload);
+
+    if (payload.sort_order === "" || payload.sort_order === null) {
+      delete payload.sort_order;
+    }
+
+    const result = isEdit
+      ? await updateItem(actionPath, payload)
+      : await createItem(actionPath, payload);
 
     if (result.success) {
-      showModal(`Premorbid personality ${isEdit ? "updated" : "created"} successfully`);
+      showModal(
+        `Premorbid personality ${isEdit ? "updated" : "created"} successfully`
+      );
       resetForm();
       refresh();
     } else {
@@ -83,12 +97,11 @@ const result = isEdit
   };
 
   const handleDelete = async () => {
+
     if (!selectedItem) return;
 
-    // if (!window.confirm("Are you sure you want to delete this record?")) return;
-
     const result = await deleteItem(
-      `${API_PATH}/delete/${selectedItem.premorbid_personality_code}/`
+      `${PATH}/delete/${selectedItem.premorbid_personality_code}/`
     );
 
     if (result.success) {
@@ -100,96 +113,111 @@ const result = isEdit
     }
   };
 
-  if (loading) return (
-    <div className="loading-overlay">
-      <div className="loading-spinner-container text-center">
-        <div className="loading-spinner mx-auto mb-4"></div>
-        <p className="text-emerald-700 font-bold">Loading master data...</p>
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="app-container">
 
-      {/* MODAL */}
+      {/* Modal */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body text-center">
-              <div className="mb-4">
-                {modal.type === "success"
-                  ? <FaCheckCircle className="text-4xl text-emerald-500 mx-auto"/>
-                  : <FaTimesCircle className="text-4xl text-red-500 mx-auto"/>
-                }
-              </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
 
-              <h3 className={`text-xl font-bold mb-2 ${
-                modal.type === "success" ? "text-emerald-700" : "text-red-700"
-              }`}>
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
+          <div className="form-container max-w-sm w-full p-8 text-center">
 
-              <p className="text-gray-600 mb-6">{modal.message}</p>
-
-              <button
-                className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-2.5 rounded-lg font-semibold"
-                onClick={() => setModal({ ...modal, visible: false })}
-              >
-                OK
-              </button>
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? (
+                <FaCheckCircle className="text-6xl text-emerald-500" />
+              ) : (
+                <FaTimesCircle className="text-6xl text-rose-500" />
+              )}
             </div>
+
+            <h3
+              className={`text-xl font-bold mb-2 ${
+                modal.type === "success"
+                  ? "text-emerald-500"
+                  : "text-rose-500"
+              }`}
+            >
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+
+            <p className="mb-6">{modal.message}</p>
+
+            <button
+              className="btn-primary w-full"
+              onClick={() =>
+                setModal({ ...modal, visible: false })
+              }
+            >
+              Continue
+            </button>
+
           </div>
+
         </div>
       )}
 
-      {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
-        <div>
-          <h4 className="text-2xl font-black text-gray-800 tracking-tight">
-            Premorbid Personality Master
-          </h4>
-        </div>
+      {/* Header */}
+
+      <div className="section-header">
+
+        <h4 className="page-title">
+          Premorbid Personality Master
+        </h4>
 
         {!showForm && (
           <div className="flex gap-2">
+
             <button
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md shadow-emerald-100"
+              className="btn-primary flex items-center gap-2"
               onClick={() => setShowForm(true)}
             >
-              <FaPlus size={14}/> Add New
+              <FaPlus size={14} /> Add
             </button>
 
             {selectedItem && (
-              <div className="flex gap-2 animate-in slide-in-from-right-5">
+              <>
                 <button
-                  className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md"
+                  className="btn-warning flex items-center gap-2"
                   onClick={() => {
                     setFormData(selectedItem);
                     setIsEdit(true);
                     setShowForm(true);
                   }}
                 >
-                  <FaEdit size={14}/> Edit
+                  <FaEdit size={14} /> Edit
                 </button>
 
                 <button
-                  className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md"
+                  className="btn-danger flex items-center gap-2"
                   onClick={handleDelete}
                 >
-                  <FaTrash size={14}/> Delete
+                  <FaTrash size={14} /> Delete
                 </button>
-              </div>
+              </>
             )}
+
           </div>
         )}
+
       </div>
 
-      {/* FORM */}
+      {/* Form */}
+
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100 animate-in zoom-in-95 duration-200">
-          <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">
-            {isEdit ? "Update Premorbid Personality" : "Create Premorbid Personality"}
+
+        <div className="form-container animate-in zoom-in-95 duration-200">
+
+          <h6 className="form-section-title">
+            {isEdit
+              ? "Update Premorbid Personality"
+              : "Create Premorbid Personality"}
           </h6>
 
           <form
@@ -197,35 +225,32 @@ const result = isEdit
             onSubmit={handleSubmit}
           >
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Code
-              </label>
+            <div>
+              <label className="form-label">Code</label>
+
               <input
-                className={`w-full px-4 py-3 rounded-lg border border-gray-200
-                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none
-                ${isEdit ? "bg-gray-50 text-gray-400" : ""}`}
-                value={formData.premorbid_personality_code}
-                disabled={isEdit}
                 required
+                disabled={isEdit}
+                className={`form-input w-full ${
+                  isEdit ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                value={formData.premorbid_personality_code}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    premorbid_personality_code: e.target.value.toUpperCase()
+                    premorbid_personality_code: e.target.value
                   })
                 }
               />
+
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Name
-              </label>
+            <div>
+              <label className="form-label">Name</label>
+
               <input
-                className="w-full px-4 py-3 rounded-lg border border-gray-200
-                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+                className="form-input w-full"
                 value={formData.premorbid_personality_name}
-                required
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -233,17 +258,16 @@ const result = isEdit
                   })
                 }
               />
+
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Sort Order
-              </label>
+            <div>
+              <label className="form-label">Sort Order</label>
+
               <input
                 type="number"
-                className="w-full px-4 py-3 rounded-lg border border-gray-200
-                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
-                value={formData.sort_order}
+                className="form-input w-full"
+                value={formData.sort_order || ""}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -251,15 +275,14 @@ const result = isEdit
                   })
                 }
               />
+
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
-                Status
-              </label>
+            <div>
+              <label className="form-label">Status</label>
+
               <select
-                className="w-full px-4 py-3 rounded-lg border border-gray-200
-                focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 outline-none"
+                className="form-input w-full"
                 value={formData.status}
                 onChange={(e) =>
                   setFormData({
@@ -271,31 +294,38 @@ const result = isEdit
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
               </select>
+
             </div>
 
-            <div className="md:col-span-2 flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-2.5 rounded-lg text-sm font-bold shadow-lg shadow-emerald-100"
-              >
+            <div
+              className="md:col-span-2 flex justify-end gap-3 border-t pt-6"
+              style={{ borderColor: "var(--border-color)" }}
+            >
+
+              <button type="submit" className="btn-primary">
                 {isEdit ? "Update" : "Save"}
               </button>
 
               <button
                 type="button"
-                className="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-700"
+                className="btn-ghost"
                 onClick={resetForm}
               >
                 Cancel
               </button>
+
             </div>
 
           </form>
+
         </div>
       )}
 
-      {/* TABLE */}
+      {/* Table */}
+
       {!showForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in duration-500">
+
+        <div className="data-table-container animate-in fade-in duration-500">
 
           <TableToolbar
             itemsPerPage={itemsPerPage}
@@ -306,79 +336,79 @@ const result = isEdit
           />
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+
+            <table className="w-full">
+
               <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="px-6 py-4 w-16"></th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Code</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Name</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">Sort</th>
-                  <th className="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
+                <tr>
+                  <th className="text-admin-th w-16"></th>
+                  <th className="text-admin-th">Code</th>
+                  <th className="text-admin-th">Name</th>
+                  <th className="text-admin-th">Sort Order</th>
+                  <th className="text-admin-th text-center">Status</th>
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-gray-50">
+              <tbody
+                className="divide-y"
+                style={{ borderColor: "var(--border-color)" }}
+              >
+
                 {paginatedData.map((row) => (
+
                   <tr
                     key={row.premorbid_personality_code}
-                    onClick={() =>
-                      setSelectedItem(
-                        selectedItem?.premorbid_personality_code ===
-                        row.premorbid_personality_code ? null : row
-                      )
-                    }
-                    className={`group cursor-pointer transition-colors duration-150
-                      ${selectedItem?.premorbid_personality_code ===
-                        row.premorbid_personality_code
-                        ? "bg-emerald-50/40"
-                        : "hover:bg-gray-50/50"}`}
+                    onClick={() => setSelectedItem(row)}
+                    className={`cursor-pointer transition ${
+                      selectedItem?.premorbid_personality_code ===
+                      row.premorbid_personality_code
+                        ? "bg-emerald-500/10"
+                        : "hover:bg-emerald-500/5"
+                    }`}
                   >
 
-                    <td className="px-6 py-4">
-                      <div
-                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all
-                          ${selectedItem?.premorbid_personality_code ===
-                            row.premorbid_personality_code
-                            ? "border-emerald-500 bg-emerald-500"
-                            : "border-gray-200 group-hover:border-emerald-300"}`}
-                      >
-                        {selectedItem?.premorbid_personality_code ===
-                          row.premorbid_personality_code && (
-                          <div className="w-1.5 h-1.5 rounded-full bg-white" />
-                        )}
-                      </div>
-                    </td>
+                    <td></td>
 
-                    <td className="px-6 py-4 font-black text-gray-800 text-sm">
+                    <td className="text-admin-td font-bold">
                       {row.premorbid_personality_code}
                     </td>
 
-                    <td className="px-6 py-4 font-bold text-gray-700">
+                    <td className="text-admin-td">
                       {row.premorbid_personality_name}
                     </td>
 
-                    <td className="px-6 py-4 text-center font-mono text-xs">
+                    <td className="text-admin-td">
                       {row.sort_order}
                     </td>
 
-                    <td className="px-6 py-4 text-center">
+                    <td className="text-admin-td text-center">
+
                       <span
-                        className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest
-                          ${row.status === 1
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"}`}
+                        className={`badge ${
+                          row.status === 1
+                            ? "badge-success"
+                            : "badge-danger"
+                        }`}
                       >
-                        {row.status === 1 ? "Active" : "Inactive"}
+                        {row.status === 1
+                          ? "Active"
+                          : "Inactive"}
                       </span>
+
                     </td>
 
                   </tr>
+
                 ))}
+
               </tbody>
+
             </table>
+
           </div>
 
-          <div className="bg-white border-t border-gray-50 p-6">
+          <div className="pagination-container">
+
             <Pagination
               totalEntries={filteredData.length}
               itemsPerPage={effectiveItemsPerPage}
@@ -386,6 +416,7 @@ const result = isEdit
               setCurrentPage={setCurrentPage}
               totalPages={totalPages}
             />
+
           </div>
 
         </div>
