@@ -42,7 +42,6 @@ import MseMaster from "../pages/masters/MseMaster.jsx";
 import ExpensesMst from "../pages/masters/ExpensesMst.jsx";
 import ThoughtContentMaster from "../pages/masters/thought_content_master.jsx";
 import Noticeboard from "../pages/masters/noticeboard.jsx";
-import DoctorMst from "../pages/masters/DoctorMst.jsx";
 import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.jsx";
 import AppointmentMst from "../pages/masters/AppointmentMst.jsx";
 import EctMst from "../pages/masters/EctMst.jsx";
