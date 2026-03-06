@@ -1857,13 +1857,7 @@ class MoodHistoryDeleteView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-    from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
+   
 from .models import States
 from .serializers import StatesSerializer
 import traceback
@@ -1917,13 +1911,7 @@ class StatesDeleteView(APIView):
         except Exception as e:
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
-from django.utils import timezone
+   
 from .models import Districts
 from .serializers import DistrictsSerializer
 import traceback
@@ -2051,13 +2039,7 @@ class DistrictsDeleteView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
-from django.utils import timezone
+
 from .models import Cities
 from .serializers import CitiesSerializer
 import traceback
@@ -3190,12 +3172,6 @@ class PossessionMasterDeleteView(APIView):
         
 
 # doctor
-import traceback
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 
 from backend.models import Doctor
 from backend.serializers import DoctorSerializer
@@ -4755,20 +4731,14 @@ class TransactionsDeleteView(APIView):
 #                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
 #             )            
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
+
 from .models import Account
 from .serializers import AccountSerializer
 import traceback
 
 # --- List View ---
 class AccountListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+   
 
     def get(self, request):
         try:
@@ -4780,9 +4750,7 @@ class AccountListView(APIView):
 
 # --- Create View ---
 class AccountCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
+    
     def post(self, request):
         try:
             serializer = AccountSerializer(data=request.data, context={"request": request})
@@ -4795,8 +4763,7 @@ class AccountCreateView(APIView):
 
 # --- Detail View (Retrieve) ---
 class AccountDetailView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+   
 
     def get(self, request, account_code):
         try:
@@ -4808,8 +4775,7 @@ class AccountDetailView(APIView):
 
 # --- Update View ---
 class AccountUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+   
 
     def put(self, request, account_code):
         try:
@@ -4825,8 +4791,7 @@ class AccountUpdateView(APIView):
 
 # --- Delete View ---
 class AccountDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+    
 
     def delete(self, request, account_code):
         try:
@@ -4839,21 +4804,14 @@ class AccountDeleteView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
+
 from .models import Doctor
 from .serializers import DoctorSerializer
 import traceback
 
 # --- List View ---
 class DoctorListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
+   
     def get(self, request):
         try:
             # Ordering by doctor_code or name as per your preference
@@ -4865,9 +4823,7 @@ class DoctorListView(APIView):
 
 # --- Create View ---
 class DoctorCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
+    
     def post(self, request):
         try:
             serializer = DoctorSerializer(data=request.data, context={"request": request})
@@ -4878,19 +4834,6 @@ class DoctorCreateView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# class DoctorListView(APIView):
-#     def get(self, request):
-#         try:
-#             doctors = Doctor.objects.all().order_by('-doctor_code')
-#             serializer = DoctorSerializer(doctors, many=True)
-#             return Response(serializer.data, status=status.HTTP_200_OK)
-
-#         except Exception as e:
-#             return Response(
-#                 {"error": str(e)},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
 
 
 # ---------------- DETAIL ----------------
@@ -5146,21 +5089,14 @@ class DoctorDeleteView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
+
 from .models import HospitalDetails  # Updated name
 from .serializers import HospitalDetailsSerializer # Ensure your serializer matches this name
 import traceback
 
 # --- List View ---
 class HospitalListView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
+   
     def get(self, request):
         try:
             objs = HospitalDetails.objects.all().order_by("hospital_code")
@@ -5171,8 +5107,7 @@ class HospitalListView(APIView):
 
 # --- Create View ---
 class HospitalCreateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+   
 
     def post(self, request):
         try:
@@ -5186,8 +5121,7 @@ class HospitalCreateView(APIView):
 
 # --- Update View ---
 class HospitalUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
+   
 
     def put(self, request, hospital_code):
         try:
@@ -5202,9 +5136,7 @@ class HospitalUpdateView(APIView):
 
 # --- Delete View ---
 class HospitalDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
+   
     def delete(self, request, hospital_code):
         try:
             obj = get_object_or_404(HospitalDetails, hospital_code=hospital_code)
@@ -5536,3 +5468,449 @@ class DepartmentsDeleteView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+from .models import ComplaintMaster
+from .serializers import ComplaintMasterSerializer
+import traceback
+
+class ComplaintListView(APIView):
+    
+    def get(self, request):
+        try:
+            objs = ComplaintMaster.objects.all().order_by("sort_order")
+            serializer = ComplaintMasterSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ComplaintCreateView(APIView):
+    
+
+    def post(self, request):
+        try:
+            serializer = ComplaintMasterSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                # React useCrud hook expects {success: true} usually, but standard is data
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ComplaintUpdateView(APIView):
+    
+    def put(self, request, complaint_code):
+        try:
+            obj = get_object_or_404(ComplaintMaster, complaint_code=complaint_code)
+            serializer = ComplaintMasterSerializer(obj, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ComplaintDeleteView(APIView):
+   
+
+    def delete(self, request, complaint_code):
+        try:
+            obj = get_object_or_404(ComplaintMaster, complaint_code=complaint_code)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response(
+                {"error": str(e), "trace": traceback.format_exc()}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+from .models import ExpensesMaster
+from .serializers import ExpensesMasterSerializer
+import traceback
+
+class ExpensesListView(APIView):
+    
+
+    def get(self, request):
+        try:
+            objs = ExpensesMaster.objects.all().order_by("expenses_code")
+            serializer = ExpensesMasterSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ExpensesCreateView(APIView):
+    
+
+    def post(self, request):
+        try:
+            serializer = ExpensesMasterSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ExpensesUpdateView(APIView):
+    
+
+    def put(self, request, expenses_code):
+        try:
+            obj = get_object_or_404(ExpensesMaster, expenses_code=expenses_code)
+            serializer = ExpensesMasterSerializer(obj, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ExpensesDeleteView(APIView):
+   
+
+    def delete(self, request, expenses_code):
+        try:
+            obj = get_object_or_404(ExpensesMaster, expenses_code=expenses_code)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response(
+                {"error": str(e), "trace": traceback.format_exc()}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+from .models import Noticeboard
+from .serializers import NoticeboardSerializer
+
+class NoticeListView(APIView):
+    
+
+    def get(self, request):
+        try:
+            objs = Noticeboard.objects.all().order_by("-createdon")
+            serializer = NoticeboardSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class NoticeCreateView(APIView):
+   
+
+    def post(self, request):
+        try:
+            serializer = NoticeboardSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class NoticeUpdateView(APIView):
+    
+
+    def put(self, request, notice_code):
+        try:
+            obj = get_object_or_404(Noticeboard, notice_code=notice_code)
+            serializer = NoticeboardSerializer(obj, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class NoticeDeleteView(APIView):
+    
+    def delete(self, request, notice_code):
+        try:
+            obj = get_object_or_404(Noticeboard, notice_code=notice_code)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+from .models import MseMaster
+from .serializers import MseMasterSerializer
+import traceback
+
+class MseMasterListView(APIView):
+    
+    def get(self, request):
+        try:
+            objs = MseMaster.objects.all().order_by("mse_code")
+            serializer = MseMasterSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class MseMasterCreateView(APIView):
+    
+
+    def post(self, request):
+        try:
+            serializer = MseMasterSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class MseMasterUpdateView(APIView):
+   
+
+    def put(self, request, mse_code):
+        try:
+            obj = get_object_or_404(MseMaster, mse_code=mse_code)
+            serializer = MseMasterSerializer(obj, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class MseMasterDeleteView(APIView):
+    
+
+    def delete(self, request, mse_code):
+        try:
+            obj = get_object_or_404(MseMaster, mse_code=mse_code)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from .models import ThoughtContentMaster
+from .serializers import ThoughtContentMasterSerializer
+import traceback
+
+class ThoughtContentListView(APIView):
+    
+    def get(self, request):
+        try:
+            objs = ThoughtContentMaster.objects.all().order_by("thought_content_code")
+            serializer = ThoughtContentMasterSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ThoughtContentCreateView(APIView):
+   
+    def post(self, request):
+        try:
+            serializer = ThoughtContentMasterSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ThoughtContentUpdateView(APIView):
+    
+
+    def put(self, request, thought_content_code):
+        try:
+            obj = get_object_or_404(ThoughtContentMaster, thought_content_code=thought_content_code)
+            serializer = ThoughtContentMasterSerializer(obj, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ThoughtContentDeleteView(APIView):
+  
+    def delete(self, request, thought_content_code):
+        try:
+            obj = get_object_or_404(ThoughtContentMaster, thought_content_code=thought_content_code)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from .models import TransactionModeMaster
+from .serializers import TransactionModeMasterSerializer
+
+class TransactionModeListView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            objs = TransactionModeMaster.objects.all().order_by("sort_order")
+            serializer = TransactionModeMasterSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TransactionModeCreateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            serializer = TransactionModeMasterSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TransactionModeUpdateView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def put(self, request, transaction_mode_code):
+        try:
+            obj = get_object_or_404(TransactionModeMaster, transaction_mode_code=transaction_mode_code)
+            serializer = TransactionModeMasterSerializer(obj, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TransactionModeDeleteView(APIView):
+    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, transaction_mode_code):
+        try:
+            obj = get_object_or_404(TransactionModeMaster, transaction_mode_code=transaction_mode_code)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+from .models import OpdCasesheet
+from .serializers import OpdCasesheetSerializer
+import traceback
+
+# --- List View ---
+class OpdCasesheetListView(APIView):
+   
+
+    def get(self, request):
+        try:
+            # Ordering by createdon descending to show newest cases first
+            objs = OpdCasesheet.objects.all().order_by("-createdon")
+            serializer = OpdCasesheetSerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- Create View ---
+class OpdCasesheetCreateView(APIView):
+    
+
+    def post(self, request):
+        try:
+            serializer = OpdCasesheetSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- Detail View ---
+class OpdCasesheetDetailView(APIView):
+    
+
+    def get(self, request, opd_casesheet_code):
+        try:
+            obj = get_object_or_404(OpdCasesheet, opd_casesheet_code=opd_casesheet_code)
+            serializer = OpdCasesheetSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- Update View ---
+class OpdCasesheetUpdateView(APIView):
+    
+    def put(self, request, opd_casesheet_code):
+        try:
+            obj = get_object_or_404(OpdCasesheet, opd_casesheet_code=opd_casesheet_code)
+            # partial=True allows for partial updates (PATCH behavior)
+            serializer = OpdCasesheetSerializer(obj, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# --- Delete View ---
+class OpdCasesheetDeleteView(APIView):
+    
+    def delete(self, request, opd_casesheet_code):
+        try:
+            obj = get_object_or_404(OpdCasesheet, opd_casesheet_code=opd_casesheet_code)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response(
+                {"error": str(e), "trace": traceback.format_exc()}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+from .models import DischargeSummary
+from .serializers import DischargeSummarySerializer
+
+class DischargeSummaryListView(APIView):
+    
+    def get(self, request):
+        try:
+            # discharge_summary_code ke hisaab se order kiya hai
+            objs = DischargeSummary.objects.all().order_by("-createdon")
+            serializer = DischargeSummarySerializer(objs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DischargeSummaryCreateView(APIView):
+    
+    def post(self, request):
+        try:
+            serializer = DischargeSummarySerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DischargeSummaryUpdateView(APIView):
+  
+    def put(self, request, discharge_summary_code):
+        try:
+            # discharge_summary_code ko lookup field banaya hai
+            obj = get_object_or_404(DischargeSummary, discharge_summary_code=discharge_summary_code)
+            serializer = DischargeSummarySerializer(obj, data=request.data, partial=True, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class DischargeSummaryDeleteView(APIView):
+    
+    def delete(self, request, discharge_summary_code):
+        try:
+            obj = get_object_or_404(DischargeSummary, discharge_summary_code=discharge_summary_code)
+            obj.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

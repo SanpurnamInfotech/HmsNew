@@ -56,7 +56,7 @@ const DoctorMst = () => {
   const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${DOCTOR_PATH}/`);
  
   // Dropdown Data (Inhe fetch karna zaroori hai dropdown dikhane ke liye)
-  const { data: departments } = useCrud("departments/");
+  const { data: departments = [] } = useCrud("departments/");
   const { data: countries } = useCrud("countries/");
   const { data: states } = useCrud("states/");
   const { data: districts } = useCrud("districts/");
@@ -186,10 +186,25 @@ const DoctorMst = () => {
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Doctor Name *</label>
                   <input className="w-full px-3 py-2 rounded border" value={formData.doctor_name} required onChange={e => setFormData({ ...formData, doctor_name: e.target.value })} />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Department *</label>
-                  <SearchableSelect placeholder="Select Dept" required value={formData.department_code} onChange={v => setFormData({ ...formData, department_code: v })} options={(departments || []).map(d => ({ value: d.department_code, label: d.department_name }))} />
-                </div>
+               <div className="space-y-1">
+  <label className="text-[10px] font-bold text-gray-400 uppercase">
+    Department *
+  </label>
+
+  <SearchableSelect
+    placeholder="Select Dept"
+    required
+    value={formData.department_code}
+    onChange={(v)=>setFormData({
+      ...formData,
+      department_code:v
+    })}
+    options={(Array.isArray(departments)?departments:[]).map(d=>({
+      value:d.department_code,
+      label:d.department_code
+    }))}
+  />
+</div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Qualification</label>
                   <input className="w-full px-3 py-2 rounded border" value={formData.qualification} onChange={e => setFormData({ ...formData, qualification: e.target.value })} />
@@ -226,9 +241,27 @@ const DoctorMst = () => {
                   <input className="w-full px-3 py-2 rounded border" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Marital Status</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.marital_status_code} onChange={e => setFormData({ ...formData, marital_status_code: e.target.value })} />
-                </div>
+  <label className="text-[10px] font-bold text-gray-400 uppercase">
+    Marital Status
+  </label>
+
+  <SearchableSelect
+    placeholder="Select"
+    value={formData.marital_status_code}
+    onChange={(v) =>
+      setFormData({
+        ...formData,
+        marital_status_code: v
+      })
+    }
+    options={[
+      { value: "Single", label: "Single" },
+      { value: "Married", label: "Married" },
+      { value: "Divorced", label: "Divorced" },
+      { value: "Widowed", label: "Widowed" }
+    ]}
+  />
+</div>
               </div>
             </div>
  
