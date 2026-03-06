@@ -314,19 +314,50 @@ path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name
     path('api/hospital/create/',HospitalCreateView.as_view(),name='hospital-create'),
     path('api/hospital/update/<str:hospital_code>/',HospitalUpdateView.as_view(),name='hospital-update'),
     path('api/hospital/delete/<str:hospital_code>/',HospitalDeleteView.as_view(),name='hospital-delete'),
-    path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
-    path('api/doctors/<str:doctor_code>/', DoctorDetailView.as_view(), name='doctors-detail'),
-    path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
-    path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
-    path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
+    path('api/hospital_details/', HospitalDetailsListView.as_view(), name='hospital_details_list'),\
     
-    path('api/hospital_details/', HospitalDetailsListView.as_view(), name='hospital_details_list'),
-    # path('api/hospital_details/<str:hospital__detailscode>/', Hospital_detailsDetailView.as_view(), name='hospital_details_detail'),
-    path('api/hospital_details/create/', HospitalDetailsCreateView.as_view(), name='hospital_details_create'),
-    path('api/hospital_details/update/<str:hospital_details_code>/', HospitalDetailsUpdateView.as_view(), name='hospital_details_update'),
-    path('api/hospital_details/delete/<str:hospital_details_code>/', HospitalDetailsDeleteView.as_view(), name='hospital_details_delete'),
+    path('api/complaints/', ComplaintListView.as_view(), name='complaints-list'),
+    path('api/complaints/create/', ComplaintCreateView.as_view(), name='complaints-create'),
+    path('api/complaints/update/<str:complaint_code>/', ComplaintUpdateView.as_view(), name='complaints-update'),
+    path('api/complaints/delete/<str:complaint_code>/', ComplaintDeleteView.as_view(), name='complaints-delete'),
+
+     path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
+    path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
+    path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),
+    path('api/expenses/delete/<str:expenses_code>/', ExpensesDeleteView.as_view(), name='expenses-delete'),
+
+     path('api/notices/', NoticeListView.as_view(), name='notices-list'),
+    path('api/notices/create/', NoticeCreateView.as_view(), name='notices-create'),
+    path('api/notices/update/<str:notice_code>/', NoticeUpdateView.as_view(), name='notices-update'),
+    path('api/notices/delete/<str:notice_code>/', NoticeDeleteView.as_view(), name='notices-delete'),
 
 
+    path('api/mse_master/', MseMasterListView.as_view(), name='mse-list'),
+    path('api/mse_master/create/', MseMasterCreateView.as_view(), name='mse-create'),
+    path('api/mse_master/update/<str:mse_code>/', MseMasterUpdateView.as_view(), name='mse-update'),
+    path('api/mse_master/delete/<str:mse_code>/', MseMasterDeleteView.as_view(), name='mse-delete'),
+
+    path('api/thought_content/', ThoughtContentListView.as_view(), name='thought-content-list'),
+    path('api/thought_content/create/', ThoughtContentCreateView.as_view(), name='thought-content-create'),
+    path('api/thought_content/update/<str:thought_content_code>/', ThoughtContentUpdateView.as_view(), name='thought-content-update'),
+    path('api/thought_content/delete/<str:thought_content_code>/', ThoughtContentDeleteView.as_view(), name='thought-content-delete'),
+
+    path('api/transaction-modes/', TransactionModeListView.as_view(), name='transaction-modes-list'),
+    path('api/transaction-modes/create/', TransactionModeCreateView.as_view(), name='transaction-modes-create'),
+    path('api/transaction-modes/update/<str:transaction_mode_code>/', TransactionModeUpdateView.as_view(), name='transaction-modes-update'),
+    path('api/transaction-modes/delete/<str:transaction_mode_code>/', TransactionModeDeleteView.as_view(), name='transaction-modes-delete'),
+
+
+    path('api/opd-casesheet/', OpdCasesheetListView.as_view(), name='opd-casesheet-list'),
+    path('api/opd-casesheet/create/', OpdCasesheetCreateView.as_view(), name='opd-casesheet-create'),
+    path('api/opd-casesheet/<str:opd_casesheet_code>/', OpdCasesheetDetailView.as_view(), name='opd-casesheet-detail'),
+    path('api/opd-casesheet/update/<str:opd_casesheet_code>/', OpdCasesheetUpdateView.as_view(), name='opd-casesheet-update'),
+    path('api/opd-casesheet/delete/<str:opd_casesheet_code>/', OpdCasesheetDeleteView.as_view(), name='opd-casesheet-delete'),
+    
+    path('api/discharge-summary/', DischargeSummaryListView.as_view(), name='discharge-summary-list'),
+    path('api/discharge-summary/create/', DischargeSummaryCreateView.as_view(), name='discharge-summary-create'),
+    path('api/discharge-summary/update/<str:discharge_summary_code>/', DischargeSummaryUpdateView.as_view(), name='discharge-summary-update'),
+    path('api/discharge-summary/delete/<str:discharge_summary_code>/', DischargeSummaryDeleteView.as_view(), name='discharge-summary-delete'),
 ]
 
 

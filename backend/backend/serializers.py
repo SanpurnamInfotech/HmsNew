@@ -962,4 +962,141 @@ class FollowUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FollowUp
-        fields = "__all__"        
+        fields = "__all__"   
+
+
+from rest_framework import serializers
+from .models import TransactionModeMaster
+from django.utils import timezone
+
+class TransactionModeMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TransactionModeMaster
+        fields = "__all__"
+        read_only_fields = ["createdon", "createdby", "updatedon", "updatedby"]
+
+    def validate_transaction_mode_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Transaction mode code is required.")
+        return value.strip()
+
+    def validate_transaction_mode_name(self, value):
+        if not value:
+            raise serializers.ValidationError("Transaction mode name is required.")
+        return value.strip()
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        validated_data['updatedon'] = timezone.now()
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().update(instance, validated_data)
+
+class OpdCasesheetSerializer(serializers.ModelSerializer):
+    # This allows you to see the patient_code in the response
+    # slug_field='patient_code' ensures we use your custom unique code instead of an ID
+    patient_code = serializers.SlugRelatedField(
+        queryset=Patient.objects.all(),
+        slug_field='patient_code'
+    )
+
+    class Meta:
+        model = OpdCasesheet
+        fields = [
+            'opd_casesheet_code',
+            'patient_code',
+            'case_title',
+            'chief_complaint',
+            'symptoms',
+            'diagnosis',
+            'vital_signs',
+            'weight_kg',
+            'height_cm',
+            'bp_sys',
+            'bp_dia',
+            'status',
+            'sort_order',
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby'
+        ]
+        
+    def create(self, validated_data):
+        # You can add logic here to automatically set createdby if needed
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        # You can add logic here to automatically set updatedon/updatedby
+        return super().update(instance, validated_data)
+
+
+from rest_framework import serializers
+from .models import DischargeSummary
+from django.utils import timezone
+
+class DischargeSummarySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DischargeSummary
+        fields = "__all__"
+        # In fields ko manual input se protect karne ke liye read_only rakha hai
+        read_only_fields = [
+            "createdon",
+            "createdby",
+            "updatedon",
+            "updatedby",
+        ]
+
+    def validate_discharge_summary_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Discharge summary code is required.")
+        return value.strip()
+
+    def validate_patient_code(self, value):
+        if not value:
+            raise serializers.ValidationError("Patient code is required.")
+        return value
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        # Timestamp set karna
+        validated_data['createdon'] = timezone.now()
+        validated_data['updatedon'] = timezone.now()
+        
+        # User tracking logic
+        if request and hasattr(request, 'user'):
+            try:
+                # Agar user logged in hai toh uski ID save karein
+                validated_data['createdby'] = request.user.id
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        request = self.context.get('request')
+        # Sirf update timestamp aur user badalna
+        validated_data['updatedon'] = timezone.now()
+        
+        if request and hasattr(request, 'user'):
+            try:
+                validated_data['updatedby'] = request.user.id
+            except Exception:
+                pass
+        return super().update(instance, validated_data)
+
