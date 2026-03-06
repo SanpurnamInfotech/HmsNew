@@ -53,11 +53,14 @@ import MoodHistoryMst from './pages/masters/MoodHistoryMst.jsx';
 import StatesMst from './pages/masters/StatesMst.jsx';
 import DistrictsMst from './pages/masters/DistrictsMst.jsx';
 import CitiesMst from './pages/masters/CitiesMst.jsx';
-import DoctorMst from './pages/masters/DoctorMst.jsx';
-import EctMst from './pages/masters/EctMst.jsx';
-import FollowUpMst from './pages/masters/FollowUpMst.jsx';
+import DoctorMst from './pages/masters/DoctorMst.jsx'
+import EctMst from './pages/masters/EctMst.jsx'
+import FollowUpMst from './pages/masters/FollowUpMst.jsx'
+import PatientMst from './pages/masters/PatientMst.jsx';
+import TransactionsMst from './pages/masters/TransactionsMst';
 
-import { ThemeProvider } from './theme/ThemeContext.jsx';
+
+
 
 function App() {
   return (
@@ -115,6 +118,7 @@ function App() {
             <Route path="medicine" element={<MedicineMst />} />
             <Route path="appointment-type-master" element={<AppointmentTypeMasterMst />} />
             <Route path="appointment" element={<AppointmentMst />} />
+            <Route path="patient" element={<PatientMst />} />
 
             <Route path="complaints" element={<ComplaintMaster />} />
             <Route path="expenses" element={<ExpensesMst />} />
@@ -126,8 +130,19 @@ function App() {
             <Route path="mse" element={<MseMaster />} />
             <Route path="thought_content_master" element={<ThoughtContentMaster />} />
             <Route path="noticeboard" element={<Noticeboard />} />
+<<<<<<< HEAD
             <Route path="ect" element={<EctMst />} />
             <Route path="follow-up" element={<FollowUpMst />} />
+=======
+            <Route path="ect" element={<EctMst/>} />
+            <Route path="follow-up" element={<FollowUpMst/>} />
+            <Route path="patient" element={<PatientMst/>} />
+            <Route path="transactions" element={<TransactionsMst/>} />
+
+
+           
+            
+>>>>>>> ganesh-1
 
           </Route>
 

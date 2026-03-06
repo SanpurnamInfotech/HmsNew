@@ -370,7 +370,6 @@ class Patient(models.Model):
     patient_last_name = models.CharField(max_length=100)
     dob = models.DateField(blank=True, null=True)
     age = models.IntegerField(blank=True, null=True)
-    gender = models.IntegerField(blank=True, null=True)  # 1=Male,2=Female,3=Other
     gender = models.IntegerField(blank=True, null=True, db_comment='1=>Male, 2=>Female, 3=>Other')
     marital_status_code = models.CharField(max_length=45, blank=True, null=True)
     blood_group_code = models.CharField(max_length=10, blank=True, null=True)
@@ -396,7 +395,6 @@ class Patient(models.Model):
     emergency_contact_relation = models.CharField(max_length=45, blank=True, null=True)
     patient_photo_path = models.CharField(max_length=255, blank=True, null=True)
     renew_date = models.DateField(blank=True, null=True)
-    status = models.IntegerField(blank=True, null=True)  # 1=Active,0=Inactive
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
@@ -406,7 +404,8 @@ class Patient(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'patient'    
+        db_table = 'patient' 
+           
 
 class OpdBillMaster(models.Model):
     opd_bill_code = models.CharField(max_length=45, unique=True)
@@ -469,6 +468,8 @@ class OpdBilling(models.Model):
     class Meta:
         managed = False
         db_table = "opd_billing"                     
+
+        db_table = 'patient'
 
 
 class IpdServices(models.Model):
@@ -993,6 +994,33 @@ class Settings(models.Model):
         db_table = 'settings'
         
         
+class OpdBilling(models.Model):
+    opd_billing_code = models.CharField(primary_key=True, max_length=45)
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+    bill_no = models.CharField(unique=True, max_length=45, blank=True, null=True)
+    appointment_code = models.ForeignKey('Appointment', models.DO_NOTHING, db_column='appointment_code', blank=True, null=True)
+    appointment_type_code = models.ForeignKey('AppointmentTypeMaster', models.DO_NOTHING, db_column='appointment_type_code', blank=True, null=True)
+    hospital_name = models.CharField(max_length=100, blank=True, null=True)
+    billing_date = models.DateField(blank=True, null=True)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    bill_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    amt_received = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    dues_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    types_of_items = models.CharField(max_length=100, blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'opd_billing'
+        
+        
+        
         
 
 class AppointmentTypeMaster(models.Model):
@@ -1037,30 +1065,7 @@ class Appointment(models.Model):
         db_table = 'appointment'
         
         
-        
-# class Transactions(models.Model):
-#     transaction_code = models.CharField(primary_key=True, max_length=45)
-#     patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
-#     bill_no = models.ForeignKey('OpdBilling', models.DO_NOTHING, db_column='bill_no', to_field='bill_no', blank=True, null=True)
-#     appointment_code = models.ForeignKey('Appointment', models.DO_NOTHING, db_column='appointment_code', blank=True, null=True)
-#     transaction_date = models.DateField()
-#     transaction_mode_code = models.ForeignKey('TransactionModeMaster', models.DO_NOTHING, db_column='transaction_mode_code', db_comment='Link to transaction_mode_master')
-#     transaction_type = models.CharField(max_length=45, blank=True, null=True, db_comment='PAYMENT, REFUND, ADJUSTMENT')
-#     depositor_name = models.CharField(max_length=100, blank=True, null=True)
-#     mobile = models.CharField(max_length=20, blank=True, null=True)
-#     bill_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
-#     amt_received = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)      
-#     dues_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
-#     sort_order = models.IntegerField(blank=True, null=True)
-#     status = models.IntegerField(blank=True, null=True)
-#     createdon = models.DateTimeField(blank=True, null=True)
-#     createdby = models.IntegerField(blank=True, null=True)
-#     updatedon = models.DateTimeField(blank=True, null=True)
-#     updatedby = models.IntegerField(blank=True, null=True)
-
-#     class Meta:
-#         managed = False
-#         db_table = 'transactions'        
+             
 
 
 class Account(models.Model):
@@ -1172,3 +1177,44 @@ class FollowUp(models.Model):
     class Meta:
         managed = False
         db_table = 'follow_up'
+        
+        
+class TransactionModeMaster(models.Model):
+    transaction_mode_code = models.CharField(primary_key=True, max_length=45)
+    transaction_mode_name = models.CharField(unique=True, max_length=100)
+    description = models.CharField(max_length=255, blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'transaction_mode_master'        
+        
+        
+class Transactions(models.Model):
+    transaction_code = models.CharField(primary_key=True, max_length=45)
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+    bill_no = models.ForeignKey('OpdBilling', models.DO_NOTHING, db_column='bill_no', to_field='bill_no', blank=True, null=True)
+    appointment_code = models.ForeignKey('Appointment', models.DO_NOTHING, db_column='appointment_code', blank=True, null=True)
+    transaction_date = models.DateField()
+    transaction_mode_code = models.ForeignKey('TransactionModeMaster', models.DO_NOTHING, db_column='transaction_mode_code', db_comment='Link to transaction_mode_master')
+    transaction_type = models.CharField(max_length=45, blank=True, null=True, db_comment='PAYMENT, REFUND, ADJUSTMENT')
+    depositor_name = models.CharField(max_length=100, blank=True, null=True)
+    mobile = models.CharField(max_length=20, blank=True, null=True)
+    bill_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
+    amt_received = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)      
+    dues_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)       
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'transactions'           

@@ -72,7 +72,8 @@ class MaritalStatusMasterSerializer(serializers.ModelSerializer):
 #         model = Doctor
 #         fields = "__all__"
 
-class PatientSerializer(serializers.ModelSerializer):  
+class PatientSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Patient
         fields = "__all__"
@@ -836,11 +837,11 @@ class AppointmentSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = "__all__" 
         
-# class TransactionsSerializer(serializers.ModelSerializer):
+class TransactionsSerializer(serializers.ModelSerializer):
 
-#     class Meta:
-#         model = Transactions
-#         fields = "__all__"                         
+    class Meta:
+        model = Transactions
+        fields = "__all__"                         
 
 from rest_framework import serializers
 from .models import Account

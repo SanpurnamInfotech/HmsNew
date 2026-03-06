@@ -1,16 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import api from "../../utils/domain";
-import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import {
+  useCrud,
+  useTable,
+  Pagination,
+  TableToolbar
+} from "../../components/common/BaseCRUD";
+
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaLightbulb,
+  FaSearch,
+  FaChevronDown
+} from "react-icons/fa";
 
 const TransactionsMst = () => {
-
-  /* ================= DATA FETCHING ================= */
   const PATH = "transactions";
-  const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud(`${PATH}/`);
+  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${PATH}/`);
 
-  /* ================= UI STATES ================= */
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
@@ -34,59 +45,92 @@ const TransactionsMst = () => {
 
   const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
 
-  /* ================= TABLE LOGIC ================= */
+  /* ---------- Dropdown Data States ---------- */
+  const [patients, setPatients] = useState([]);
+  const [bills, setBills] = useState([]);
+  const [appointments, setAppointments] = useState([]);
+  const [modes, setModes] = useState([]);
+
+  /* ---------- Search & UI States ---------- */
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [searchTerms, setSearchTerms] = useState({
+    patient: "",
+    bill: "",
+    appointment: "",
+    mode: ""
+  });
+
   const {
     search, setSearch,
     currentPage, setCurrentPage,
     itemsPerPage, setItemsPerPage,
-    paginatedData, effectiveItemsPerPage,
-    filteredData, totalPages
+    paginatedData,
+    effectiveItemsPerPage,
+    filteredData,
+    totalPages
   } = useTable(data || []);
 
-  /* ================= HELPERS ================= */
+  /* ---------- Fetch Foreign Key Data ---------- */
+  useEffect(() => {
+    api.get("patient/").then(r => setPatients(r.data || []));
+    api.get("opd-billing/").then(r => setBills(r.data || []));
+    api.get("appointment/").then(r => setAppointments(r.data || []));
+    api.get("transaction-mode-master/").then(r => setModes(r.data || []));
+  }, []);
+
+  /* ---------- Filtered Lists (useMemo) ---------- */
+  const filteredPatients = useMemo(() => 
+    patients.filter(p => p.patient_code?.toLowerCase().includes(searchTerms.patient.toLowerCase())), 
+    [patients, searchTerms.patient]
+  );
+
+  const filteredBills = useMemo(() => 
+    bills.filter(b => b.bill_no?.toLowerCase().includes(searchTerms.bill.toLowerCase())), 
+    [bills, searchTerms.bill]
+  );
+
+  const filteredAppointments = useMemo(() => 
+    appointments.filter(a => a.appointment_code?.toLowerCase().includes(searchTerms.appointment.toLowerCase())), 
+    [appointments, searchTerms.appointment]
+  );
+
+  const filteredModes = useMemo(() => 
+    modes.filter(m => m.transaction_mode_code?.toLowerCase().includes(searchTerms.mode.toLowerCase())), 
+    [modes, searchTerms.mode]
+  );
+
   const resetForm = () => {
     setShowForm(false);
     setIsEdit(false);
     setSelectedRow(null);
+    setOpenDropdown(null);
+    setSearchTerms({ patient: "", bill: "", appointment: "", mode: "" });
     setFormData({
-      transaction_code: "",
-      patient_code: "",
-      bill_no: "",
-      appointment_code: "",
-      transaction_date: "",
-      transaction_mode_code: "",
-      transaction_type: "",
-      depositor_name: "",
-      mobile: "",
-      bill_amount: "",
-      amt_received: "",
-      dues_amount: "",
-      sort_order: "",
-      status: 1
+      transaction_code: "", patient_code: "", bill_no: "", appointment_code: "",
+      transaction_date: "", transaction_mode_code: "", transaction_type: "",
+      depositor_name: "", mobile: "", bill_amount: "", amt_received: "",
+      dues_amount: "", sort_order: "", status: 1
     });
   };
 
-  const showModal = (message, type = "success") =>
-    setModal({ message, visible: true, type });
+  const showModal = (message, type = "success") => setModal({ message, visible: true, type });
 
-  /* ================= CRUD ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const actionPath = isEdit ? `${PATH}/update/${formData.transaction_code}/` : `${PATH}/create/`;
+    
+    // Formatting payload to send only IDs for ForeignKeys
+    const payload = {
+      ...formData,
+      patient_code: formData.patient_code || null,
+      bill_no: formData.bill_no || null,
+      appointment_code: formData.appointment_code || null,
+      transaction_mode_code: formData.transaction_mode_code || null,
+    };
 
-    const actionPath = isEdit
-      ? `${PATH}/update/${formData.transaction_code}/`
-      : `${PATH}/create/`;
+    if (!payload.sort_order) delete payload.sort_order;
 
-    const payload = { ...formData };
-
-    // empty optional fields remove
-    Object.keys(payload).forEach(k => {
-      if (payload[k] === "") delete payload[k];
-    });
-
-    const result = isEdit
-      ? await updateItem(actionPath, payload)
-      : await createItem(actionPath, payload);
+    const result = isEdit ? await updateItem(actionPath, payload) : await createItem(actionPath, payload);
 
     if (result.success) {
       showModal(`Transaction ${isEdit ? "updated" : "created"} successfully!`);
@@ -97,109 +141,97 @@ const TransactionsMst = () => {
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedRow) return;
-
-    const result = await deleteItem(
-      `${PATH}/delete/${selectedRow.transaction_code}/`
-    );
-
-    if (result.success) {
-      showModal("Transaction deleted successfully!");
-      setSelectedRow(null);
-      refresh();
-    } else {
-      showModal(result.error || "Delete failed!", "error");
-    }
-  };
-
-  if (loading)
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner-container text-center">
-          <div className="loading-spinner mx-auto mb-4"></div>
-          <p className="text-emerald-700 font-bold">Loading Transactions...</p>
-        </div>
+  /* ---------- Reusable Dropdown Component ---------- */
+  const SearchableDropdown = ({ label, name, value, options, searchKey, filterList, displayKey }) => (
+    <div className="space-y-1.5 relative">
+      <label className="form-label">{label}</label>
+      <div
+        className="form-input w-full flex justify-between items-center cursor-pointer"
+        onClick={() => setOpenDropdown(openDropdown === name ? null : name)}
+      >
+        <span className={value ? "" : "opacity-50"}>{value || `Select ${label}`}</span>
+        <FaChevronDown size={12} className="opacity-50" />
       </div>
-    );
+
+      {openDropdown === name && (
+        <div className="absolute z-[60] w-full mt-2 rounded-xl shadow-2xl border overflow-hidden bg-[var(--input-bg)] border-[var(--border-color)]">
+          <div className="p-3 border-b border-[var(--border-color)] flex items-center gap-2">
+            <FaSearch size={14} className="opacity-40" />
+            <input
+              autoFocus
+              className="bg-transparent outline-none text-sm w-full"
+              placeholder={`Search ${label}...`}
+              value={searchTerms[searchKey]}
+              onChange={e => setSearchTerms({ ...searchTerms, [searchKey]: e.target.value })}
+            />
+          </div>
+          <div className="max-h-48 overflow-y-auto custom-scrollbar">
+            {filterList.map(item => (
+              <div
+                key={item[displayKey]}
+                className="px-4 py-3 hover:bg-emerald-500/10 cursor-pointer text-sm"
+                onClick={() => {
+                  setFormData({ ...formData, [name]: item[displayKey] });
+                  setOpenDropdown(null);
+                  setSearchTerms({ ...searchTerms, [searchKey]: "" });
+                }}
+              >
+                {item[displayKey]}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+    </div>
+  );
 
   return (
     <div className="app-container">
-
       {/* MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body text-center">
-              <div className="modal-icon-container mb-4">
-                {modal.type === "success" ? (
-                  <FaCheckCircle className="text-4xl text-emerald-500 mx-auto" />
-                ) : (
-                  <FaTimesCircle className="text-4xl text-red-500 mx-auto" />
-                )}
-              </div>
-              <h3
-                className={`text-xl font-bold mb-2 ${
-                  modal.type === "success"
-                    ? "text-emerald-700"
-                    : "text-red-700"
-                }`}
-              >
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-              <p className="text-gray-600 mb-6">{modal.message}</p>
-              <button
-                className="bg-emerald-600 hover:bg-emerald-700 text-white w-full py-2.5 rounded-lg font-semibold"
-                onClick={() => setModal({ ...modal, visible: false })}
-              >
-                OK
-              </button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
             </div>
+            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            <button className="btn-primary w-full justify-center py-3" onClick={() => setModal({ ...modal, visible: false })}>Continue</button>
           </div>
         </div>
       )}
 
       {/* HEADER */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
-        <h4 className="text-2xl font-black text-gray-800 tracking-tight">
-          Transactions
-        </h4>
-
+      <div className="section-header">
+        <h4 className="page-title">Transactions Master</h4>
         {!showForm && (
-          <div className="flex gap-2">
-            <button
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold"
-              onClick={() => setShowForm(true)}
-            >
-              <FaPlus size={14} /> Add New
-            </button>
-
+          <div className="flex items-center gap-2">
+            <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus size={14}/> Add New</button>
             {selectedRow && (
-              <>
-                <button
-                  className="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold"
-                  onClick={() => {
-                    setFormData({
-                      ...selectedRow,
-                      patient_code: selectedRow.patient_code,
-                      bill_no: selectedRow.bill_no,
-                      appointment_code: selectedRow.appointment_code,
-                      transaction_mode_code: selectedRow.transaction_mode_code
-                    });
-                    setIsEdit(true);
-                    setShowForm(true);
-                  }}
-                >
-                  <FaEdit size={14} /> Edit
+              <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
+                <button className="btn-warning" onClick={() => {
+                   setFormData({
+                    ...selectedRow,
+                    patient_code: selectedRow.patient_code?.patient_code ?? selectedRow.patient_code,
+                    bill_no: selectedRow.bill_no?.bill_no ?? selectedRow.bill_no,
+                    appointment_code: selectedRow.appointment_code?.appointment_code ?? selectedRow.appointment_code,
+                    transaction_mode_code: selectedRow.transaction_mode_code?.transaction_mode_code ?? selectedRow.transaction_mode_code,
+                   });
+                   setIsEdit(true);
+                   setShowForm(true);
+                }}>
+                  <FaEdit size={14}/> Edit
                 </button>
-
-                <button
-                  className="flex items-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-5 py-2.5 rounded-lg text-sm font-bold"
-                  onClick={handleDelete}
-                >
-                  <FaTrash size={14} /> Delete
-                </button>
-              </>
+                <button className="btn-danger" onClick={() => { if(window.confirm("Delete?")) handleDelete(); }}><FaTrash size={14}/> Delete</button>
+              </div>
             )}
           </div>
         )}
@@ -207,178 +239,72 @@ const TransactionsMst = () => {
 
       {/* FORM */}
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm p-8 mb-8 border border-gray-100">
-          <h6 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">
-            {isEdit ? "Update Transaction" : "Create Transaction"}
-          </h6>
+        <div className="form-container animate-in zoom-in-95 duration-200">
+          <h6 className="form-section-title uppercase tracking-tighter">{isEdit ? "Update Transaction" : "Create Transaction"}</h6>
+          <form className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
+            
+            <div className="space-y-1.5">
+              <label className="form-label">Transaction Code</label>
+              <input className={`form-input w-full ${isEdit ? "opacity-50 cursor-not-allowed" : ""}`} value={formData.transaction_code} disabled={isEdit} required onChange={e => setFormData({ ...formData, transaction_code: e.target.value })} />
+            </div>
 
-          <form
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
-            onSubmit={handleSubmit}
-          >
-            <input
-              placeholder="Transaction Code"
-              className={`w-full px-4 py-3 rounded-lg border ${
-                isEdit ? "bg-gray-50 text-gray-400" : ""
-              }`}
-              value={formData.transaction_code}
-              disabled={isEdit}
-              required
-              onChange={e =>
-                setFormData({ ...formData, transaction_code: e.target.value })
-              }
-            />
+            {/* FOREIGN KEY DROPDOWNS */}
+            <SearchableDropdown label="Patient" name="patient_code" value={formData.patient_code} options={patients} searchKey="patient" filterList={filteredPatients} displayKey="patient_code" />
+            <SearchableDropdown label="Bill No" name="bill_no" value={formData.bill_no} options={bills} searchKey="bill" filterList={filteredBills} displayKey="bill_no" />
+            <SearchableDropdown label="Appointment" name="appointment_code" value={formData.appointment_code} options={appointments} searchKey="appointment" filterList={filteredAppointments} displayKey="appointment_code" />
+            <SearchableDropdown label="Transaction Mode" name="transaction_mode_code" value={formData.transaction_mode_code} options={modes} searchKey="mode" filterList={filteredModes} displayKey="transaction_mode_code" />
 
-            <input
-              placeholder="Patient Code"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.patient_code}
-              required
-              onChange={e =>
-                setFormData({ ...formData, patient_code: e.target.value })
-              }
-            />
+            <div className="space-y-1.5">
+              <label className="form-label">Transaction Date</label>
+              <input type="date" className="form-input w-full" value={formData.transaction_date} onChange={e => setFormData({ ...formData, transaction_date: e.target.value })} required />
+            </div>
 
-            <input
-              placeholder="Bill No"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.bill_no || ""}
-              onChange={e =>
-                setFormData({ ...formData, bill_no: e.target.value })
-              }
-            />
+            <div className="space-y-1.5">
+              <label className="form-label">Type (Payment/Refund)</label>
+              <select className="form-input w-full" value={formData.transaction_type} onChange={e => setFormData({...formData, transaction_type: e.target.value})}>
+                <option value="">Select Type</option>
+                <option value="PAYMENT">PAYMENT</option>
+                <option value="REFUND">REFUND</option>
+                <option value="ADJUSTMENT">ADJUSTMENT</option>
+              </select>
+            </div>
 
-            <input
-              placeholder="Appointment Code"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.appointment_code || ""}
-              onChange={e =>
-                setFormData({ ...formData, appointment_code: e.target.value })
-              }
-            />
+            <div className="space-y-1.5">
+              <label className="form-label">Depositor Name</label>
+              <input className="form-input w-full" value={formData.depositor_name} onChange={e => setFormData({ ...formData, depositor_name: e.target.value })} />
+            </div>
 
-            <input
-              type="date"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.transaction_date}
-              required
-              onChange={e =>
-                setFormData({ ...formData, transaction_date: e.target.value })
-              }
-            />
+            <div className="space-y-1.5">
+              <label className="form-label">Mobile</label>
+              <input className="form-input w-full" value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} />
+            </div>
 
-            <input
-              placeholder="Transaction Mode Code"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.transaction_mode_code}
-              required
-              onChange={e =>
-                setFormData({
-                  ...formData,
-                  transaction_mode_code: e.target.value
-                })
-              }
-            />
+            <div className="space-y-1.5">
+              <label className="form-label">Bill Amount</label>
+              <input type="number" step="0.01" className="form-input w-full" value={formData.bill_amount} onChange={e => setFormData({ ...formData, bill_amount: e.target.value })} />
+            </div>
 
-            <select
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.transaction_type || ""}
-              onChange={e =>
-                setFormData({
-                  ...formData,
-                  transaction_type: e.target.value
-                })
-              }
-            >
-              <option value="">Select Type</option>
-              <option value="PAYMENT">PAYMENT</option>
-              <option value="REFUND">REFUND</option>
-              <option value="ADJUSTMENT">ADJUSTMENT</option>
-            </select>
+            <div className="space-y-1.5">
+              <label className="form-label">Amount Received</label>
+              <input type="number" step="0.01" className="form-input w-full" value={formData.amt_received} onChange={e => setFormData({ ...formData, amt_received: e.target.value })} />
+            </div>
 
-            <input
-              placeholder="Depositor Name"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.depositor_name || ""}
-              onChange={e =>
-                setFormData({
-                  ...formData,
-                  depositor_name: e.target.value
-                })
-              }
-            />
+            <div className="space-y-1.5">
+              <label className="form-label">Dues Amount</label>
+              <input type="number" step="0.01" className="form-input w-full" value={formData.dues_amount} onChange={e => setFormData({ ...formData, dues_amount: e.target.value })} />
+            </div>
 
-            <input
-              placeholder="Mobile"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.mobile || ""}
-              onChange={e =>
-                setFormData({ ...formData, mobile: e.target.value })
-              }
-            />
+            <div className="space-y-1.5">
+              <label className="form-label">Status</label>
+              <select className="form-input w-full" value={formData.status} onChange={e => setFormData({ ...formData, status: Number(e.target.value) })}>
+                <option value={1}>Active</option>
+                <option value={0}>Inactive</option>
+              </select>
+            </div>
 
-            <input
-              type="number"
-              placeholder="Bill Amount"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.bill_amount || ""}
-              onChange={e =>
-                setFormData({ ...formData, bill_amount: e.target.value })
-              }
-            />
-
-            <input
-              type="number"
-              placeholder="Amount Received"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.amt_received || ""}
-              onChange={e =>
-                setFormData({ ...formData, amt_received: e.target.value })
-              }
-            />
-
-            <input
-              type="number"
-              placeholder="Dues Amount"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.dues_amount || ""}
-              onChange={e =>
-                setFormData({ ...formData, dues_amount: e.target.value })
-              }
-            />
-
-            <input
-              type="number"
-              placeholder="Sort Order"
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.sort_order || ""}
-              onChange={e =>
-                setFormData({ ...formData, sort_order: e.target.value })
-              }
-            />
-
-            <select
-              className="w-full px-4 py-3 rounded-lg border"
-              value={formData.status}
-              onChange={e =>
-                setFormData({ ...formData, status: Number(e.target.value) })
-              }
-            >
-              <option value={1}>Active</option>
-              <option value={0}>Inactive</option>
-            </select>
-
-            <div className="md:col-span-3 flex justify-end gap-3 pt-4">
-              <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-12 py-2.5 rounded-lg font-bold">
-                {isEdit ? "Update" : "Save"}
-              </button>
-              <button
-                type="button"
-                className="px-6 py-2.5 text-sm font-bold text-gray-400"
-                onClick={resetForm}
-              >
-                Cancel
-              </button>
+            <div className="md:col-span-2 lg:col-span-3 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update" : "Save"}</button>
+              <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
         </div>
@@ -386,91 +312,35 @@ const TransactionsMst = () => {
 
       {/* TABLE */}
       {!showForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <TableToolbar
-            itemsPerPage={itemsPerPage}
-            setItemsPerPage={setItemsPerPage}
-            search={search}
-            setSearch={setSearch}
-            setCurrentPage={setCurrentPage}
-          />
-
+        <div className="data-table-container animate-in fade-in duration-500">
+          <TableToolbar itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} />
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-gray-50/50 border-b border-gray-100">
-                  <th className="px-6 py-4 w-16"></th>
-                  <th className="px-6 py-4 text-xs">Code</th>
-                  <th className="px-6 py-4 text-xs">Patient</th>
-                  <th className="px-6 py-4 text-xs">Date</th>
-                  <th className="px-6 py-4 text-xs text-center">Amount</th>
-                  <th className="px-6 py-4 text-xs text-center">Status</th>
+                <tr>
+                  <th className="text-admin-th w-16"></th>
+                  <th className="text-admin-th">Code</th>
+                  <th className="text-admin-th">Patient</th>
+                  <th className="text-admin-th">Bill</th>
+                  <th className="text-admin-th">Amount</th>
+                  <th className="text-admin-th text-center">Status</th>
                 </tr>
               </thead>
-
-              <tbody className="divide-y divide-gray-50">
-                {[...(paginatedData || [])].map(row => (
-                  <tr
-                    key={row.transaction_code}
-                    onClick={() =>
-                      setSelectedRow(
-                        selectedRow?.transaction_code === row.transaction_code
-                          ? null
-                          : row
-                      )
-                    }
-                    className={`cursor-pointer ${
-                      selectedRow?.transaction_code === row.transaction_code
-                        ? "bg-emerald-50/40"
-                        : "hover:bg-gray-50/50"
-                    }`}
-                  >
-                    <td className="px-6 py-4">
-                      <div className="w-4 h-4 rounded-full border"></div>
-                    </td>
-
-                    <td className="px-6 py-4 font-bold">
-                      {row.transaction_code}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      {row.patient_code}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      {row.transaction_date}
-                    </td>
-
-                    <td className="px-6 py-4 text-center">
-                      {row.amt_received}
-                    </td>
-
-                    <td className="px-6 py-4 text-center">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-bold ${
-                          row.status === 1
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-rose-100 text-rose-700"
-                        }`}
-                      >
-                        {row.status === 1 ? "Active" : "Inactive"}
-                      </span>
-                    </td>
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
+                {paginatedData.map(row => (
+                  <tr key={row.transaction_code} onClick={() => setSelectedRow(selectedRow?.transaction_code === row.transaction_code ? null : row)} className={`group cursor-pointer transition-colors ${selectedRow?.transaction_code === row.transaction_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}>
+                    <td className="px-6 py-4"><div className={`selection-indicator ${selectedRow?.transaction_code === row.transaction_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>{selectedRow?.transaction_code === row.transaction_code && <div className="selection-dot" />}</div></td>
+                    <td className="text-admin-td font-black">{row.transaction_code}</td>
+                    <td className="text-admin-td font-bold">{row.patient_code?.patient_code ?? row.patient_code}</td>
+                    <td className="text-admin-td">{row.bill_no?.bill_no ?? row.bill_no}</td>
+                    <td className="text-admin-td font-bold text-emerald-600">₹{row.amt_received}</td>
+                    <td className="text-admin-td text-center"><span className={`badge ${row.status === 1 ? "badge-success" : "badge-danger"}`}>{row.status === 1 ? "Active" : "Inactive"}</span></td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
-          <div className="bg-white border-t border-gray-50 p-6">
-            <Pagination
-              totalEntries={filteredData.length}
-              itemsPerPage={effectiveItemsPerPage}
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              totalPages={totalPages}
-            />
-          </div>
+          <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
         </div>
       )}
     </div>
