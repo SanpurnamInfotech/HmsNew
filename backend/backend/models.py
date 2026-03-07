@@ -110,7 +110,39 @@ class Permissions(models.Model):
     class Meta:
         managed = False
         db_table = 'permissions'
+
+class Division(models.Model):
+    division_code = models.CharField(unique=True, max_length=45)
+    division_name = models.CharField(max_length=255)
+    department_code = models.ForeignKey('Departments', models.DO_NOTHING, db_column='department_code', to_field='department_code')
+    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code')
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'division'
         
+class Designation(models.Model):
+    designation_code = models.CharField(unique=True, max_length=45)
+    designation_name = models.CharField(max_length=255)
+    division_code = models.ForeignKey('Division', models.DO_NOTHING, db_column='division_code', to_field='division_code')
+    department_code = models.ForeignKey('Departments', models.DO_NOTHING, db_column='department_code', to_field='department_code')
+    financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code')
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'designation'   
         
 class CompanyMaster(models.Model):
     company_code = models.CharField(unique=True, max_length=45)
@@ -143,10 +175,9 @@ class CompanyMaster(models.Model):
         managed = False
         db_table = 'company_master'
         
-        
 class EmployeeMaster(models.Model):
     employee_code = models.CharField(unique=True, max_length=45)
-    company_code = models.CharField(max_length=45, blank=True, null=True)
+    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code')
     financialyear_code = models.ForeignKey('FinancialyearMaster', models.DO_NOTHING, db_column='financialyear_code', to_field='financialyear_code', blank=True, null=True)
     department_code = models.CharField(max_length=45, blank=True, null=True)
     designation_code = models.CharField(max_length=45, blank=True, null=True)
@@ -175,6 +206,7 @@ class EmployeeMaster(models.Model):
     district_code = models.CharField(max_length=45, blank=True, null=True)
     city_code = models.CharField(max_length=45, blank=True, null=True)
     pincode = models.CharField(max_length=15, blank=True, null=True)
+    marital_status_code = models.CharField(max_length=45, blank=True, null=True)
     sort_order = models.IntegerField(blank=True, null=True)
     createdon = models.DateTimeField(blank=True, null=True)
     createdby = models.IntegerField(blank=True, null=True)

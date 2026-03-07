@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaHospital
+} from "react-icons/fa";
 
 const HospitalDetails = () => {
 
-  // IMPORTANT: yaha api mat likho
   const PATH = "hospital";
 
   const { data, loading, refresh, createItem, updateItem, deleteItem } =
@@ -13,6 +19,8 @@ const HospitalDetails = () => {
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+
+  const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
 
   const [formData, setFormData] = useState({
     hospital_code: "",
@@ -78,6 +86,9 @@ const HospitalDetails = () => {
     });
   };
 
+  const showModal = (message, type = "success") =>
+    setModal({ visible: true, message, type });
+
   const handleSubmit = async (e) => {
 
     e.preventDefault();
@@ -92,14 +103,13 @@ const HospitalDetails = () => {
 
     if (result && result.success) {
 
-      alert(isEdit ? "Hospital Updated" : "Hospital Created");
-
+      showModal(isEdit ? "Hospital Updated" : "Hospital Created");
       resetForm();
       refresh();
 
     } else {
 
-      alert("Error saving hospital");
+      showModal("Error saving hospital", "error");
 
     }
   };
@@ -114,7 +124,7 @@ const HospitalDetails = () => {
 
     if (result.success) {
 
-      alert("Hospital Deleted");
+      showModal("Hospital Deleted");
       setSelectedRow(null);
       refresh();
 
@@ -122,11 +132,45 @@ const HospitalDetails = () => {
 
   };
 
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+      </div>
+    );
 
   return (
-
     <div className="app-container">
+
+      {/* MODAL */}
+      {modal.visible && (
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="form-container max-w-sm w-full p-8 text-center shadow-2xl">
+
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? (
+                <FaCheckCircle className="text-6xl text-emerald-500" />
+              ) : (
+                <FaTimesCircle className="text-6xl text-rose-500" />
+              )}
+            </div>
+
+            <h3 className="text-xl font-black mb-3 uppercase">
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+
+            <p className="mb-6">{modal.message}</p>
+
+            <button
+              className="btn-primary w-full justify-center py-3"
+              onClick={() => setModal({ ...modal, visible: false })}
+            >
+              Continue
+            </button>
+
+          </div>
+        </div>
+      )}
 
       {/* HEADER */}
 
@@ -142,12 +186,13 @@ const HospitalDetails = () => {
               className="btn-primary"
               onClick={() => setShowForm(true)}
             >
-              <FaPlus size={14}/> Add New
+              <FaPlus size={14} /> Add New
             </button>
 
             {selectedRow && (
 
-              <>
+              <div className="flex gap-2 animate-in slide-in-from-right-5">
+
                 <button
                   className="btn-warning"
                   onClick={() => {
@@ -156,16 +201,17 @@ const HospitalDetails = () => {
                     setShowForm(true);
                   }}
                 >
-                  <FaEdit size={14}/> Edit
+                  <FaEdit size={14} /> Edit
                 </button>
 
                 <button
                   className="btn-danger"
                   onClick={handleDelete}
                 >
-                  <FaTrash size={14}/> Delete
+                  <FaTrash size={14} /> Delete
                 </button>
-              </>
+
+              </div>
 
             )}
 
@@ -179,10 +225,10 @@ const HospitalDetails = () => {
 
       {showForm && (
 
-        <div className="form-container">
+        <div className="form-container animate-in zoom-in-95 duration-200">
 
           <h6 className="form-section-title">
-            {isEdit ? "Update Hospital" : "Add Hospital"}
+            {isEdit ? "Update Hospital Profile" : "Add Hospital"}
           </h6>
 
           <form
@@ -190,128 +236,75 @@ const HospitalDetails = () => {
             onSubmit={handleSubmit}
           >
 
-            <input className="form-input"
-              placeholder="Hospital Code"
-              value={formData.hospital_code}
-              disabled={isEdit}
-              onChange={(e)=>setFormData({...formData,hospital_code:e.target.value})}
-            />
+            <div className="space-y-1">
+              <label className="form-label">Hospital Code</label>
+              <input
+                className="form-input"
+                value={formData.hospital_code}
+                disabled={isEdit}
+                onChange={(e) =>
+                  setFormData({ ...formData, hospital_code: e.target.value })
+                }
+              />
+            </div>
 
-            <input className="form-input"
-              placeholder="Hospital Name"
-              value={formData.hospital_name}
-              onChange={(e)=>setFormData({...formData,hospital_name:e.target.value})}
-            />
+            <div className="space-y-1">
+              <label className="form-label">Hospital Name</label>
+              <input
+                className="form-input"
+                value={formData.hospital_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, hospital_name: e.target.value })
+                }
+              />
+            </div>
 
-            <input className="form-input"
-              placeholder="Registration Number"
-              value={formData.hospital_reg_number}
-              onChange={(e)=>setFormData({...formData,hospital_reg_number:e.target.value})}
-            />
+            <div className="space-y-1">
+              <label className="form-label">Email</label>
+              <input
+                className="form-input"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+              />
+            </div>
 
-            <input className="form-input"
-              placeholder="CST Number"
-              value={formData.hospital_cst_number}
-              onChange={(e)=>setFormData({...formData,hospital_cst_number:e.target.value})}
-            />
+            <div className="space-y-1">
+              <label className="form-label">Mobile</label>
+              <input
+                className="form-input"
+                value={formData.mobile}
+                onChange={(e) =>
+                  setFormData({ ...formData, mobile: e.target.value })
+                }
+              />
+            </div>
 
-            <input className="form-input"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e)=>setFormData({...formData,email:e.target.value})}
-            />
+            <div className="space-y-1">
+              <label className="form-label">Phone</label>
+              <input
+                className="form-input"
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+              />
+            </div>
 
-            <input className="form-input"
-              placeholder="Mobile"
-              value={formData.mobile}
-              onChange={(e)=>setFormData({...formData,mobile:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Phone"
-              value={formData.phone}
-              onChange={(e)=>setFormData({...formData,phone:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Landmark"
-              value={formData.landmark}
-              onChange={(e)=>setFormData({...formData,landmark:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Address 1"
-              value={formData.address1}
-              onChange={(e)=>setFormData({...formData,address1:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Address 2"
-              value={formData.address2}
-              onChange={(e)=>setFormData({...formData,address2:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="City Code"
-              value={formData.city_code}
-              onChange={(e)=>setFormData({...formData,city_code:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="District Code"
-              value={formData.district_code}
-              onChange={(e)=>setFormData({...formData,district_code:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="State Code"
-              value={formData.state_code}
-              onChange={(e)=>setFormData({...formData,state_code:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Country Code"
-              value={formData.country_code}
-              onChange={(e)=>setFormData({...formData,country_code:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Pincode"
-              value={formData.pincode}
-              onChange={(e)=>setFormData({...formData,pincode:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Lunch Timing"
-              value={formData.lunch_timing}
-              onChange={(e)=>setFormData({...formData,lunch_timing:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Weekly Off"
-              value={formData.weeklyoff_day}
-              onChange={(e)=>setFormData({...formData,weeklyoff_day:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Logo Path"
-              value={formData.logo_path}
-              onChange={(e)=>setFormData({...formData,logo_path:e.target.value})}
-            />
-
-            <input className="form-input"
-              placeholder="Developed By"
-              value={formData.developed_by}
-              onChange={(e)=>setFormData({...formData,developed_by:e.target.value})}
-            />
-
-            <select className="form-input"
-              value={formData.status}
-              onChange={(e)=>setFormData({...formData,status:Number(e.target.value)})}
-            >
-              <option value={1}>Active</option>
-              <option value={0}>Inactive</option>
-            </select>
+            <div className="space-y-1">
+              <label className="form-label">Status</label>
+              <select
+                className="form-input"
+                value={formData.status}
+                onChange={(e) =>
+                  setFormData({ ...formData, status: Number(e.target.value) })
+                }
+              >
+                <option value={1}>Active</option>
+                <option value={0}>Inactive</option>
+              </select>
+            </div>
 
             <div className="md:col-span-3 flex justify-end gap-3">
 
@@ -360,21 +353,54 @@ const HospitalDetails = () => {
 
             <tbody>
 
-              {paginatedData.map((item)=>(
+              {paginatedData.map((item) => (
 
                 <tr
                   key={item.hospital_code}
-                  onClick={()=>setSelectedRow(
-                    selectedRow?.hospital_code===item.hospital_code?null:item
-                  )}
+                  onClick={() =>
+                    setSelectedRow(
+                      selectedRow?.hospital_code === item.hospital_code
+                        ? null
+                        : item
+                    )
+                  }
+                  className={`group cursor-pointer transition-colors ${
+                    selectedRow?.hospital_code === item.hospital_code
+                      ? "bg-emerald-500/10"
+                      : "hover:bg-emerald-500/5"
+                  }`}
                 >
 
-                  <td></td>
-                  <td>{item.hospital_code}</td>
-                  <td>{item.hospital_name}</td>
-                  <td>{item.email}</td>
-                  <td>{item.mobile}</td>
-                  <td>{item.status===1?"Active":"Inactive"}</td>
+                  <td className="px-6 py-4">
+
+                    <div
+                      className={`selection-indicator ${
+                        selectedRow?.hospital_code === item.hospital_code
+                          ? "selection-indicator-active"
+                          : "group-hover:border-emerald-500/50"
+                      }`}
+                    >
+                      {selectedRow?.hospital_code === item.hospital_code && (
+                        <div className="selection-dot" />
+                      )}
+                    </div>
+
+                  </td>
+
+                  <td className="text-admin-td">{item.hospital_code}</td>
+                  <td className="text-admin-td">{item.hospital_name}</td>
+                  <td className="text-admin-td">{item.email}</td>
+                  <td className="text-admin-td">{item.mobile}</td>
+
+                  <td className="text-admin-td">
+                    <span
+                      className={`badge ${
+                        item.status === 1 ? "badge-success" : "badge-danger"
+                      }`}
+                    >
+                      {item.status === 1 ? "Active" : "Inactive"}
+                    </span>
+                  </td>
 
                 </tr>
 
@@ -398,7 +424,6 @@ const HospitalDetails = () => {
 
     </div>
   );
-
 };
 
 export default HospitalDetails;

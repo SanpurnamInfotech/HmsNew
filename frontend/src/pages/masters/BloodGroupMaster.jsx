@@ -23,18 +23,18 @@ const BloodGroupMaster = () => {
   const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
 
   /* ================= SORTING LOGIC ================= */
+/* ================= SORTING LOGIC ================= */
   const sortedData = useMemo(() => {
-    const list = Array.isArray(data) ? [...data] : [];
-    const getOrder = (row) => {
-      const n = Number(row?.sort_order);
-      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
-    };
-
-    return list.sort((a, b) => {
-      const ao = getOrder(a);
-      const bo = getOrder(b);
-      if (ao !== bo) return ao - bo;
-      return (a?.blood_group_code || "").toString().localeCompare((b?.blood_group_code || "").toString());
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      // Standardized: Blanks/Nulls go to the bottom (999)
+      const sa = (a.sort_order === null || a.sort_order === "" || a.sort_order === undefined) ? 999 : Number(a.sort_order);
+      const sb = (b.sort_order === null || b.sort_order === "" || b.sort_order === undefined) ? 999 : Number(b.sort_order);
+      
+      if (sa !== sb) return sa - sb;
+      
+      // Secondary sort by code
+      return (a.blood_group_code || "").toString().localeCompare((b.blood_group_code || "").toString());
     });
   }, [data]);
 
@@ -143,9 +143,16 @@ const BloodGroupMaster = () => {
             </button>
             {selectedRow && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
-                <button className="btn-warning" onClick={() => { setFormData(selectedRow); setIsEdit(true); setShowForm(true); }}>
-                  <FaEdit size={14} /> Edit
-                </button>
+              <button 
+                className="btn-warning" 
+                onClick={() => { 
+                  setFormData({ ...selectedRow, sort_order: selectedRow.sort_order ?? "" }); 
+                  setIsEdit(true); 
+                  setShowForm(true); 
+                }}
+              >
+                <FaEdit size={14} /> Edit
+              </button>
                 <button className="btn-danger" onClick={handleDelete}>
                   <FaTrash size={14} /> Delete
                 </button>

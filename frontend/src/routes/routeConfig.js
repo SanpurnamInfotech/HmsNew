@@ -48,6 +48,8 @@ import EctMst from "../pages/masters/EctMst.jsx";
 import FollowUpMst from "../pages/masters/FollowUpMst.jsx";
 import TransactionsMst from "../pages/masters/TransactionsMst.jsx";
 import BedMaster from "../pages/masters/BedMaster.jsx";
+import DoctorMst from "../pages/masters/DoctorMst.jsx"
+import Opd from "../pages/masters/Opd.jsx"
 
 
 
@@ -100,16 +102,11 @@ export const adminRoutes = [
   { path: "appointment-type-master", label: "Appointment Type Master", component: AppointmentTypeMasterMst },
   { path: "ect", label: "ECT", component: EctMst },
   { path: "follow-up", label: "Follow Up", component: FollowUpMst },
-
-
-
-  { path: "complaints", label: "Complaint Master", component: ComplaintMaster },
-  { path: "expenses", label: "Expenses Master", component: ExpensesMst },
-  { path: "mse-master", label: "MSE Master", component: MseMaster },
-  { path: "thought-content-master", label: "Thought Content Master", component: ThoughtContentMaster },
+  { path: "transaction-modes", label: "Transaction Modes", component: TransactionmodesMst },
   { path: "noticeboard", label: "Noticeboard", component: Noticeboard },
-
- 
+  { path: "Doctors", label: "Doctors", component: DoctorMst },
+  { path: "Opd_casesheet", label: "OPD case sheet", component: Opd },
+  { path: "discharge", label: "Discharge Summary", component: Discharge_summaryMst },
   
   { path: "transactions", label: "Transactions", component: TransactionsMst },
   { path: "bed", label: "Bed", component: BedMaster },
