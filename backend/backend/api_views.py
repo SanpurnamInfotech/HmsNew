@@ -1058,77 +1058,6 @@ class BloodGroupMasterDeleteView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-    # Blood Donor    
-class BloodDonorListView(APIView):
-
-
-    def get(self, request):
-        try:
-            data = BloodDonor.objects.all().order_by("donor_firstname")
-            serializer = BloodDonorSerializer(data, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class BloodDonorDetailView(APIView):
-
-
-    def get(self, request, pk):
-        try:
-            obj = get_object_or_404(BloodDonor, pk=pk)
-            serializer = BloodDonorSerializer(obj)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class BloodDonorCreateView(APIView):
-
-
-    def post(self, request):
-        try:
-            serializer = BloodDonorSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(
-                    createdby=request.user.id,
-                    createdon=timezone.now(),
-                )
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class BloodDonorUpdateView(APIView):
-
-
-    def put(self, request, pk):
-        try:
-            obj = get_object_or_404(BloodDonor, pk=pk)
-            serializer = BloodDonorSerializer(obj, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save(
-                    updatedby=request.user.id,
-                    updatedon=timezone.now(),
-                )
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class BloodDonorDeleteView(APIView):
-
-
-    def delete(self, request, pk):
-        try:
-            obj = get_object_or_404(BloodDonor, pk=pk)
-            obj.delete()
-            return Response({"message": "Blood donor deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)   
-
 # bankdetails
 
 class BankdetailsListView(APIView):
@@ -1421,7 +1350,18 @@ class PatientDeleteView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
+# Opd Bill Master
+class OpdBillMasterListView(APIView):
+    def get(self, request):
+        try:
+            data = OpdBillMaster.objects.all().order_by('opd_bill_name')
+            serializer = OpdBillMasterSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 class OpdBillMasterDetailView(APIView):
     def get(self, request, opd_bill_code):
@@ -6044,3 +5984,140 @@ class DischargeSummaryDeleteView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+# branch
+class BranchListView(APIView):
+    def get(self, request):
+        try:
+            data = Branch.objects.all().order_by('branch_name')
+            serializer = BranchSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class BranchDetailView(APIView):
+    def get(self, request, branch_code):
+        try:
+            obj = get_object_or_404(Branch, branch_code=branch_code)
+            serializer = BranchSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class BranchCreateView(APIView):
+    def post(self, request):
+        try:
+            serializer = BranchSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    created_by=request.user.id,
+                    created_on=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class BranchUpdateView(APIView):
+    def put(self, request, branch_code):
+        try:
+            obj = get_object_or_404(Branch, branch_code=branch_code)
+            serializer = BranchSerializer(obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updated_by=request.user.id,
+                    updated_on=timezone.now()
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class BranchDeleteView(APIView):
+    def delete(self, request, branch_code):
+        try:
+            obj = get_object_or_404(Branch, branch_code=branch_code)
+            obj.delete()
+            return Response(
+                {"message": "Branch deleted successfully"}, 
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+# blood donor
+
+class BloodDonorListView(APIView):
+    def get(self, request):
+        try:
+            # Ordering by firstname and lastname for a clean list presentation
+            data = BloodDonor.objects.all().order_by('donor_firstname', 'donor_lastname')
+            serializer = BloodDonorSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class BloodDonorDetailView(APIView):
+    def get(self, request, blood_donor_code):
+        try:
+            obj = get_object_or_404(BloodDonor, blood_donor_code=blood_donor_code)
+            serializer = BloodDonorSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class BloodDonorCreateView(APIView):
+    def post(self, request):
+        try:
+            serializer = BloodDonorSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class BloodDonorUpdateView(APIView):
+    def put(self, request, blood_donor_code):
+        try:
+            obj = get_object_or_404(BloodDonor, blood_donor_code=blood_donor_code)
+            serializer = BloodDonorSerializer(obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now()
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class BloodDonorDeleteView(APIView):
+    def delete(self, request, blood_donor_code):
+        try:
+            obj = get_object_or_404(BloodDonor, blood_donor_code=blood_donor_code)
+            obj.delete()
+            return Response(
+                {"message": "Blood Donor deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
