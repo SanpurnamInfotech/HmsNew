@@ -94,7 +94,7 @@ export const adminRoutes = [
   { path: "medicine-category", label: "Medicine_category", component: MedicineCategory },
   { path: "medicine", label: "Medicine" , component: MedicineMst },
   { path: "posssation", label: "Possation", component: Possation },
-  { path: "financialyear-master", label: "financial year", component: FinancialYearMst },
+  { path: "financial_year", label: "financial year", component: FinancialYearMst },
   { path: "settings", label: "Settings", component: SettingsMst },
   { path: "accounts", label: "Accounts Master", component: AccountMst },
   { path: "usertype", label: "Usertype Master", component: UsertypeMst },
