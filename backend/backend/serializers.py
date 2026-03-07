@@ -1045,6 +1045,9 @@ class OpdCasesheetSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+from rest_framework import serializers
+from .models import DischargeSummary
+from django.utils import timezone
 
 
 class DischargeSummarySerializer(serializers.ModelSerializer):
