@@ -84,7 +84,7 @@ export const adminRoutes = [
   { path: "cities", label: "Cities Master", component: CitiesMst },
   { path: "mood_history", label: "Mood History Master", component: MoodHistoryMst },
   { path: "prescription_report", label: "Prescription Report", component: PrescriptionReport},
-  { path: "icd-master", label:"ICD Master", component:IcdMasterMst},
+  { path: "icd_master", label:"ICD Master", component:IcdMasterMst},
   { path: "dsm_master", label:"DSM Master", component:DsmMaster},
   { path: "room_type", label: "Room Type Master", component:RoomTypeMasterMst},
   { path: "habit", label: "Habit Master", component:HabitMaster}, 
