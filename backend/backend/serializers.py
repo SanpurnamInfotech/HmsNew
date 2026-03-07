@@ -228,7 +228,6 @@ class BankdetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bankdetails
         fields = "__all__"
-        read_only_fields = ("createdon", "createdby", "updatedon", "updatedby")
 
 class BedAllotmentSerializer(serializers.ModelSerializer):
     class Meta:
