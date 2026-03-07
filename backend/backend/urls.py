@@ -21,11 +21,7 @@ urlpatterns = [
 
    
     
-    path('api/usertypes/', UserTypeListView.as_view(), name='usertype-list'),
-    path('api/usertypes/create/', UserTypeCreateView.as_view(), name='usertype-create'),
-    path('api/usertypes/<int:usertype_code>/', UserTypeDetailView.as_view(), name='usertype-detail'),
-    path('api/usertypes/update/<int:usertype_code>/', UserTypeUpdateView.as_view(), name='usertype-update'),
-    path('api/usertypes/delete/<int:usertype_code>/', UserTypeDeleteView.as_view(), name='usertype-delete'),
+
     
     path("api/engine-module/", EngineModuleListView.as_view()),
     path("api/engine-module/create/", EngineModuleCreateView.as_view()),

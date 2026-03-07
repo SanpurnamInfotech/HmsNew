@@ -48,6 +48,8 @@ import EctMst from "../pages/masters/EctMst.jsx";
 import FollowUpMst from "../pages/masters/FollowUpMst.jsx";
 import TransactionsMst from "../pages/masters/TransactionsMst.jsx";
 import BedMaster from "../pages/masters/BedMaster.jsx";
+import DoctorMst from "../pages/masters/DoctorMst.jsx"
+import Opd from "../pages/masters/Opd.jsx"
 
 
 
