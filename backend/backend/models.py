@@ -1249,7 +1249,11 @@ class Transactions(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'transactions'           
+        db_table = 'transactions' 
+
+
+from django.db import models
+
 
 class DischargeSummary(models.Model):
     discharge_summary_code = models.CharField(unique=True, max_length=45)
@@ -1279,4 +1283,4 @@ class DischargeSummary(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'discharge_summary'
+        db_table = 'discharge_summary'          

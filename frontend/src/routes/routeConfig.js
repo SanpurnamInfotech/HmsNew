@@ -46,12 +46,10 @@ import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.
 import AppointmentMst from "../pages/masters/AppointmentMst.jsx";
 import EctMst from "../pages/masters/EctMst.jsx";
 import FollowUpMst from "../pages/masters/FollowUpMst.jsx";
-import TransactionsMst from "../pages/masters/TransactionsMst.jsx";
-import BedMaster from "../pages/masters/BedMaster.jsx";
-import DoctorMst from "../pages/masters/DoctorMst.jsx"
-import Opd from "../pages/masters/Opd.jsx"
+import DoctorMst from "../pages/masters/DoctorMst.jsx";
 import TransactionmodesMst from "../pages/masters/TransactionmodesMst.jsx";
-import Discharge_summaryMst  from "../pages/masters/Discharge_summaryMst.jsx";
+import Discharge_summaryMst from "../pages/masters/Discharge_summaryMst.jsx";
+import Opd from "../pages/masters/Opd.jsx";
 
 
 
@@ -87,19 +85,19 @@ export const adminRoutes = [
   { path: "icd_master", label:"ICD Master", component:IcdMasterMst},
   { path: "dsm_master", label:"DSM Master", component:DsmMaster},
   { path: "room_type", label: "Room Type Master", component:RoomTypeMasterMst},
-  { path: "habit", label: "Habit Master", component:HabitMaster}, 
+  { path: "habit", label: "Habit Master", component:HabitMaster},
   { path: "hallucination", label:"Hallucination Master", component:HallucinationMaster},
   { path :"history", label:"History Master", component:HistoryMaster}, 
   { path :" mental_illness", label: "Mental Illness Master", component:MentalIllnessMaster},
-  { path: "medicine-category", label: "Medicine_category", component: MedicineCategory },
+  { path: "medicine_category", label: "Medicine_category", component: MedicineCategory },
   { path: "medicine", label: "Medicine" , component: MedicineMst },
   { path: "posssation", label: "Possation", component: Possation },
-  { path: "financialyear-master", label: "financial year", component: FinancialYearMst },
+  { path: "financial_year", label: "financial year", component: FinancialYearMst },
   { path: "settings", label: "Settings", component: SettingsMst },
   { path: "accounts", label: "Accounts Master", component: AccountMst },
   { path: "usertype", label: "Usertype Master", component: UsertypeMst },
   { path: "hospital", label: "Hospital Master", component: Hospital_detailsMst },
-  // { path: "doctor", label: "Doctor", component: DoctorMst },
+  { path: "doctor", label: "Doctor", component: DoctorMst },
   { path: "appointment", label: "Appointment", component: AppointmentMst},
   { path: "appointment-type-master", label: "Appointment Type Master", component: AppointmentTypeMasterMst },
   { path: "ect", label: "ECT", component: EctMst },
@@ -109,8 +107,7 @@ export const adminRoutes = [
   { path: "Doctors", label: "Doctors", component: DoctorMst },
   { path: "Opd_casesheet", label: "OPD case sheet", component: Opd },
   { path: "discharge", label: "Discharge Summary", component: Discharge_summaryMst },
-  { path: "transactions", label: "Transactions", component: TransactionsMst },
-  { path: "bed", label: "Bed", component: BedMaster },
+  
   
 ];
 
