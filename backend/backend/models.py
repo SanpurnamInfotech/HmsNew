@@ -1250,3 +1250,33 @@ class Transactions(models.Model):
     class Meta:
         managed = False
         db_table = 'transactions'           
+
+class DischargeSummary(models.Model):
+    discharge_summary_code = models.CharField(unique=True, max_length=45)
+    patient_code = models.ForeignKey('Patient', models.DO_NOTHING, db_column='patient_code', to_field='patient_code')
+    doctor_code = models.ForeignKey('Doctor', models.DO_NOTHING, db_column='doctor_code', to_field='doctor_code')
+    appointment_code = models.ForeignKey('Appointment', models.DO_NOTHING, db_column='appointment_code', blank=True, null=True)
+    summary_date = models.DateField(blank=True, null=True)
+    age_at_discharge = models.IntegerField(blank=True, null=True)
+    gender = models.CharField(max_length=20, blank=True, null=True)
+    address_snapshot = models.TextField(blank=True, null=True)
+    admission_date = models.DateField(blank=True, null=True)
+    discharge_date = models.DateField(blank=True, null=True)
+    visit_type = models.CharField(max_length=10, blank=True, null=True, db_comment='IPD or OPD')
+    complaints = models.TextField(blank=True, null=True)
+    mse = models.TextField(blank=True, null=True, db_comment='Mental State Examination')
+    investigations = models.TextField(blank=True, null=True)
+    diagnosis = models.TextField(blank=True, null=True)
+    treatment_given = models.TextField(blank=True, null=True)
+    advice_on_discharge = models.TextField(blank=True, null=True)
+    next_visit_date = models.DateField(blank=True, null=True)
+    sort_order = models.IntegerField(blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'discharge_summary'

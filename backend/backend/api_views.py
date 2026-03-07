@@ -4068,7 +4068,43 @@ class EctCreateView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+            
+class EctUpdateView(APIView):
 
+
+    def put(self, request, ect_code):
+        try:
+            obj = get_object_or_404(Ect, ect_code=ect_code)
+            serializer = EctSerializer(obj, data=request.data, partial=True)
+
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id,
+                    updatedon=timezone.now()
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class EctDeleteView(APIView):
+
+    def delete(self, request, ect_code):
+        try:
+            obj = get_object_or_404(Ect, ect_code=ect_code)
+
+            obj.delete()
+
+            return Response(
+                {"message": "Ect deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # ---------------- UPDATE ----------------
 class FinancialyearMasterUpdateView(APIView):
@@ -4170,23 +4206,7 @@ class SettingsCreateView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-class EctUpdateView(APIView):
 
-
-    def put(self, request, ect_code):
-        try:
-            obj = get_object_or_404(Ect, ect_code=ect_code)
-            serializer = EctSerializer(obj, data=request.data, partial=True)
-
-            if serializer.is_valid():
-                serializer.save(
-                    updatedby=request.user.id,
-                    updatedon=timezone.now()
-                )
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
  
 
