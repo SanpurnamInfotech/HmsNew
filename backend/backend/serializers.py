@@ -1046,57 +1046,57 @@ class OpdCasesheetSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-from rest_framework import serializers
-from .models import DischargeSummary
-from django.utils import timezone
+# from rest_framework import serializers
+# from .models import DischargeSummary
+# from django.utils import timezone
 
-class DischargeSummarySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DischargeSummary
-        fields = "__all__"
-        # In fields ko manual input se protect karne ke liye read_only rakha hai
-        read_only_fields = [
-            "createdon",
-            "createdby",
-            "updatedon",
-            "updatedby",
-        ]
+# class DischargeSummarySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = DischargeSummary
+#         fields = "__all__"
+#         # In fields ko manual input se protect karne ke liye read_only rakha hai
+#         read_only_fields = [
+#             "createdon",
+#             "createdby",
+#             "updatedon",
+#             "updatedby",
+#         ]
 
-    def validate_discharge_summary_code(self, value):
-        if not value:
-            raise serializers.ValidationError("Discharge summary code is required.")
-        return value.strip()
+#     def validate_discharge_summary_code(self, value):
+#         if not value:
+#             raise serializers.ValidationError("Discharge summary code is required.")
+#         return value.strip()
 
-    def validate_patient_code(self, value):
-        if not value:
-            raise serializers.ValidationError("Patient code is required.")
-        return value
+#     def validate_patient_code(self, value):
+#         if not value:
+#             raise serializers.ValidationError("Patient code is required.")
+#         return value
 
-    def create(self, validated_data):
-        request = self.context.get('request')
-        # Timestamp set karna
-        validated_data['createdon'] = timezone.now()
-        validated_data['updatedon'] = timezone.now()
+#     def create(self, validated_data):
+#         request = self.context.get('request')
+#         # Timestamp set karna
+#         validated_data['createdon'] = timezone.now()
+#         validated_data['updatedon'] = timezone.now()
         
-        # User tracking logic
-        if request and hasattr(request, 'user'):
-            try:
-                # Agar user logged in hai toh uski ID save karein
-                validated_data['createdby'] = request.user.id
-                validated_data['updatedby'] = request.user.id
-            except Exception:
-                pass
-        return super().create(validated_data)
+#         # User tracking logic
+#         if request and hasattr(request, 'user'):
+#             try:
+#                 # Agar user logged in hai toh uski ID save karein
+#                 validated_data['createdby'] = request.user.id
+#                 validated_data['updatedby'] = request.user.id
+#             except Exception:
+#                 pass
+#         return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        request = self.context.get('request')
-        # Sirf update timestamp aur user badalna
-        validated_data['updatedon'] = timezone.now()
+#     def update(self, instance, validated_data):
+#         request = self.context.get('request')
+#         # Sirf update timestamp aur user badalna
+#         validated_data['updatedon'] = timezone.now()
         
-        if request and hasattr(request, 'user'):
-            try:
-                validated_data['updatedby'] = request.user.id
-            except Exception:
-                pass
-        return super().update(instance, validated_data)
+#         if request and hasattr(request, 'user'):
+#             try:
+#                 validated_data['updatedby'] = request.user.id
+#             except Exception:
+#                 pass
+#         return super().update(instance, validated_data)
 
