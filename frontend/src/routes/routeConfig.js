@@ -50,6 +50,8 @@ import TransactionsMst from "../pages/masters/TransactionsMst.jsx";
 import BedMaster from "../pages/masters/BedMaster.jsx";
 import DoctorMst from "../pages/masters/DoctorMst.jsx"
 import Opd from "../pages/masters/Opd.jsx"
+import TransactionmodesMst from "../pages/masters/TransactionmodesMst.jsx";
+import Discharge_summaryMst  from "../pages/masters/Discharge_summaryMst.jsx";
 
 
 
@@ -107,7 +109,6 @@ export const adminRoutes = [
   { path: "Doctors", label: "Doctors", component: DoctorMst },
   { path: "Opd_casesheet", label: "OPD case sheet", component: Opd },
   { path: "discharge", label: "Discharge Summary", component: Discharge_summaryMst },
-  
   { path: "transactions", label: "Transactions", component: TransactionsMst },
   { path: "bed", label: "Bed", component: BedMaster },
   
