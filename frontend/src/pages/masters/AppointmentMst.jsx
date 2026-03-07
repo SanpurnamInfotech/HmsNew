@@ -128,34 +128,39 @@ const AppointmentMst = () => {
     setModal({ message, visible: true, type });
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const actionPath = isEdit
-      ? `${PATH}/update/${formData.appointment_code}/`
-      : `${PATH}/create/`;
+  const actionPath = isEdit
+    ? `${PATH}/update/${formData.appointment_code}/`
+    : `${PATH}/create/`;
 
-    const payload = {
-      ...formData,
-      patient_code: formData.patient_code || null,
-      doctor_code: formData.doctor_code || null,
-      appointment_type_code: formData.appointment_type_code || null,
-    };
-
-    if (payload.sort_order === "" || payload.sort_order === null)
-      delete payload.sort_order;
-
-    const result = isEdit
-      ? await updateItem(actionPath, payload)
-      : await createItem(actionPath, payload);
-
-    if (result.success) {
-      showModal(`Appointment ${isEdit ? "updated" : "created"} successfully!`);
-      resetForm();
-      refresh();
-    } else {
-      showModal(result.error || "Operation failed!", "error");
-    }
+  const payload = {
+    ...formData,
+    patient_code: formData.patient_code || null,
+    doctor_code: formData.doctor_code || null,
+    appointment_type_code: formData.appointment_type_code || null,
   };
+
+  /* appointment_code backend generate karnaar */
+  if (!isEdit) {
+    delete payload.appointment_code;
+  }
+
+  if (payload.sort_order === "" || payload.sort_order === null)
+    delete payload.sort_order;
+
+  const result = isEdit
+    ? await updateItem(actionPath, payload)
+    : await createItem(actionPath, payload);
+
+  if (result.success) {
+    showModal(`Appointment ${isEdit ? "updated" : "created"} successfully!`);
+    resetForm();
+    refresh();
+  } else {
+    showModal(result.error || "Operation failed!", "error");
+  }
+};
 
   const handleDelete = async () => {
     if (!selectedRow) return;
@@ -270,14 +275,10 @@ const AppointmentMst = () => {
             <div className="space-y-1.5">
               <label className="form-label">Appointment Code</label>
               <input
-                className={`form-input w-full ${isEdit ? "opacity-50 cursor-not-allowed" : ""}`}
-                value={formData.appointment_code}
-                disabled={isEdit}
-                required
-                onChange={e =>
-                  setFormData({ ...formData, appointment_code: e.target.value })
-                }
-              />
+  className="form-input w-full opacity-50 cursor-not-allowed"
+  value={formData.appointment_code || "Auto Generated"}
+  disabled
+/>
             </div>
 
             <div className="space-y-1.5">

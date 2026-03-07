@@ -93,7 +93,7 @@ export const adminRoutes = [
   { path :" mental_illness", label: "Mental Illness Master", component:MentalIllnessMaster},
   { path: "medicine-category", label: "Medicine_category", component: MedicineCategory },
   { path: "medicine", label: "Medicine" , component: MedicineMst },
-  { path: "posssation", label: "Possation", component: Possation },
+  { path: "possession-master", label: "Possation", component: Possation },
   { path: "financialyear-master", label: "financial year", component: FinancialYearMst },
   { path: "settings", label: "Settings", component: SettingsMst },
   { path: "accounts", label: "Accounts Master", component: AccountMst },

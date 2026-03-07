@@ -18,10 +18,9 @@ import {
 
 const BedMaster = () => {
 
-  const PATH = "bed";
-
+  const BED_PATH = "bed";
   const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud(`${PATH}/`);
+    useCrud(`${BED_PATH}/`);
 
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -43,9 +42,12 @@ const BedMaster = () => {
   });
 
   const {
-    search, setSearch,
-    currentPage, setCurrentPage,
-    itemsPerPage, setItemsPerPage,
+    search,
+    setSearch,
+    currentPage,
+    setCurrentPage,
+    itemsPerPage,
+    setItemsPerPage,
     paginatedData,
     effectiveItemsPerPage,
     filteredData,
@@ -56,6 +58,7 @@ const BedMaster = () => {
     setShowForm(false);
     setIsEdit(false);
     setSelectedRow(null);
+
     setFormData({
       bed_code: "",
       bed_name: "",
@@ -73,15 +76,18 @@ const BedMaster = () => {
     e.preventDefault();
 
     const actionPath = isEdit
-      ? `${PATH}/update/${formData.bed_code}/`
-      : `${PATH}/create/`;
+      ? `${BED_PATH}/update/${formData.bed_code}/`
+      : `${BED_PATH}/create/`;
 
     const payload = { ...formData };
 
-    if (!isEdit) delete payload.bed_code;
+    if (!isEdit) {
+      delete payload.bed_code;
+    }
 
-    if (payload.sort_order === "" || payload.sort_order === null)
+    if (payload.sort_order === "" || payload.sort_order === null) {
       delete payload.sort_order;
+    }
 
     const result = isEdit
       ? await updateItem(actionPath, payload)
@@ -100,7 +106,7 @@ const BedMaster = () => {
     if (!selectedRow) return;
 
     const result = await deleteItem(
-      `${PATH}/delete/${selectedRow.bed_code}/`
+      `${BED_PATH}/delete/${selectedRow.bed_code}/`
     );
 
     if (result.success) {
@@ -126,20 +132,25 @@ const BedMaster = () => {
       {modal.visible && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center shadow-2xl">
-
             <div className="mb-4 flex justify-center">
-              {modal.type === "success"
-                ? <FaCheckCircle className="text-6xl text-emerald-500" />
-                : <FaTimesCircle className="text-6xl text-rose-500" />}
+              {modal.type === "success" ? (
+                <FaCheckCircle className="text-6xl text-emerald-500" />
+              ) : (
+                <FaTimesCircle className="text-6xl text-rose-500" />
+              )}
             </div>
 
-            <h3 className="text-xl font-black mb-2 uppercase tracking-tight">
+            <h3
+              className={`text-xl font-black mb-2 uppercase tracking-tight ${
+                modal.type === "success"
+                  ? "text-emerald-500"
+                  : "text-rose-500"
+              }`}
+            >
               {modal.type === "success" ? "Success" : "Error"}
             </h3>
 
-            <p className="mb-6 font-medium opacity-80">
-              {modal.message}
-            </p>
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
 
             <button
               className="btn-primary w-full justify-center py-3"
@@ -147,29 +158,22 @@ const BedMaster = () => {
             >
               Continue
             </button>
-
           </div>
         </div>
       )}
 
       {/* HEADER */}
       <div className="section-header">
-
         <h4 className="page-title">Bed Master</h4>
 
         {!showForm && (
           <div className="flex items-center gap-2">
-
-            <button
-              className="btn-primary"
-              onClick={() => setShowForm(true)}
-            >
-              <FaPlus size={14}/> Add New
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
+              <FaPlus size={14} /> Add New
             </button>
 
             {selectedRow && (
-              <div className="flex items-center gap-2">
-
+              <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
                 <button
                   className="btn-warning"
                   onClick={() => {
@@ -178,16 +182,12 @@ const BedMaster = () => {
                     setShowForm(true);
                   }}
                 >
-                  <FaEdit size={14}/> Edit
+                  <FaEdit size={14} /> Edit
                 </button>
 
-                <button
-                  className="btn-danger"
-                  onClick={handleDelete}
-                >
-                  <FaTrash size={14}/> Delete
+                <button className="btn-danger" onClick={handleDelete}>
+                  <FaTrash size={14} /> Delete
                 </button>
-
               </div>
             )}
           </div>
@@ -210,10 +210,9 @@ const BedMaster = () => {
             <div className="space-y-1.5">
               <label className="form-label">Bed Code</label>
               <input
-                className={`form-input w-full ${isEdit ? "opacity-50 cursor-not-allowed" : ""}`}
-                value={formData.bed_code}
-                disabled={isEdit}
-                onChange={(e)=>setFormData({...formData, bed_code:e.target.value})}
+                className="form-input w-full opacity-50 cursor-not-allowed"
+                value={formData.bed_code || "Auto Generated"}
+                disabled
               />
             </div>
 
@@ -221,8 +220,11 @@ const BedMaster = () => {
               <label className="form-label">Bed Name</label>
               <input
                 className="form-input w-full"
+                required
                 value={formData.bed_name}
-                onChange={(e)=>setFormData({...formData, bed_name:e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, bed_name: e.target.value })
+                }
               />
             </div>
 
@@ -230,8 +232,11 @@ const BedMaster = () => {
               <label className="form-label">Room Type</label>
               <input
                 className="form-input w-full"
+                required
                 value={formData.room_type}
-                onChange={(e)=>setFormData({...formData, room_type:e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, room_type: e.target.value })
+                }
               />
             </div>
 
@@ -241,7 +246,9 @@ const BedMaster = () => {
                 type="number"
                 className="form-input w-full"
                 value={formData.bed_charges}
-                onChange={(e)=>setFormData({...formData, bed_charges:e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, bed_charges: e.target.value })
+                }
               />
             </div>
 
@@ -251,7 +258,9 @@ const BedMaster = () => {
                 type="number"
                 className="form-input w-full"
                 value={formData.sort_order}
-                onChange={(e)=>setFormData({...formData, sort_order:e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, sort_order: e.target.value })
+                }
               />
             </div>
 
@@ -260,7 +269,12 @@ const BedMaster = () => {
               <select
                 className="form-input w-full"
                 value={formData.status}
-                onChange={(e)=>setFormData({...formData, status:Number(e.target.value)})}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    status: Number(e.target.value)
+                  })
+                }
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
@@ -301,44 +315,48 @@ const BedMaster = () => {
           />
 
           <div className="overflow-x-auto">
-
             <table className="w-full text-left">
-
               <thead>
                 <tr>
                   <th className="text-admin-th w-16"></th>
-                  <th className="text-admin-th">Code</th>
-                  <th className="text-admin-th">Name</th>
+                  <th className="text-admin-th">Bed Code</th>
+                  <th className="text-admin-th">Bed Name</th>
                   <th className="text-admin-th">Room Type</th>
                   <th className="text-admin-th">Charges</th>
+                  <th className="text-admin-th">Sort</th>
                   <th className="text-admin-th text-center">Status</th>
                 </tr>
               </thead>
 
-              <tbody
-                className="divide-y"
-                style={{ borderColor: "var(--border-color)" }}
-              >
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
                   paginatedData.map((row) => (
-
                     <tr
                       key={row.bed_code}
                       onClick={() =>
                         setSelectedRow(
-                          selectedRow?.bed_code === row.bed_code
-                            ? null
-                            : row
+                          selectedRow?.bed_code === row.bed_code ? null : row
                         )
                       }
-                      className={`cursor-pointer ${
+                      className={`group cursor-pointer transition-colors ${
                         selectedRow?.bed_code === row.bed_code
                           ? "bg-emerald-500/10"
                           : "hover:bg-emerald-500/5"
                       }`}
                     >
-
-                      <td className="px-6 py-4"></td>
+                      <td className="px-6 py-4">
+                        <div
+                          className={`selection-indicator ${
+                            selectedRow?.bed_code === row.bed_code
+                              ? "selection-indicator-active"
+                              : "group-hover:border-emerald-500/50"
+                          }`}
+                        >
+                          {selectedRow?.bed_code === row.bed_code && (
+                            <div className="selection-dot" />
+                          )}
+                        </div>
+                      </td>
 
                       <td className="text-admin-td font-black">
                         {row.bed_code}
@@ -356,6 +374,10 @@ const BedMaster = () => {
                         {row.bed_charges}
                       </td>
 
+                      <td className="text-admin-td">
+                        {row.sort_order}
+                      </td>
+
                       <td className="text-admin-td text-center">
                         <span
                           className={`badge ${
@@ -364,37 +386,29 @@ const BedMaster = () => {
                               : "badge-danger"
                           }`}
                         >
-                          {row.status === 1
-                            ? "Active"
-                            : "Inactive"}
+                          {row.status === 1 ? "Active" : "Inactive"}
                         </span>
                       </td>
-
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="6" className="px-6 py-24 text-center">
-
+                    <td colSpan="7" className="px-6 py-24 text-center">
                       <FaLightbulb
                         size={64}
                         className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse"
                       />
-
                       <p className="text-xl font-black opacity-30 uppercase tracking-widest">
                         No Bed Records Found
                       </p>
-
                     </td>
                   </tr>
                 )}
               </tbody>
-
             </table>
           </div>
 
           <div className="pagination-container">
-
             <Pagination
               totalEntries={filteredData.length}
               itemsPerPage={effectiveItemsPerPage}
@@ -402,8 +416,8 @@ const BedMaster = () => {
               setCurrentPage={setCurrentPage}
               totalPages={totalPages}
             />
-
           </div>
+
         </div>
       )}
 
