@@ -107,15 +107,11 @@ urlpatterns = [
     path("api/bed_allotment/delete/<int:id>/", BedAllotmentDeleteView.as_view(), name="bed-allotment-delete"),
 
     path('api/patient/', PatientListView.as_view(), name='patient-list'),
+    path('api/patient/detail/<str:patient_code>/', PatientDetailView.as_view(), name='patient-detail'),
+    path('api/patient/create/', PatientCreateView.as_view(), name='patient-create'),
+    path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
+    path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
 
-path('api/patient/detail/<str:patient_code>/', PatientDetailView.as_view(), name='patient-detail'),
-
-path('api/patient/create/', PatientCreateView.as_view(), name='patient-create'),
-
-path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
-
-path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
-    
     path('api/patient-dates/<str:patient_code>/', PatientPrescriptionDatesView.as_view(), name='patient-dates'),
     
     path('api/prescription-report/', PrescriptionReportView.as_view(), name='prescription-report'),
@@ -375,6 +371,19 @@ path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name
     path("api/opd_bill_master/create/", OpdBillMasterCreateView.as_view(), name="opd_bill_create"),
     path("api/opd_bill_master/update/<str:opd_bill_code>/", OpdBillMasterUpdateView.as_view(), name="opd_bill_update"),
     path("api/opd_bill_master/delete/<str:opd_bill_code>/", OpdBillMasterDeleteView.as_view(), name="opd_bill_delete"),
+    
+    path('api/opd-billing/', OpdBillingListView.as_view(), name='opd-billing-list'),
+    path('api/opd-billing/create/', OpdBillingCreateView.as_view(), name='opd-billing-create'),
+
+    path('api/opd-billing/<str:opd_billing_code>/', OpdBillingDetailView.as_view(), name='opd-billing-detail'),
+    path('api/opd-billing/update/<str:opd_billing_code>/', OpdBillingUpdateView.as_view(), name='opd-billing-update'),
+    path('api/opd-billing/delete/<str:opd_billing_code>/', OpdBillingDeleteView.as_view(), name='opd-billing-delete'),
+    
+    path('api/patient/', PatientListView.as_view(), name='patient-list'),
+    path('api/patient/create/', PatientCreateView.as_view(), name='patient-create'),
+    path('api/patient/<str:patient_code>/', PatientDetailView.as_view(), name='patient-detail'),
+    path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
+    path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
     
     
 ]

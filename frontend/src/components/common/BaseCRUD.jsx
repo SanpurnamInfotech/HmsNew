@@ -41,7 +41,7 @@ export const useCrud = (endpoint) => {
     } catch (err) { 
       return { 
         success: false, 
-        error: err.response?.data?.error || err.response?.data?.message || "Error" 
+        error: err.response?.data || err.response?.message || "Error" 
       }; 
     }
   };
@@ -54,7 +54,7 @@ export const useCrud = (endpoint) => {
     } catch (err) { 
       return { 
         success: false, 
-        error: err.response?.data?.error || err.response?.data?.message || "Error" 
+        error: err.response?.data || err.response?.message || "Error" 
       }; 
     }
   };
@@ -67,7 +67,7 @@ export const useCrud = (endpoint) => {
     } catch (err) { 
       return { 
         success: false, 
-        error: err.response?.data?.error || err.response?.data?.message || "Error" 
+        error: err.response?.data || err.response?.message || "Error" 
       }; 
     }
   };
