@@ -52,6 +52,10 @@ import DoctorMst from "../pages/masters/DoctorMst.jsx"
 import Opd from "../pages/masters/Opd.jsx"
 import TransactionmodesMst from "../pages/masters/TransactionmodesMst.jsx";
 import Discharge_summaryMst  from "../pages/masters/Discharge_summaryMst.jsx";
+import OpdBillMaster from "../pages/masters/OpdBillMaster.jsx";
+import OpdBilling from "../pages/masters/OpdBilling.jsx";
+import OpdBillingDetails from "../pages/masters/OpdBillingDetails.jsx";
+
 
 
 
@@ -93,8 +97,8 @@ export const adminRoutes = [
   { path :" mental_illness", label: "Mental Illness Master", component:MentalIllnessMaster},
   { path: "medicine-category", label: "Medicine_category", component: MedicineCategory },
   { path: "medicine", label: "Medicine" , component: MedicineMst },
-  { path: "possession-master", label: "Possation", component: Possation },
-  { path: "financialyear-master", label: "financial year", component: FinancialYearMst },
+  { path: "posssation", label: "Possation", component: Possation },
+  { path: "financial_year", label: "financial year", component: FinancialYearMst },
   { path: "settings", label: "Settings", component: SettingsMst },
   { path: "accounts", label: "Accounts Master", component: AccountMst },
   { path: "usertype", label: "Usertype Master", component: UsertypeMst },
@@ -111,6 +115,9 @@ export const adminRoutes = [
   { path: "discharge", label: "Discharge Summary", component: Discharge_summaryMst },
   { path: "transactions", label: "Transactions", component: TransactionsMst },
   { path: "bed", label: "Bed", component: BedMaster },
+  { path: "opd_bill_master", label: "OPd Billing Master", component: OpdBillMaster },
+  { path: "opd_billing", label: "OPd Billing", component: OpdBilling },
+  { path: "opd_billing_details", label: "OPd Billing Details", component: OpdBillingDetails },
   
 ];
 

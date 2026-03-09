@@ -277,15 +277,7 @@ const EmployeeMaster = () => {
             <section>
               <h6 className="form-section-title uppercase tracking-tighter mb-6">Personal Information</h6>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Employee Code</label>
-                  <input 
-                    className="form-input w-full" 
-                    value={formData.employee_code || ''} 
-                    disabled={isEdit}
-                    readOnly 
-                  />
-                </div>
+
                 <SearchDropdown label="Company" options={companies} valKey="company_code" dispKey="company_name" stateKey="company_code" dKey="co" />
                 <div className="space-y-1.5"><label className="form-label">First Name</label><input className="form-input w-full" value={formData.employee_firstname} required onChange={e => setFormData({...formData, employee_firstname: e.target.value})} /></div>
                 <div className="space-y-1.5"><label className="form-label">Middle Name</label><input className="form-input w-full" value={formData.employee_middlename || ""} onChange={e => setFormData({...formData, employee_middlename: e.target.value})} /></div>
