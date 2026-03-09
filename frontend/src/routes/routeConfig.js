@@ -20,7 +20,7 @@ import BloodGroupMaster from '../pages/masters/BloodGroupMaster';
 import BloodDonor from '../pages/masters/BloodDonor';
 import BankDetails from "../pages/masters/BankDetails";
 import BedAllotment from "../pages/masters/BedAllotment";
-// import PatientMst from "../pages/masters/PatientMst.";
+import PatientMst from "../pages/masters/PatientMst";
 import PrescriptionReport from "../pages/PrescriptionReport.jsx";
 import IcdMasterMst from "../pages/masters/IcdMasterMst.jsx";
 import DsmMaster from "../pages/masters/DsmMaster.jsx";
@@ -74,7 +74,7 @@ export const adminRoutes = [
   { path: "blood_donor", label: "Blood Donor", component: BloodDonor },
   { path: "bank_details", label: "Bank Details", component: BankDetails },
   { path: "bed_allotment", label: "Bed Allotment", component: BedAllotment },
-  // { path: "patient", label: "PatientMst", component: PatientMst },
+  { path: "patient", label: "PatientMst", component: PatientMst },
   { path: "complaints", label: "Complaint Master", component: ComplaintMaster },
   { path: "expenses", label: "Expenses Master", component: ExpensesMst },
   { path: "mse_master", label: "MSE Master", component: MseMaster },
