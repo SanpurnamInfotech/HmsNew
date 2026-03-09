@@ -222,7 +222,6 @@ class BankdetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bankdetails
         fields = "__all__"
-        read_only_fields = ("createdon", "createdby", "updatedon", "updatedby")
 
 class BedAllotmentSerializer(serializers.ModelSerializer):
     class Meta:
@@ -250,18 +249,6 @@ class OpdBillingSerializer(serializers.ModelSerializer):
         fields = "__all__"                        
 
         
-
-
-
-
-
-# class BedSerializer(serializers.ModelSerializer):
-
-#     class Meta:
-#         model = Bed
-#         fields = "__all__"
-    
-
 
 class IpdRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -827,11 +814,11 @@ class AppointmentTypeMasterSerializer(serializers.ModelSerializer):
         fields = "__all__"   
         
         
-from rest_framework import serializers
-from .models import Appointment, Patient, Doctor, AppointmentTypeMaster
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
+
+    appointment_code = serializers.CharField(required=False)
 
     patient_code = serializers.SlugRelatedField(
         queryset=Patient.objects.all(),
@@ -840,7 +827,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
         required=False
     )
 
-    
     doctor_code = serializers.SlugRelatedField(
         queryset=Doctor.objects.all(),
         slug_field="doctor_code"
@@ -855,8 +841,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Appointment
-        fields = "__all__" 
-        
+        fields = "__all__"
+                
 class TransactionsSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -1045,6 +1031,9 @@ class OpdCasesheetSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+from rest_framework import serializers
+from .models import DischargeSummary
+from django.utils import timezone
 
 
 class DischargeSummarySerializer(serializers.ModelSerializer):
