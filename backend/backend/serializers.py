@@ -72,11 +72,6 @@ class MaritalStatusMasterSerializer(serializers.ModelSerializer):
 #         model = Doctor
 #         fields = "__all__"
 
-class PatientSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Patient
-        fields = "__all__"
 
 
         
@@ -228,14 +223,7 @@ class BedAllotmentSerializer(serializers.ModelSerializer):
         model = BedAllotment
         fields = "__all__"        
 
-class PatientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Patient
-        fields = "__all__"
-        extra_kwargs = {
-    "hospital_code": {"required": False, "allow_null": True},
-}
-        
+   
 
         
 class OpdBillingDetailsSerializer(serializers.ModelSerializer):
@@ -265,11 +253,59 @@ class IpdRegistrationSerializer(serializers.ModelSerializer):
 
 
 
+
+
+
+
+
 class PatientSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Patient
         fields = '__all__'
+        read_only_fields = [
+            'patient_code',
+            'uhid',
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby'
+        ]
 
+    def create(self, validated_data):
+        with transaction.atomic():
+
+            last_patient = (
+                Patient.objects
+                .select_for_update()
+                .order_by('-id')
+                .first()
+            )
+
+            if last_patient and last_patient.patient_code:
+                try:
+                    last_number = int(last_patient.patient_code.replace("PAT", ""))
+                    new_number = last_number + 1
+                except ValueError:
+                    new_number = 1
+            else:
+                new_number = 1
+
+            validated_data["patient_code"] = f"PAT{new_number:06d}"
+            validated_data["uhid"] = f"UHID{new_number:06d}"
+
+            patient = Patient.objects.create(**validated_data)
+
+            return patient
+
+
+    def update(self, instance, validated_data):
+
+        # Prevent updating these fields
+        validated_data.pop('patient_code', None)
+        validated_data.pop('uhid', None)
+
+        return super().update(instance, validated_data)
 class IpdServicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = IpdServices
@@ -843,13 +879,30 @@ class AppointmentSerializer(serializers.ModelSerializer):
         model = Appointment
         fields = "__all__"
                 
+
 class TransactionsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Transactions
-        fields = "__all__"                         
+        fields = '__all__'
+        read_only_fields = ('transaction_code','createdon','createdby','updatedon','updatedby')
 
+    def create(self, validated_data):
 
+        if not validated_data.get('transaction_code'):
+
+            last_transaction = Transactions.objects.all().order_by('transaction_code').last()
+
+            if not last_transaction:
+                new_code = "TRN-000001"
+            else:
+                last_code = last_transaction.transaction_code
+                last_number = int(last_code.split("-")[1])
+                new_code = f"TRN-{str(last_number + 1).zfill(6)}"
+
+            validated_data['transaction_code'] = new_code
+
+        return super().create(validated_data)
 
 
 class AccountSerializer(serializers.ModelSerializer):

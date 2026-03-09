@@ -1267,65 +1267,38 @@ class PatientCreateView(APIView):
 
             if serializer.is_valid():
                 serializer.save(
-                    createdby=request.user.id,
+                    createdby=request.user.id if request.user.is_authenticated else None,
                     createdon=timezone.now()
                 )
 
-                return Response(
-                    serializer.data,
-                    status=status.HTTP_201_CREATED
-                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # ---------------- UPDATE ----------------
 class PatientUpdateView(APIView):
 
     def put(self, request, patient_code):
         try:
-            obj = get_object_or_404(
-                Patient,
-                patient_code=patient_code
-            )
+            obj = get_object_or_404(Patient, patient_code=patient_code)
 
-            serializer = PatientSerializer(
-                obj,
-                data=request.data,
-                partial=True
-            )
+            serializer = PatientSerializer(obj, data=request.data, partial=True)
 
             if serializer.is_valid():
                 serializer.save(
-                    updatedby=request.user.id,
+                    updatedby=request.user.id if request.user.is_authenticated else None,
                     updatedon=timezone.now()
                 )
 
-                return Response(
-                    serializer.data,
-                    status=status.HTTP_200_OK
-                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
 
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # ---------------- DELETE ----------------
 class PatientDeleteView(APIView):
@@ -5651,8 +5624,7 @@ class ThoughtContentDeleteView(APIView):
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-from .models import TransactionModeMaster
-from .serializers import TransactionModeMasterSerializer
+
 
 class TransactionModeListView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
