@@ -1118,6 +1118,14 @@ class OpdCasesheet(models.Model):
     bp_dia = models.IntegerField(blank=True, null=True)
     status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')        
     sort_order = models.IntegerField(blank=True, null=True)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'opd_casesheet'
                 
 
 class Ect(models.Model):
@@ -1142,7 +1150,6 @@ class Ect(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'opd_casesheet'
         db_table = 'ect'
 
 

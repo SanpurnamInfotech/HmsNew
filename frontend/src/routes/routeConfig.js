@@ -97,14 +97,14 @@ export const adminRoutes = [
   { path: "accounts", label: "Accounts Master", component: AccountMst },
   { path: "usertype", label: "Usertype Master", component: UsertypeMst },
   { path: "hospital", label: "Hospital Master", component: Hospital_detailsMst },
-  { path: "doctor", label: "Doctor", component: DoctorMst },
+  { path: "doctors", label: "Doctor", component: DoctorMst },
   { path: "appointment", label: "Appointment", component: AppointmentMst},
   { path: "appointment-type-master", label: "Appointment Type Master", component: AppointmentTypeMasterMst },
   { path: "ect", label: "ECT", component: EctMst },
   { path: "follow-up", label: "Follow Up", component: FollowUpMst },
   { path: "transaction-modes", label: "Transaction Modes", component: TransactionmodesMst },
   { path: "noticeboard", label: "Noticeboard", component: Noticeboard },
-  { path: "Doctors", label: "Doctors", component: DoctorMst },
+  
   { path: "Opd_casesheet", label: "OPD case sheet", component: Opd },
   { path: "discharge", label: "Discharge Summary", component: Discharge_summaryMst },
   

@@ -3173,70 +3173,107 @@ class PossessionMasterDeleteView(APIView):
 
 # doctor
 
-from backend.models import Doctor
-from backend.serializers import DoctorSerializer
 
+from rest_framework.views import APIView
 
-# ================= LIST =================
+from rest_framework.response import Response
+
+from rest_framework import status
+
+from django.shortcuts import get_object_or_404
+ 
+from .models import Doctor
+
+from .serializers import DoctorSerializer
+ 
+ 
 class DoctorListView(APIView):
-
+ 
     def get(self, request):
-        doctors = Doctor.objects.all().order_by("doctor_name")
+
+        doctors = Doctor.objects.all()
+
         serializer = DoctorSerializer(doctors, many=True)
+
         return Response(serializer.data)
-
-
-# ================= DETAILS =================
-class DoctorDetailView(APIView):
-
-    def get(self, request, doctor_code):
-        doctor = get_object_or_404(Doctor, doctor_code=doctor_code)
-        serializer = DoctorSerializer(doctor)
-        return Response(serializer.data)
-
-
-# ================= CREATE =================
+ 
+ 
 class DoctorCreateView(APIView):
-
+    permission_classes = [AllowAny]
+ 
     def post(self, request):
-        try:
-            serializer = DoctorSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save(createdon=timezone.now())
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response(
-                {"error": str(e), "trace": traceback.format_exc()},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-
-# ================= UPDATE =================
-class DoctorUpdateView(APIView):
-
-    def put(self, request, doctor_code):
-        doctor = get_object_or_404(Doctor, doctor_code=doctor_code)
-
-        serializer = DoctorSerializer(doctor, data=request.data)
-
+        serializer = DoctorSerializer(data=request.data)
+ 
         if serializer.is_valid():
-            serializer.save(updatedon=timezone.now())
-            return Response(serializer.data)
 
+            serializer.save()
+ 
+            return Response(
+
+                {
+
+                    "message": "Doctor created successfully",
+
+                    "data": serializer.data
+
+                },
+
+                status=status.HTTP_201_CREATED
+
+            )
+ 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+ 
+class DoctorDetailView(APIView):
+ 
+    def get(self, request, doctor_code):
 
-
-# ================= DELETE =================
-class DoctorDeleteView(APIView):
-
-
-    def delete(self, request, doctor_code):
         doctor = get_object_or_404(Doctor, doctor_code=doctor_code)
+
+        serializer = DoctorSerializer(doctor)
+
+        return Response(serializer.data)
+ 
+ 
+class DoctorUpdateView(APIView):
+ 
+    def put(self, request, doctor_code):
+
+        doctor = get_object_or_404(Doctor, doctor_code=doctor_code)
+ 
+        serializer = DoctorSerializer(doctor, data=request.data)
+ 
+        if serializer.is_valid():
+
+            serializer.save()
+ 
+            return Response({
+
+                "message": "Doctor updated successfully",
+
+                "data": serializer.data
+
+            })
+ 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+ 
+ 
+class DoctorDeleteView(APIView):
+ 
+    def delete(self, request, doctor_code):
+
+        doctor = get_object_or_404(Doctor, doctor_code=doctor_code)
+ 
         doctor.delete()
-        return Response({"message": "Doctor deleted successfully"})
+ 
+        return Response({
+
+            "message": "Doctor deleted successfully"
+
+        }, status=status.HTTP_204_NO_CONTENT)
+ 
 
 class PossessionMasterUpdateView(APIView):
 
@@ -3869,21 +3906,6 @@ class AppointmentDeleteView(APIView):
 
 
   
-
-class DoctorListView(APIView):
-    permission_classes = [AllowAny]
- 
-    def get(self, request):
-        try:
-            doctors = Doctor.objects.all().order_by('-doctor_code')
-            serializer = DoctorSerializer(doctors, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
- 
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
 
 
@@ -4805,34 +4827,6 @@ class AccountDeleteView(APIView):
             )
 
 
-from .models import Doctor
-from .serializers import DoctorSerializer
-import traceback
-
-# --- List View ---
-class DoctorListView(APIView):
-   
-    def get(self, request):
-        try:
-            # Ordering by doctor_code or name as per your preference
-            objs = Doctor.objects.all().order_by("doctor_code")
-            serializer = DoctorSerializer(objs, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# --- Create View ---
-class DoctorCreateView(APIView):
-    
-    def post(self, request):
-        try:
-            serializer = DoctorSerializer(data=request.data, context={"request": request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
@@ -5056,38 +5050,6 @@ class AppointmentDeleteView(APIView):
 
 #
 
-# --- Update View ---
-class DoctorUpdateView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def put(self, request, doctor_code):
-        try:
-            obj = get_object_or_404(Doctor, doctor_code=doctor_code)
-            # partial=True allows you to update only specific fields
-            serializer = DoctorSerializer(obj, data=request.data, partial=True, context={"request": request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-# --- Delete View ---
-class DoctorDeleteView(APIView):
-    authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
-
-    def delete(self, request, doctor_code):
-        try:
-            obj = get_object_or_404(Doctor, doctor_code=doctor_code)
-            obj.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except Exception as e:
-            return Response(
-                {"error": str(e), "trace": traceback.format_exc()}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
 
 
 from .models import HospitalDetails  # Updated name

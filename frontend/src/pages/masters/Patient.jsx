@@ -126,7 +126,7 @@ const Patient = () => {
   const { data: maritalData } = useCrud("marital_status_master/");
   const { data: bloodGroupData } = useCrud("blood_group_master/");
   const { data: relationData } = useCrud("relation_master/");
-  const { data: doctorData } = useCrud("doctors/");
+  const { data: doctorData } = useCrud("doctor/");
 
   const { data: countriesData } = useCrud("countries/");
   const { data: statesData } = useCrud("states/");

@@ -297,12 +297,11 @@ path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name
     path('api/account/<str:account_code>/',AccountDetailView.as_view(),name='account-detail' ),
 
     
-    path('api/doctors/', DoctorListView.as_view(), name='doctors-list'),
-    path('api/doctors/<str:doctor_code>/', DoctorDetailView.as_view(), name='doctors-detail'),
-    path('api/doctors/create/', DoctorCreateView.as_view(), name='doctors-create'),
-    path('api/doctors/update/<str:doctor_code>/', DoctorUpdateView.as_view(), name='doctors-update'),
-    path('api/doctors/delete/<str:doctor_code>/', DoctorDeleteView.as_view(), name='doctors-delete'),
-
+    path('api/doctor/', DoctorListView.as_view()),
+    path('api/doctor/create/', DoctorCreateView.as_view()),
+    path('api/doctor/update/<str:doctor_code>/', DoctorUpdateView.as_view()),
+    path('api/doctor/delete/<str:doctor_code>/', DoctorDeleteView.as_view()),
+    path('api/doctor/<str:doctor_code>/', DoctorDetailView.as_view()),
 
     path('api/hospital/',HospitalListView.as_view(),name='hospital-list'),
     path('api/hospital/create/',HospitalCreateView.as_view(),name='hospital-create'),
@@ -315,7 +314,7 @@ path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name
     path('api/complaints/update/<str:complaint_code>/', ComplaintUpdateView.as_view(), name='complaints-update'),
     path('api/complaints/delete/<str:complaint_code>/', ComplaintDeleteView.as_view(), name='complaints-delete'),
 
-     path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
+    path('api/expenses/', ExpensesListView.as_view(), name='expenses-list'),
     path('api/expenses/create/', ExpensesCreateView.as_view(), name='expenses-create'),
     path('api/expenses/update/<str:expenses_code>/', ExpensesUpdateView.as_view(), name='expenses-update'),
     path('api/expenses/delete/<str:expenses_code>/', ExpensesDeleteView.as_view(), name='expenses-delete'),

@@ -69,7 +69,7 @@ const AppointmentMst = () => {
 
   useEffect(() => {
     api.get("patient/").then(r => setPatients(r.data || []));
-    api.get("doctors/").then(r => setDoctors(r.data || []));
+    api.get("doctor/").then(r => setDoctors(r.data || []));
     api.get("appointment-type-master/").then(r => setAppointmentTypes(r.data || []));
   }, []);
 
