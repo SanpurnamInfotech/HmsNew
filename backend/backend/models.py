@@ -790,6 +790,21 @@ class BloodDonor(models.Model):
     class Meta:
         managed = False
         db_table = 'blood_donor'
+
+class Branch(models.Model):
+    branch_code = models.CharField(unique=True, max_length=45, blank=True, null=True)
+    branch_name = models.CharField(max_length=100, blank=True, null=True)
+    company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code', blank=True, null=True)
+    status = models.IntegerField(blank=True, null=True, db_comment='1=Active, 0=Inactive')
+    sort_order = models.IntegerField(blank=True, null=True)
+    created_on = models.DateTimeField(blank=True, null=True)
+    created_by = models.IntegerField(blank=True, null=True)
+    updated_on = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'branch'
         
 class Bankdetails(models.Model):
     bank_code = models.CharField(unique=True, max_length=45)

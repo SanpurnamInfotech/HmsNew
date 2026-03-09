@@ -157,10 +157,7 @@ class AdvicemasterSerializer(serializers.ModelSerializer):
         model = Advicemaster
         fields = "__all__"
 
-class CompanyMasterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CompanyMaster
-        fields = '__all__'
+
 
 class EmployeeMasterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -219,10 +216,7 @@ class BloodGroupMasterSerializer(serializers.ModelSerializer):
             "updatedby": {"required": False},
         }
 
-class BloodDonorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BloodDonor
-        fields = "__all__"
+
 
 class BankdetailsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -242,10 +236,7 @@ class PatientSerializer(serializers.ModelSerializer):
     "hospital_code": {"required": False, "allow_null": True},
 }
         
-class OpdBillMasterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OpdBillMaster
-        fields = '__all__'
+
         
 class OpdBillingDetailsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -949,11 +940,19 @@ class FollowUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = FollowUp
         fields = "__all__"   
+class DesignationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Designation
+        fields = "__all__"   
+        
+class DivisionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Division
+        fields = "__all__"   
 
 
-from rest_framework import serializers
-from .models import TransactionModeMaster
-from django.utils import timezone
 
 class TransactionModeMasterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1087,3 +1086,65 @@ class DischargeSummarySerializer(serializers.ModelSerializer):
                 pass
         return super().update(instance, validated_data)
 
+
+class BranchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Branch
+        fields = "__all__"
+
+
+
+class BloodDonorSerializer(serializers.ModelSerializer):    
+    class Meta:
+        model = BloodDonor
+        fields = '__all__'
+        read_only_fields = ('createdby', 'createdon', 'updatedby', 'updatedon', 'blood_donor_code')
+
+    def create(self, validated_data):
+        if not validated_data.get('blood_donor_code'):
+            last_donor = BloodDonor.objects.all().order_by('id').last()
+            if not last_donor:
+                new_code = "DONOR-000001"
+            else:
+                last_id = last_donor.id
+                new_code = f"DONOR-{str(last_id + 1).zfill(6)}"
+            validated_data['blood_donor_code'] = new_code
+            
+        return super().create(validated_data)
+    
+    
+class CompanyMasterSerializer(serializers.ModelSerializer):    
+    class Meta:
+        model = CompanyMaster
+        fields = '__all__'
+        read_only_fields = ('company_code','createdby', 'createdon', 'updatedby', 'updatedon')
+
+    def create(self, validated_data):
+        if not validated_data.get('company_code'):
+            last_company = CompanyMaster.objects.all().order_by('id').last()
+            if not last_company:
+                new_code = "COMP-000001"
+            else:
+                last_id = last_company.id
+                new_code = f"COMP-{str(last_id + 1).zfill(6)}"
+            validated_data['company_code'] = new_code
+            
+        return super().create(validated_data)
+    
+class OpdBillMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpdBillMaster
+        fields = '__all__'
+        read_only_fields = ('opd_bill_code','createdby', 'createdon', 'updatedby', 'updatedon')
+
+    def create(self, validated_data):
+        if not validated_data.get('opd_bill_code'):
+            last_opd_bill_master = OpdBillMaster.objects.all().order_by('id').last()
+            if not last_opd_bill_master:
+                new_code = "OPD-000001"
+            else:
+                last_id = last_opd_bill_master.id
+                new_code = f"OPD-{str(last_id + 1).zfill(6)}"
+            validated_data['opd_bill_code'] = new_code
+            
+        return super().create(validated_data)
