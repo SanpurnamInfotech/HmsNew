@@ -2,7 +2,7 @@ from .models import *
 from rest_framework import serializers
 from django.db import transaction
 from django.contrib.auth.hashers import make_password 
-
+import re
 from django.db.models import Max
 class UserRegisterSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True)
@@ -189,7 +189,10 @@ class AdvicemasterSerializer(serializers.ModelSerializer):
         model = Advicemaster
         fields = "__all__"
 
-
+class CompanyMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CompanyMaster
+        fields = '__all__'
 
 class EmployeeMasterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -248,32 +251,139 @@ class BloodGroupMasterSerializer(serializers.ModelSerializer):
             "updatedby": {"required": False},
         }
 
-
+class BloodDonorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BloodDonor
+        fields = "__all__"
 
 class BankdetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bankdetails
         fields = "__all__"
+        read_only_fields = ("createdon", "createdby", "updatedon", "updatedby")
 
 class BedAllotmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = BedAllotment
         fields = "__all__"        
 
-   
 
+
+class PatientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Patient
+        fields = "__all__"
+        # These are handled by the system, not the user
+        read_only_fields = ['patient_code', 'createdon', 'createdby', 'updatedon', 'updatedby']
+        extra_kwargs = {
+            "hospital_code": {"required": False, "allow_null": True, "allow_blank": True},
+            "uhid": {"required": False, "allow_null": True, "allow_blank": True},
+        }
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            # Get the last patient to increment the code
+            last_pat = Patient.objects.select_for_update().order_by('patient_code').last()
+            
+            if not last_pat or not last_pat.patient_code:
+                new_num = 1
+            else:
+                try:
+                    # FIX: Changed "DEPT" to "PAT" to match Patient prefix
+                    last_id_numeric = last_pat.patient_code.replace("PAT", "")
+                    new_num = int(last_id_numeric) + 1
+                except (ValueError, TypeError):
+                    new_num = 1
+            
+            # Formats to PAT + 6 digits (e.g., PAT000001)
+            validated_data['patient_code'] = f"PAT{new_num:06d}"
+            
+            return super().create(validated_data)
+           
+class OpdBillMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpdBillMaster
+        fields = '__all__'
         
+
 class OpdBillingDetailsSerializer(serializers.ModelSerializer):
+    opd_bill_code = serializers.SlugRelatedField(
+        slug_field='opd_bill_code', 
+        queryset=OpdBillMaster.objects.all()
+    )
+
     class Meta:
         model = OpdBillingDetails
-        fields = "__all__"
+        fields = '__all__'
+        extra_kwargs = {'opd_billing_code': {'required': False}}
 
 class OpdBillingSerializer(serializers.ModelSerializer):
+    bill_items = OpdBillingDetailsSerializer(many=True)
+    patient_code = serializers.SlugRelatedField(
+        slug_field='patient_code', 
+        queryset=Patient.objects.all()
+    )
+
     class Meta:
         model = OpdBilling
-        fields = "__all__"                        
+        fields = '__all__'
+        read_only_fields = ('createdby', 'createdon', 'updatedby', 'updatedon')
+        extra_kwargs = {'opd_billing_code': {'required': False}}
 
+    def create(self, validated_data):
+        bill_items_data = validated_data.pop('bill_items', [])
+
+        if not validated_data.get('opd_billing_code'):
+            last_bill = OpdBilling.objects.all().order_by('opd_billing_code').last()
+            if not last_bill:
+                new_code = "BILL-000001"
+            else:
+                last_string = last_bill.opd_billing_code
+                numbers = re.findall(r'\d+', last_string)
+                num = int(numbers[-1]) if numbers else 0
+                new_code = f"BILL-{str(num + 1).zfill(6)}"
+            validated_data['opd_billing_code'] = new_code
+
+        billing_instance = OpdBilling.objects.create(**validated_data)
         
+        for item_data in bill_items_data:
+            OpdBillingDetails.objects.create(
+                opd_billing_code=billing_instance,
+                **item_data
+            )
+            
+        return billing_instance
+
+    def update(self, instance, validated_data):
+        # 1. Extract bill_items if present
+        bill_items_data = validated_data.pop('bill_items', None)
+
+        # 2. Update parent OpdBilling fields (excluding billing_code)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # 3. Update nested items (Delete existing and recreate)
+        if bill_items_data is not None:
+            # Clear old items associated with this bill
+            instance.bill_items.all().delete()
+            
+            # Create new items from the payload
+            for item_data in bill_items_data:
+                OpdBillingDetails.objects.create(
+                    opd_billing_code=instance,
+                    **item_data
+                )
+
+        return instance
+
+# class BedSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = Bed
+#         fields = "__all__"
+    
+
 
 class IpdRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -820,24 +930,18 @@ class FinancialyearMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = FinancialyearMaster
         fields = "__all__"
-   
-
 
 class SettingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Settings
         fields = "__all__"
         read_only_fields = ["setting_id"]
-
-    
-    
+ 
 class MedicineSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Medicine
         fields = "__all__"
-        
-
 
 
 class MedicineCategorySerializer(serializers.ModelSerializer):
@@ -854,11 +958,11 @@ class AppointmentTypeMasterSerializer(serializers.ModelSerializer):
         fields = "__all__"   
         
         
+from rest_framework import serializers
+from .models import Appointment, Patient, Doctor, AppointmentTypeMaster
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
-
-    appointment_code = serializers.CharField(required=False)
 
     patient_code = serializers.SlugRelatedField(
         queryset=Patient.objects.all(),
@@ -867,6 +971,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
         required=False
     )
 
+    
     doctor_code = serializers.SlugRelatedField(
         queryset=Doctor.objects.all(),
         slug_field="doctor_code"
@@ -882,8 +987,20 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = "__all__"
-                
 
+        
+class OpdCasesheetSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OpdCasesheet
+        fields = "__all__"       
+        
+class TransactionModeMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TransactionModeMaster
+        fields = "__all__"       
+                          
 class TransactionsSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -996,68 +1113,32 @@ class FollowUpSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FollowUp
-        fields = "__all__"   
-class DesignationSerializer(serializers.ModelSerializer):
+        fields = "__all__"        
+class DischargeSummarySerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Designation
-        fields = "__all__"   
-        
+        model = DischargeSummary
+        fields = "__all__"        
+
+
+
+class UsertypeMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UsertypeMaster
+        fields = "__all__"                         
 class DivisionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Division
-        fields = "__all__"   
+        fields = "__all__"                         
+class DesignationSerializer(serializers.ModelSerializer):
 
-
-
-class TransactionModeMasterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = TransactionModeMaster
-        fields = "__all__"
-        read_only_fields = ["createdon", "createdby", "updatedon", "updatedby"]
-
-    def validate_transaction_mode_code(self, value):
-        if not value:
-            raise serializers.ValidationError("Transaction mode code is required.")
-        return value.strip()
-
-    def validate_transaction_mode_name(self, value):
-        if not value:
-            raise serializers.ValidationError("Transaction mode name is required.")
-        return value.strip()
-
-    def create(self, validated_data):
-        request = self.context.get('request')
-        validated_data['createdon'] = timezone.now()
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            try:
-                validated_data['createdby'] = request.user.id
-                validated_data['updatedby'] = request.user.id
-            except Exception:
-                pass
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        request = self.context.get('request')
-        validated_data['updatedon'] = timezone.now()
-        if request and hasattr(request, 'user'):
-            try:
-                validated_data['updatedby'] = request.user.id
-            except Exception:
-                pass
-        return super().update(instance, validated_data)
+        model = Designation
+        fields = "__all__"    
 
 class OpdCasesheetSerializer(serializers.ModelSerializer):
-    # This allows you to see the patient_code in the response
-    # slug_field='patient_code' ensures we use your custom unique code instead of an ID
-    patient_code = serializers.SlugRelatedField(
-        queryset=Patient.objects.all(),
-        slug_field='patient_code'
-    )
-
-    class Meta:
         model = OpdCasesheet
         fields = [
             'opd_casesheet_code',
@@ -1075,18 +1156,13 @@ class OpdCasesheetSerializer(serializers.ModelSerializer):
             'sort_order',
         ]
         
-    def create(self, validated_data):
-        # You can add logic here to automatically set createdby if needed
-        return super().create(validated_data)
+        def create(self, validated_data):
+            # You can add logic here to automatically set createdby if needed
+            return super().create(validated_data)
 
-    def update(self, instance, validated_data):
-        # You can add logic here to automatically set updatedon/updatedby
-        return super().update(instance, validated_data)
-
-
-from rest_framework import serializers
-from .models import DischargeSummary
-from django.utils import timezone
+        def update(self, instance, validated_data):
+            # You can add logic here to automatically set updatedon/updatedby
+            return super().update(instance, validated_data)
 
 
 class DischargeSummarySerializer(serializers.ModelSerializer):
@@ -1203,3 +1279,4 @@ class OpdBillMasterSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
 
+                     

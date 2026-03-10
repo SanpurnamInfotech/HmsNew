@@ -20,7 +20,7 @@ import BloodGroupMaster from '../pages/masters/BloodGroupMaster';
 import BloodDonor from '../pages/masters/BloodDonor';
 import BankDetails from "../pages/masters/BankDetails";
 import BedAllotment from "../pages/masters/BedAllotment";
-import PatientMst from "../pages/masters/PatientMst";
+import Patient from "../pages/masters/Patient.jsx"
 import PrescriptionReport from "../pages/PrescriptionReport.jsx";
 import IcdMasterMst from "../pages/masters/IcdMasterMst.jsx";
 import DsmMaster from "../pages/masters/DsmMaster.jsx";
@@ -78,7 +78,7 @@ export const adminRoutes = [
   { path: "blood_donor", label: "Blood Donor", component: BloodDonor },
   { path: "bank_details", label: "Bank Details", component: BankDetails },
   { path: "bed_allotment", label: "Bed Allotment", component: BedAllotment },
-  { path: "patient", label: "PatientMst", component: PatientMst },
+  { path: "patient", label: "Patient", component: Patient },
   { path: "complaints", label: "Complaint Master", component: ComplaintMaster },
   { path: "expenses", label: "Expenses Master", component: ExpensesMst },
   { path: "mse_master", label: "MSE Master", component: MseMaster },
@@ -101,9 +101,12 @@ export const adminRoutes = [
   { path: "financial_year", label: "financial year", component: FinancialYearMst },
   { path: "settings", label: "Settings", component: SettingsMst },
   { path: "accounts", label: "Accounts Master", component: AccountMst },
-   { path: "usertype", label: "Usertype Master", component: UsertypeMst },
+  { path: "usertype", label: "Usertype Master", component: UsertypeMst },
   { path: "hospital", label: "Hospital Master", component: Hospital_detailsMst },
   { path: "doctors", label: "Doctor", component: DoctorMst },
+  { path: "usertype", label: "Usertype Master", component: UsertypeMst },
+  { path: "hospital_details", label: "Hospital Master", component: Hospital_detailsMst },
+  // { path: "doctor", label: "Doctor", component: DoctorMst },
   { path: "appointment", label: "Appointment", component: AppointmentMst},
   { path: "appointment-type-master", label: "Appointment Type Master", component: AppointmentTypeMasterMst },
   { path: "ect", label: "ECT", component: EctMst },
