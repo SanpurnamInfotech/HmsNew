@@ -111,17 +111,16 @@ urlpatterns = [
     path("api/bed_allotment/delete/<int:id>/", BedAllotmentDeleteView.as_view(), name="bed-allotment-delete"),
 
     path('api/patient/', PatientListView.as_view(), name='patient-list'),
-
     path('api/patient/detail/<str:patient_code>/', PatientDetailView.as_view(), name='patient-detail'),
     path('api/patient/create/', PatientCreateView.as_view(), name='patient-create'),
     path('api/patient/update/<str:patient_code>/', PatientUpdateView.as_view(), name='patient-update'),
+
     path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name='patient-delete'),
+    
     path('api/patient-dates/<str:patient_code>/', PatientPrescriptionDatesView.as_view(), name='patient-dates'),
     
     path('api/prescription-report/', PrescriptionReportView.as_view(), name='prescription-report'),
     # path('api/prescription-pdf/', PrescriptionPDFView.as_view(), name='prescription-pdf'),
-    
-  
     
     path('api/mood-history/', MoodHistoryListView.as_view(), name='mood-history-list'),
     path('api/mood-history/create/', MoodHistoryCreateView.as_view(), name='mood-history-create'),
@@ -344,6 +343,39 @@ urlpatterns = [
     path('api/discharge-summary/create/', DischargeSummaryCreateView.as_view(), name='discharge-summary-create'),
     path('api/discharge-summary/update/<str:discharge_summary_code>/', DischargeSummaryUpdateView.as_view(), name='discharge-summary-update'),
     path('api/discharge-summary/delete/<str:discharge_summary_code>/', DischargeSummaryDeleteView.as_view(), name='discharge-summary-delete'),
+    
+    
+    path('api/designation/',DesignationListView.as_view(), name='designation-list'),
+    path('api/designation/create/',DesignationCreateView.as_view(), name='designation-create'),
+    path('api/designation/<str:designation_code>/',DesignationDetailView.as_view(), name='designation-detail'),
+    path('api/designation/update/<str:designation_code>/',DesignationUpdateView.as_view(), name='designation-update'),
+    path('api/designation/delete/<str:designation_code>/',DesignationDeleteView.as_view(), name='designation-delete'),
+    
+    path('api/division/',DivisionListView.as_view(), name='division-list'),
+    path('api/division/create/',DivisionCreateView.as_view(), name='division-create'),
+    path('api/division/<str:division_code>/',DivisionDetailView.as_view(), name='division-detail'),
+    path('api/division/update/<str:division_code>/',DivisionUpdateView.as_view(), name='division-update'),
+    path('api/division/delete/<str:division_code>/',DivisionDeleteView.as_view(), name='division-delete'),
+    
+    path('api/branches/', BranchListView.as_view(), name='branch-list'),
+    path('api/branches/create/', BranchCreateView.as_view(), name='branch-create'),
+    path('api/branches/<str:branch_code>/', BranchDetailView.as_view(), name='branch-detail'),
+    path('api/branches/update/<str:branch_code>/', BranchUpdateView.as_view(), name='branch-update'),
+    path('api/branches/delete/<str:branch_code>/', BranchDeleteView.as_view(), name='branch-delete'),
+    
+    path("api/blood_donors/", BloodDonorListView.as_view(), name="blood-donor-list"),
+    path("api/blood_donors/detail/<str:blood_donor_code>/", BloodDonorDetailView.as_view(), name="blood-donor-detail"),
+    path("api/blood_donors/create/", BloodDonorCreateView.as_view(), name="blood-donor-create"),
+    path("api/blood_donors/update/<str:blood_donor_code>/", BloodDonorUpdateView.as_view(), name="blood-donor-update"),
+    path("api/blood_donors/delete/<str:blood_donor_code>/", BloodDonorDeleteView.as_view(), name="blood-donor-delete"),
+    
+    path("api/opd_bill_master/", OpdBillMasterListView.as_view(), name="blood-donor-list"),
+    path("api/opd_bill_master/detail/<str:opd_bill_code>/", OpdBillMasterDetailView.as_view(), name="opd_bill_detail"),
+    path("api/opd_bill_master/create/", OpdBillMasterCreateView.as_view(), name="opd_bill_create"),
+    path("api/opd_bill_master/update/<str:opd_bill_code>/", OpdBillMasterUpdateView.as_view(), name="opd_bill_update"),
+    path("api/opd_bill_master/delete/<str:opd_bill_code>/", OpdBillMasterDeleteView.as_view(), name="opd_bill_delete"),
+    
+    
 ]
 
 
