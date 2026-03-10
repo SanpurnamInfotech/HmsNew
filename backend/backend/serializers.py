@@ -66,14 +66,51 @@ class MaritalStatusMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = MaritalStatusMaster
         fields = "__all__"
+        
+class DoctorSerializer(serializers.ModelSerializer):
+    # Accept related objects by their code strings coming from frontend
+    department_code = serializers.SlugRelatedField(
+        queryset=Departments.objects.all(), slug_field='department_code', allow_null=True, required=False
+    )
+    marital_status_code = serializers.SlugRelatedField(
+        queryset=MaritalStatusMaster.objects.all(), slug_field='marital_status_code', allow_null=True, required=False
+    )
+    city_code = serializers.SlugRelatedField(
+        queryset=Cities.objects.all(), slug_field='city_code', allow_null=True, required=False
+    )
+    district_code = serializers.SlugRelatedField(
+        queryset=Districts.objects.all(), slug_field='district_code', allow_null=True, required=False
+    )
+    state_code = serializers.SlugRelatedField(
+        queryset=States.objects.all(), slug_field='state_code', allow_null=True, required=False
+    )
+    country_code = serializers.SlugRelatedField(
+        queryset=Countries.objects.all(), slug_field='country_code', allow_null=True, required=False
+    )
 
-# class DoctorSerializer(serializers.ModelSerializer):  
-#     class Meta:
-#         model = Doctor
-#         fields = "__all__"
+    class Meta:
+        model = Doctor
+        fields = '__all__'
+        read_only_fields = ['doctor_code']  # doctor_code ko manually change nahi karna
 
+    def create(self, validated_data):
+        # Make create robust: get the latest PK, extract trailing number from code
+        import re
 
+        last = Doctor.objects.order_by('-pk').first()
+        new_number = 1
+        if last and last.doctor_code:
+            try:
+                m = re.search(r"(\d+)$", last.doctor_code)
+                if m:
+                    last_number = int(m.group(1))
+                    new_number = last_number + 1
+            except Exception:
+                new_number = 1
 
+        validated_data['doctor_code'] = f'DR{new_number:03d}'
+        return super().create(validated_data)
+    
         
 class DepartmentsSerializer(serializers.ModelSerializer):  
     class Meta:
@@ -693,39 +730,6 @@ class CitiesSerializer(serializers.ModelSerializer):
             except Exception: pass
         return super().update(instance, validated_data)
     
-from rest_framework import serializers
-from .models import Doctor
-from django.utils import timezone
-
-
-class DoctorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Doctor
-        fields = "__all__"
-        read_only_fields = [
-            "createdon",
-            "createdby",
-            "updatedon",
-            "updatedby",
-        ]
-
-    def validate_doctor_code(self, value):
-        if not value:
-            raise serializers.ValidationError("Doctor code is required.")
-        return value.strip()
-
-    def validate_doctor_name(self, value):
-        if not value:
-            raise serializers.ValidationError("Doctor name is required.")
-        return value.strip()
-
-    def create(self, validated_data):
-        validated_data["createdon"] = timezone.now()
-        return super().create(validated_data)
-
-    def update(self, instance, validated_data):
-        validated_data["updatedon"] = timezone.now()
-        return super().update(instance, validated_data)
 
 class IcdMasterSerializer(serializers.ModelSerializer):
 
@@ -1069,10 +1073,6 @@ class OpdCasesheetSerializer(serializers.ModelSerializer):
             'bp_dia',
             'status',
             'sort_order',
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby'
         ]
         
     def create(self, validated_data):
@@ -1201,3 +1201,5 @@ class OpdBillMasterSerializer(serializers.ModelSerializer):
             validated_data['opd_bill_code'] = new_code
             
         return super().create(validated_data)
+
+

@@ -43,7 +43,8 @@ export const useCrud = (endpoint) => {
       await fetchData(); // Auto-refresh
       return { success: true, data: res.data };
     } catch (err) {
-      return { success: false, error: err.response?.data?.message || "Creation failed" };
+      const serverError = err.response?.data || err.message || "Creation failed";
+      return { success: false, error: serverError };
     }
   };
 
@@ -54,7 +55,8 @@ export const useCrud = (endpoint) => {
       await fetchData(); // Auto-refresh
       return { success: true, data: res.data };
     } catch (err) {
-      return { success: false, error: err.response?.data?.message || "Update failed" };
+      const serverError = err.response?.data || err.message || "Update failed";
+      return { success: false, error: serverError };
     }
   };
 
@@ -65,7 +67,8 @@ export const useCrud = (endpoint) => {
       await fetchData(); // Auto-refresh
       return { success: true };
     } catch (err) {
-      return { success: false, error: err.response?.data?.message || "Delete failed" };
+      const serverError = err.response?.data || err.message || "Delete failed";
+      return { success: false, error: serverError };
     }
   };
 

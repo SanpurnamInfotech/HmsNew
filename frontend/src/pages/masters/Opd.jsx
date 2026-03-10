@@ -1,19 +1,31 @@
-import React, { useState, useMemo } from "react";
-import { useCrud } from "../../components/common/BaseCRUD";
-import { FaChevronDown, FaPlus } from "react-icons/fa";
-
+import React, { useState } from "react";
+import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
+import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import SearchableSelect from "../../components/common/SearchableSelect";
 const OpdCaseSheet = () => {
 
-const OPD_PATH = "opd_cases";
+const OPD_PATH = "opd-casesheet";
 
-const { createItem } = useCrud(`${OPD_PATH}/`);
-const { data: patients } = useCrud("patients/");
+/* -------- API -------- */
+
+const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${OPD_PATH}/`);
+const { data: patients } = useCrud("patient/");
+
+const patientList = patients?.results || patients || [];
+
+/* -------- STATE -------- */
 
 const [showForm,setShowForm] = useState(false);
-const [patientSearch,setPatientSearch] = useState("");
-const [openPatient,setOpenPatient] = useState(false);
+const [isEdit,setIsEdit] = useState(false);
+const [selectedRow,setSelectedRow] = useState(null);
 
-const [formData,setFormData] = useState({
+const [modal,setModal] = useState({
+visible:false,
+message:"",
+type:"success"
+});
+
+const initialForm = {
 
 opd_casesheet_code:"",
 patient_code:"",
@@ -28,24 +40,44 @@ bp_sys:"",
 bp_dia:"",
 status:1
 
+};
+
+const [formData,setFormData] = useState(initialForm);
+
+/* -------- TABLE -------- */
+
+const {
+search,
+setSearch,
+currentPage,
+setCurrentPage,
+itemsPerPage,
+setItemsPerPage,
+paginatedData,
+filteredData,
+totalPages
+} = useTable(data || []);
+
+/* -------- RESET -------- */
+
+const resetForm = () => {
+setShowForm(false);
+setIsEdit(false);
+setSelectedRow(null);
+setFormData(initialForm);
+};
+
+/* -------- MODAL -------- */
+
+const showModal = (message,type="success") => {
+setModal({
+visible:true,
+message,
+type
 });
+};
 
-
-/* ---------------- PATIENT FILTER ---------------- */
-
-const filteredPatients = useMemo(()=>{
-
-if(!patients) return [];
-
-return patients.filter(p =>
-p.patient_first_name?.toLowerCase().includes(patientSearch.toLowerCase()) ||
-p.patient_code?.toLowerCase().includes(patientSearch.toLowerCase())
-);
-
-},[patients,patientSearch]);
-
-
-/* ---------------- SUBMIT ---------------- */
+/* -------- SUBMIT -------- */
 
 const handleSubmit = async(e)=>{
 
@@ -61,238 +93,399 @@ bp_dia:parseInt(formData.bp_dia) || 0
 
 };
 
-await createItem(`${OPD_PATH}/create/`,payload);
+const actionPath = isEdit
+? `${OPD_PATH}/update/${formData.opd_casesheet_code}/`
+: `${OPD_PATH}/create/`;
 
-alert("Saved");
+const result = isEdit
+? await updateItem(actionPath,payload)
+: await createItem(actionPath,payload);
 
-setShowForm(false);
+if(result.success){
+
+showModal(`OPD Case ${isEdit?"updated":"created"} successfully!`);
+
+resetForm();
+refresh();
+
+}else{
+
+showModal(result.error || "Failed to save","error");
+
+}
 
 };
 
+/* -------- DELETE -------- */
 
-return(
+const handleDelete = async () => {
 
-<div className="p-6">
+if(!selectedRow) return showModal("Select record","error");
 
-<div className="flex justify-between mb-4">
+if(window.confirm("Delete this OPD case?")){
 
-<h2 className="text-xl font-bold">OPD Case Sheet</h2>
+const result = await deleteItem(`${OPD_PATH}/delete/${selectedRow.opd_casesheet_code}/`);
+
+if(result.success){
+
+showModal("Deleted!");
+refresh();
+setSelectedRow(null);
+
+}
+
+}
+
+};
+
+if(loading) return <div className="p-10 text-center font-bold text-emerald-600">Loading...</div>;
+
+return (
+
+<div className="app-container">
+
+{/* MODAL */}
+
+{modal.visible && (
+
+<div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+
+<div className="form-container max-w-sm w-full p-8 text-center shadow-2xl">
+
+<div className="mb-4 flex justify-center">
+
+{modal.type==="success"
+? <FaCheckCircle className="text-6xl text-emerald-500"/>
+: <FaTimesCircle className="text-6xl text-rose-500"/>}
+
+</div>
+
+<h3 className={`text-xl font-black mb-2 ${modal.type==="success"?"text-emerald-500":"text-rose-500"}`}>
+{modal.type==="success"?"Success":"Error"}
+</h3>
+
+<p className="mb-6">{modal.message}</p>
 
 <button
-className="bg-emerald-600 text-white px-4 py-2 rounded flex gap-2 items-center"
-onClick={()=>setShowForm(true)}
+className="btn-primary w-full"
+onClick={()=>setModal({...modal,visible:false})}
 >
-<FaPlus/> New Case
+Continue
 </button>
 
 </div>
-
-
-{showForm && (
-
-<form
-onSubmit={handleSubmit}
-className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 border rounded"
->
-
-
-{/* CASE CODE */}
-
-<input
-className="border p-2 rounded"
-placeholder="Case Code"
-required
-onChange={(e)=>setFormData({...formData,opd_casesheet_code:e.target.value})}
-/>
-
-
-{/* PATIENT DROPDOWN */}
-
-<div className="relative">
-
-<div
-className="border p-2 rounded bg-white flex justify-between cursor-pointer"
-onClick={()=>setOpenPatient(!openPatient)}
->
-
-<span>
-
-{formData.patient_code
-? formData.patient_code
-: "Select Patient"}
-
-</span>
-
-<FaChevronDown/>
-
-</div>
-
-{openPatient && (
-
-<div className="absolute z-50 w-full bg-white border mt-1 shadow max-h-40 overflow-auto">
-
-<input
-className="w-full p-2 border-b"
-placeholder="Search Patient"
-onChange={(e)=>setPatientSearch(e.target.value)}
-/>
-
-{filteredPatients.map(p => (
-
-<div
-key={p.patient_code}
-className="p-2 hover:bg-emerald-50 cursor-pointer"
-onClick={()=>{
-
-setFormData({
-...formData,
-patient_code:p.patient_code
-});
-
-setOpenPatient(false);
-
-}}
->
-
-{p.patient_first_name} {p.patient_last_name}
-({p.patient_code})
-
-</div>
-
-))}
 
 </div>
 
 )}
 
-</div>
+{/* HEADER */}
 
+<div className="flex justify-between items-center mb-6 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
 
-{/* CASE TITLE DROPDOWN */}
+<h4 className="text-2xl font-black text-gray-800">OPD Case Sheet</h4>
 
-<select
-className="border p-2 rounded"
-onChange={(e)=>setFormData({...formData,case_title:e.target.value})}
+<div className="flex gap-2">
+
+{!showForm ? (
+
+<>
+
+<button
+className="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+onClick={()=>setShowForm(true)}
 >
 
-<option value="">Select Case</option>
+<FaPlus size={12}/> Add Case
+
+</button>
+
+{selectedRow && (
+
+<>
+
+<button
+className="bg-amber-500 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+onClick={()=>{
+
+setFormData(selectedRow);
+setIsEdit(true);
+setShowForm(true);
+
+}}
+>
+
+<FaEdit size={12}/> Edit
+
+</button>
+
+<button
+className="bg-rose-500 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+onClick={handleDelete}
+>
+
+<FaTrash size={12}/> Delete
+
+</button>
+
+</>
+
+)}
+
+</>
+
+) : (
+
+<button
+className="text-gray-500 font-bold"
+onClick={resetForm}
+>
+
+Back to List
+
+</button>
+
+)}
+
+</div>
+
+</div>
+
+{/* FORM */}
+
+{showForm && (
+
+<div className="bg-white rounded-xl shadow-md p-8 mb-8 border">
+
+<form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+<div>
+<label className="text-[10px] font-bold text-gray-400 uppercase">Case Code *</label>
+<input
+className="w-full px-3 py-2 rounded border"
+value={formData.opd_casesheet_code}
+onChange={e=>setFormData({...formData,opd_casesheet_code:e.target.value})}
+required
+/>
+</div>
+
+<div>
+<label className="text-[10px] font-bold text-gray-400 uppercase">Patient *</label>
+
+<SearchableSelect
+placeholder="Select Patient"
+required
+value={formData.patient_code}
+onChange={v=>setFormData({...formData,patient_code:v})}
+options={patientList.map(p=>({
+value:p.patient_code,
+label:`${p.patient_first_name} ${p.patient_last_name} (${p.patient_code})`
+}))}
+/>
+
+</div>
+
+<div>
+<label className="text-[10px] font-bold text-gray-400 uppercase">Case Type</label>
+
+<select
+className="w-full px-3 py-2 rounded border"
+value={formData.case_title}
+onChange={e=>setFormData({...formData,case_title:e.target.value})}
+>
+
+<option value="">Select</option>
 <option value="General Checkup">General Checkup</option>
 <option value="Follow Up">Follow Up</option>
 <option value="Emergency">Emergency</option>
 
 </select>
 
-
-{/* CHIEF COMPLAINT */}
-
-<textarea
-className="border p-2 rounded"
-placeholder="Chief Complaint"
-onChange={(e)=>setFormData({...formData,chief_complaint:e.target.value})}
-/>
-
-
-{/* SYMPTOMS */}
-
-<textarea
-className="border p-2 rounded"
-placeholder="Symptoms"
-onChange={(e)=>setFormData({...formData,symptoms:e.target.value})}
-/>
-
-
-{/* DIAGNOSIS */}
-
-<textarea
-className="border p-2 rounded"
-placeholder="Diagnosis"
-onChange={(e)=>setFormData({...formData,diagnosis:e.target.value})}
-/>
-
-
-{/* VITAL SIGNS */}
-
-<textarea
-className="border p-2 rounded"
-placeholder="Vital Signs"
-onChange={(e)=>setFormData({...formData,vital_signs:e.target.value})}
-/>
-
-
-{/* WEIGHT */}
-
-<input
-type="number"
-className="border p-2 rounded"
-placeholder="Weight (kg)"
-onChange={(e)=>setFormData({...formData,weight_kg:e.target.value})}
-/>
-
-
-{/* HEIGHT */}
-
-<input
-type="number"
-className="border p-2 rounded"
-placeholder="Height (cm)"
-onChange={(e)=>setFormData({...formData,height_cm:e.target.value})}
-/>
-
-
-{/* BP */}
-
-<div className="grid grid-cols-2 gap-2">
-
-<input
-type="number"
-className="border p-2 rounded"
-placeholder="BP Sys"
-onChange={(e)=>setFormData({...formData,bp_sys:e.target.value})}
-/>
-
-<input
-type="number"
-className="border p-2 rounded"
-placeholder="BP Dia"
-onChange={(e)=>setFormData({...formData,bp_dia:e.target.value})}
-/>
-
 </div>
 
+<textarea
+placeholder="Chief Complaint"
+className="col-span-3 px-3 py-2 border rounded"
+value={formData.chief_complaint}
+onChange={e=>setFormData({...formData,chief_complaint:e.target.value})}
+/>
 
-{/* STATUS DROPDOWN */}
+<textarea
+placeholder="Symptoms"
+className="col-span-3 px-3 py-2 border rounded"
+value={formData.symptoms}
+onChange={e=>setFormData({...formData,symptoms:e.target.value})}
+/>
+
+<textarea
+placeholder="Diagnosis"
+className="col-span-3 px-3 py-2 border rounded"
+value={formData.diagnosis}
+onChange={e=>setFormData({...formData,diagnosis:e.target.value})}
+/>
+
+<input
+type="number"
+placeholder="Weight (kg)"
+className="px-3 py-2 border rounded"
+value={formData.weight_kg}
+onChange={e=>setFormData({...formData,weight_kg:e.target.value})}
+/>
+
+<input
+type="number"
+placeholder="Height (cm)"
+className="px-3 py-2 border rounded"
+value={formData.height_cm}
+onChange={e=>setFormData({...formData,height_cm:e.target.value})}
+/>
+
+<input
+type="number"
+placeholder="BP Sys"
+className="px-3 py-2 border rounded"
+value={formData.bp_sys}
+onChange={e=>setFormData({...formData,bp_sys:e.target.value})}
+/>
+
+<input
+type="number"
+placeholder="BP Dia"
+className="px-3 py-2 border rounded"
+value={formData.bp_dia}
+onChange={e=>setFormData({...formData,bp_dia:e.target.value})}
+/>
+
+<div>
+<label className="text-[10px] font-bold text-gray-400 uppercase">Status</label>
 
 <select
-className="border p-2 rounded"
-onChange={(e)=>setFormData({...formData,status:e.target.value})}
+className="w-full px-3 py-2 border rounded"
+value={formData.status}
+onChange={e=>setFormData({...formData,status:Number(e.target.value)})}
 >
 
-<option value="1">Active</option>
-<option value="0">Inactive</option>
+<option value={1}>Active</option>
+<option value={0}>Inactive</option>
 
 </select>
 
+</div>
 
-<div className="md:col-span-2 flex justify-end gap-2">
-
-<button
-type="button"
-className="bg-gray-400 text-white px-4 py-2 rounded"
-onClick={()=>setShowForm(false)}
->
-Cancel
-</button>
+<div className="col-span-3 flex justify-end gap-3 pt-4 border-t">
 
 <button
 type="submit"
-className="bg-emerald-600 text-white px-4 py-2 rounded"
+className="bg-emerald-600 text-white px-10 py-2.5 rounded-lg font-bold"
 >
-Save
+
+Save Case
+
+</button>
+
+<button
+type="button"
+className="text-gray-400 font-bold px-4"
+onClick={resetForm}
+>
+
+Cancel
+
 </button>
 
 </div>
 
 </form>
+
+</div>
+
+)}
+
+{/* TABLE */}
+
+{!showForm && (
+
+<div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+
+<TableToolbar
+itemsPerPage={itemsPerPage}
+setItemsPerPage={setItemsPerPage}
+search={search}
+setSearch={setSearch}
+setCurrentPage={setCurrentPage}
+/>
+
+<div className="overflow-x-auto">
+
+<table className="w-full text-left border-collapse">
+
+<thead>
+
+<tr className="bg-gray-50 border-b">
+
+<th className="p-4 w-12"></th>
+<th className="p-4 text-[10px] font-bold text-gray-400 uppercase">Case Code</th>
+<th className="p-4 text-[10px] font-bold text-gray-400 uppercase">Patient</th>
+<th className="p-4 text-[10px] font-bold text-gray-400 uppercase">Case Type</th>
+<th className="p-4 text-[10px] font-bold text-gray-400 uppercase">Diagnosis</th>
+<th className="p-4 text-[10px] font-bold text-gray-400 uppercase text-center">Status</th>
+
+</tr>
+
+</thead>
+
+<tbody className="divide-y">
+
+{paginatedData.map(row=>(
+
+<tr
+key={row.opd_casesheet_code}
+onClick={()=>setSelectedRow(selectedRow?.opd_casesheet_code===row.opd_casesheet_code?null:row)}
+className={`cursor-pointer ${selectedRow?.opd_casesheet_code===row.opd_casesheet_code?"bg-emerald-50":"hover:bg-gray-50"}`}
+>
+
+<td className="p-4 text-center">
+
+<div className={`w-4 h-4 rounded-full border-2 ${selectedRow?.opd_casesheet_code===row.opd_casesheet_code?"border-emerald-500 bg-emerald-500":"border-gray-200"}`}/>
+
+</td>
+
+<td className="p-4 text-sm font-bold">{row.opd_casesheet_code}</td>
+<td className="p-4 text-sm text-gray-500">{row.patient_code}</td>
+<td className="p-4 text-sm text-gray-500">{row.case_title}</td>
+<td className="p-4 text-sm text-gray-500">{row.diagnosis}</td>
+
+<td className="p-4 text-center">
+
+<span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase ${row.status===1?"bg-emerald-100 text-emerald-700":"bg-red-100 text-red-700"}`}>
+{row.status===1?"Active":"Inactive"}
+</span>
+
+</td>
+
+</tr>
+
+))}
+
+</tbody>
+
+</table>
+
+</div>
+
+<div className="p-4 border-t">
+
+<Pagination
+totalEntries={filteredData.length}
+itemsPerPage={itemsPerPage}
+currentPage={currentPage}
+setCurrentPage={setCurrentPage}
+totalPages={totalPages}
+/>
+
+</div>
+
+</div>
 
 )}
 

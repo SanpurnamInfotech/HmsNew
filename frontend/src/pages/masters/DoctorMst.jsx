@@ -49,7 +49,7 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = "Select
 };
  
 const DoctorMst = () => {
-  const DOCTOR_PATH = "doctors";
+  const DOCTOR_PATH = "doctor";
  
   // --- FETCHING DATA ---
   // Main Doctor Data
@@ -106,24 +106,36 @@ const DoctorMst = () => {
   const showModal = (message, type = "success") => setModal({ message, visible: true, type });
  
   const handleSubmit = async (e) => {
-    e.preventDefault();
- 
-    // Convert empty date to null to avoid DRF validation issues
-    const cleanedData = { ...formData };
-    if (!cleanedData.dob) cleanedData.dob = null;
- 
-    const actionPath = isEdit ? `${DOCTOR_PATH}/update/${formData.doctor_code}/` : `${DOCTOR_PATH}/create/`;
-    const result = isEdit ? await updateItem(actionPath, cleanedData) : await createItem(actionPath, cleanedData);
- 
-    if (result.success) {
-      showModal(`Doctor ${isEdit ? "updated" : "created"} successfully!`);
-      resetForm();
-      refresh();
-    } else {
-      showModal(result.error || "Failed to save data", "error");
-    }
-  };
- 
+  e.preventDefault();
+
+  const cleanedData = { ...formData };
+
+  // doctor code auto generate ke liye remove
+  if (!isEdit) {
+    delete cleanedData.doctor_code;
+  }
+
+  // empty date fix
+  if (!cleanedData.dob) {
+    cleanedData.dob = null;
+  }
+
+  const actionPath = isEdit
+    ? `${DOCTOR_PATH}/update/${formData.doctor_code}/`
+    : `${DOCTOR_PATH}/create/`;
+
+  const result = isEdit
+    ? await updateItem(actionPath, cleanedData)
+    : await createItem(actionPath, cleanedData);
+
+  if (result.success) {
+    showModal(`Doctor ${isEdit ? "updated" : "created"} successfully!`);
+    resetForm();
+    refresh();
+  } else {
+    showModal(result.error || "Failed to save data", "error");
+  }
+};
   const handleDelete = async () => {
     if (!selectedRow) return showModal("Please select a record", "error");
     if (window.confirm(`Delete Dr. ${selectedRow.doctor_name}?`)) {
@@ -140,12 +152,16 @@ const DoctorMst = () => {
     <div className="app-container">
       {/* MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container p-6 text-center">
-            {modal.type === "success" ? <FaCheckCircle className="text-emerald-500 text-4xl mx-auto mb-4" /> : <FaTimesCircle className="text-red-500 text-4xl mx-auto mb-4" />}
-            <h3 className="font-bold text-lg mb-2">{modal.type === "success" ? "Success" : "Error"}</h3>
-            <p className="text-gray-600 mb-6">{modal.message}</p>
-            <button className="bg-emerald-600 text-white px-6 py-2 rounded-lg w-full" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
+            </div>
+            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            <button className="btn-primary w-full justify-center py-3" onClick={() => setModal({ ...modal, visible: false })}>Continue</button>
           </div>
         </div>
       )}
@@ -180,7 +196,11 @@ const DoctorMst = () => {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Doctor Code *</label>
-                  <input className="w-full px-3 py-2 rounded border focus:ring-1 focus:ring-emerald-500 outline-none" value={formData.doctor_code} disabled={isEdit} required onChange={e => setFormData({ ...formData, doctor_code: e.target.value.toUpperCase() })} />
+                  <input
+className="w-full px-3 py-2 rounded border bg-gray-100 cursor-not-allowed"
+value={formData.doctor_code || "Auto Generated"}
+disabled
+/>
                 </div>
                 <div className="space-y-1 md:col-span-2">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Doctor Name *</label>

@@ -82,7 +82,7 @@ const IpdRegistration = () => {
         try {
         const [patientRes, doctorRes, bedRes] = await Promise.all([
             api.get("patients/"),
-            api.get("doctors/"),
+            api.get("doctor/"),
             api.get("bed/"),
         ]);
 
