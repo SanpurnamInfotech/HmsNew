@@ -367,9 +367,9 @@ const Patient = () => {
                         {selectedRow?.patient_code === item.patient_code && <div className="selection-dot" />}
                       </div>
                     </td>
-                    <td className="text-admin-td font-bold text-emerald-600">{item.patient_code}</td>
+                    <td className="text-admin-td">{item.patient_code}</td>
                     <td className="text-admin-td">{item.uhid}</td>
-                    <td className="text-admin-td uppercase font-medium">{`${item.patient_first_name} ${item.patient_last_name}`}</td>
+                    <td className="text-admin-td">{`${item.patient_first_name} ${item.patient_last_name}`}</td>
                     <td className="text-admin-td">{item.mobile || "---"}</td>
                     <td className="text-admin-td">
                       <span className={`badge ${item.status === 1 ? "badge-success" : "badge-danger"}`}>{item.status === 1 ? "Active" : "Inactive"}</span>

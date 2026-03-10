@@ -144,11 +144,18 @@ const OpdBilling = () => {
     });
   }, [patients, patientSearch]);
 
+  // CORRECTED: Display name only on select, but keep patient_code in formData
   const selectedPatientDisplay = useMemo(() => {
     const p = patients.find(p => p.patient_code === formData.patient_code);
     if (!p) return "Select Patient";
-    return `${p.first_name || p.patient_first_name} ${p.last_name || p.patient_last_name} (${p.patient_code})`;
+    return `${p.first_name || p.patient_first_name} ${p.last_name || p.patient_last_name}`;
   }, [patients, formData.patient_code]);
+
+  // HELPER: Map patient_code to Name for the Table list
+  const getPatientName = (pCode) => {
+    const p = patients.find(pat => pat.patient_code === pCode);
+    return p ? `${p.first_name || p.patient_first_name} ${p.last_name || p.patient_last_name}` : pCode;
+  };
 
   const subTotal = useMemo(() => {
     return billItems.reduce((sum, item) => sum + Number(item.amount), 0);
@@ -341,7 +348,7 @@ const OpdBilling = () => {
                     <div className="max-h-60 overflow-y-auto">
                       {filteredPatients.map(p => (
                         <div key={p.patient_code} className="px-4 py-3 hover:bg-emerald-500/10 cursor-pointer text-sm" onClick={() => handlePatientSelect(p.patient_code)}>
-                          {p.first_name || p.patient_first_name} {p.last_name || p.patient_last_name} ({p.patient_code})
+                          {p.first_name || p.patient_first_name} {p.last_name || p.patient_last_name}
                         </div>
                       ))}
                     </div>
@@ -466,12 +473,12 @@ const OpdBilling = () => {
                           {selectedRow?.opd_billing_code === bill.opd_billing_code && <div className="selection-dot" />}
                         </div>
                     </td>
-                    <td className="text-admin-td font-bold">{bill.opd_billing_code}</td>
-                    <td className="text-admin-td">{bill.patient_code}</td>
+                    <td className="text-admin-td">{bill.opd_billing_code}</td>
+                    <td className="text-admin-td">{getPatientName(bill.patient_code)}</td>
                     <td className="text-admin-td">{bill.billing_date}</td>
                     <td className="text-admin-td ">₹{bill.bill_amount}</td>
                     <td className={`text-admin-td ${bill.dues_amount > 0 ? "text-rose-500" : "text-emerald-500"}`}>
-                       {bill.dues_amount > 0 ? `₹${bill.dues_amount}` : "PAID"}
+                        {bill.dues_amount > 0 ? `₹${bill.dues_amount}` : "PAID"}
                     </td>
                   </tr>
                 ))}

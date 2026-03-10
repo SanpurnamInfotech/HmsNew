@@ -375,6 +375,13 @@ urlpatterns = [
     path("api/opd_bill_master/update/<str:opd_bill_code>/", OpdBillMasterUpdateView.as_view(), name="opd_bill_update"),
     path("api/opd_bill_master/delete/<str:opd_bill_code>/", OpdBillMasterDeleteView.as_view(), name="opd_bill_delete"),
     
+    path('api/opd-billing/', OpdBillingListView.as_view(), name='opd-billing-list'),
+    path('api/opd-billing/create/', OpdBillingCreateView.as_view(), name='opd-billing-create'),
+
+    path('api/opd-billing/<str:opd_billing_code>/', OpdBillingDetailView.as_view(), name='opd-billing-detail'),
+    path('api/opd-billing/update/<str:opd_billing_code>/', OpdBillingUpdateView.as_view(), name='opd-billing-update'),
+    path('api/opd-billing/delete/<str:opd_billing_code>/', OpdBillingDeleteView.as_view(), name='opd-billing-delete'),
+    
     
 ]
 
