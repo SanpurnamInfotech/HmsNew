@@ -1,31 +1,30 @@
-# Base image
-FROM node:18
+# ---------- FRONTEND BUILD ----------
+FROM node:20 AS frontend-build
 
-# Install Python
-RUN apt-get update && apt-get install -y python3 python3-pip
+WORKDIR /frontend
 
-# Set working directory
-WORKDIR /app
-
-# Copy project files
-COPY . .
-
-# Install backend dependencies
-RUN pip3 install -r requirements.txt
-
-# Install frontend dependencies
-WORKDIR /app/Frontend
+COPY Frontend/package*.json ./
 RUN npm install
 
-# Build frontend
-RUN npm run build || true
+COPY Frontend .
+RUN npm run build
 
-# Install backend dependencies if needed
-WORKDIR /app/Backend
-RUN pip3 install -r ../requirements.txt
 
-# Expose backend port
+# ---------- BACKEND ----------
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# install python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy backend
+COPY Backend ./Backend
+
+# copy frontend build into backend static folder
+COPY --from=frontend-build /frontend/build ./FrontendBuild
+
 EXPOSE 8000
 
-# Start backend server
-CMD ["python3", "app.py"]
+CMD ["python", "Backend/app.py"]
