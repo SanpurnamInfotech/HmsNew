@@ -5765,13 +5765,6 @@ class DischargeSummaryDeleteView(APIView):
 
 
 
-class UsertypeMasterListView(APIView):
-
-    def get(self, request):
-        try:
-            objs = UsertypeMaster.objects.all().order_by("usertype_code")
-            serializer = UsertypeMasterSerializer(objs, many=True)
-        
 # branch
 class BranchListView(APIView):
     def get(self, request):
@@ -5783,58 +5776,8 @@ class BranchListView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class UsertypeMasterCreateView(APIView):
 
-    def post(self, request):
-        try:
-            serializer = UsertypeMasterSerializer(data=request.data, context={"request": request})
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class UsertypeMasterUpdateView(APIView):
-
-    def put(self, request, usertype_code):
-        try:
-            obj = get_object_or_404(UsertypeMaster, usertype_code=usertype_code)
-
-            serializer = UsertypeMasterSerializer(
-                obj,
-                data=request.data,
-                partial=True,
-                context={"request": request}
-            )
-
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-class UsertypeMasterDeleteView(APIView):
-
-    def delete(self, request, usertype_code):
-        try:
-            obj = get_object_or_404(UsertypeMaster, usertype_code=usertype_code)
-            obj.delete()
-
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        except Exception as e:
-            return Response(
-                {"error": str(e), "trace": traceback.format_exc()},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            
 class BranchDetailView(APIView):
     def get(self, request, branch_code):
         try:
