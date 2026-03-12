@@ -1,157 +1,32 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import axios from "axios";
-import {
-  useCrud,
-  useTable,
-  Pagination,
-  TableToolbar,
-} from "../../components/common/BaseCRUD";
-import {
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaBuilding,
+import React, { useState, useMemo } from "react";
+import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
+import { 
+  FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, 
+  FaSearch, FaChevronDown, FaBuilding 
 } from "react-icons/fa";
-import { get_domain } from "../../utils/domain";
 
-/* =========================
-   Reusable Searchable Select
-   ========================= */
-const SearchableSelect = ({
-  value,
-  onChange,
-  options = [],
-  placeholder = "Select",
-  disabled = false,
-  className = "form-input",
-  panelWidth = "w-full",
-}) => {
-  const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
-  const wrapRef = useRef(null);
-
-  const selectedLabel = useMemo(() => {
-    const found = options.find((o) => String(o.value) === String(value));
-    return found ? found.label : "";
-  }, [options, value]);
-
-  const filtered = useMemo(() => {
-    const query = (q || "").toLowerCase().trim();
-    if (!query) return options;
-    return options.filter(
-      (o) =>
-        (o.label || "").toLowerCase().includes(query) ||
-        String(o.value || "").toLowerCase().includes(query)
-    );
-  }, [options, q]);
-
-  useEffect(() => {
-    const onDoc = (e) => {
-      if (!wrapRef.current) return;
-      if (!wrapRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
-
-  useEffect(() => {
-    if (!open) setQ("");
-  }, [open]);
-
-  return (
-    <div className="relative" ref={wrapRef}>
-      <button
-        type="button"
-        className={`${className} text-left flex items-center justify-between ${
-          disabled ? "opacity-70 cursor-not-allowed" : ""
-        }`}
-        disabled={disabled}
-        onClick={() => !disabled && setOpen((s) => !s)}
-      >
-        <span className={`${selectedLabel ? "text-gray-900" : "text-gray-400"}`}>
-          {selectedLabel || placeholder}
-        </span>
-        <span className="ml-3 text-gray-500">▾</span>
-      </button>
-
-      {open && !disabled && (
-        <div
-          className={`absolute z-50 mt-2 ${panelWidth} rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden`}
-        >
-          <div className="p-3 border-b border-gray-100">
-            <input
-              autoFocus
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-              placeholder="Search..."
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
-          </div>
-
-          <div className="max-h-64 overflow-y-auto">
-            {filtered.length > 0 ? (
-              filtered.map((o) => (
-                <button
-                  key={String(o.value)}
-                  type="button"
-                  className={`group w-full text-left px-4 py-3 flex items-center justify-between
-                    hover:bg-blue-900 hover:text-white
-                    ${String(o.value) === String(value) ? "bg-emerald-50" : ""}
-                  `}
-                  onClick={() => {
-                    onChange(o.value);
-                    setOpen(false);
-                  }}
-                >
-                  <span className="text-gray-800 group-hover:text-white">
-                    {o.label}
-                  </span>
-
-                  {String(o.value) === String(value) && (
-                    <span className="text-emerald-600 font-semibold group-hover:text-white">
-                      ✓
-                    </span>
-                  )}
-                </button>
-              ))
-            ) : (
-              <div className="px-4 py-6 text-sm text-gray-500">
-                No results found
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
 
 const CompanyMaster = () => {
   const PATH = "company_master";
+  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${PATH}/`);
 
-  const { data, loading, refresh } = useCrud(`${PATH}/`);
+  // Master Data for Dropdowns
+  const { data: countries } = useCrud("countries/");
+  const { data: states } = useCrud("states/");
+  const { data: districts } = useCrud("districts/");
+  const { data: cities } = useCrud("cities/");
 
-  // dropdowns
-  const { data: countryData } = useCrud("countries/");
-  const { data: stateData } = useCrud("states/");
-  const { data: districtData } = useCrud("districts/");
-  const { data: cityData } = useCrud("cities/");
-
+  /* ================= UI STATE ================= */
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
 
-  const [logoFile, setLogoFile] = useState(null);
+  const [dSearch, setDSearch] = useState({ cn: "", st: "", dt: "", ct: "" });
+  const [otherValues, setOtherValues] = useState({ district: "", city: "" });
 
-  // ✅ Other toggles + text (only for District & City)
-  const [districtIsOther, setDistrictIsOther] = useState(false);
-  const [cityIsOther, setCityIsOther] = useState(false);
-  const [otherDistrictText, setOtherDistrictText] = useState("");
-  const [otherCityText, setOtherCityText] = useState("");
-
-  const [formData, setFormData] = useState({
+  const initialForm = {
     company_code: "",
     company_name: "",
     email: "",
@@ -170,881 +45,288 @@ const CompanyMaster = () => {
     reg_number: "",
     gst_number: "",
     timezone: "",
-    company_logo: "", // string from API
+    company_logo: null,
     status: 1,
     sort_order: "",
-  });
+  };
 
-  const [modal, setModal] = useState({
-    message: "",
-    visible: false,
-    type: "success",
-  });
+  const [formData, setFormData] = useState(initialForm);
 
-  const token = localStorage.getItem("token");
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  /* ================= AUTO GENERATE CODE ================= */
+  const nextCompanyCode = useMemo(() => {
+    const list = Array.isArray(data) ? data : [];
+    const codes = list.map((x) => (x?.company_code || "").toString()).filter((c) => c.startsWith("COMP-"));
+    let maxNum = 0;
+    for (const code of codes) {
+      const num = parseInt(code.replace("COMP-", ""), 10);
+      if (!isNaN(num) && num > maxNum) maxNum = num;
+    }
+    return `COMP-${String(maxNum + 1).padStart(6, "0")}`;
+  }, [data]);
 
-  const showModalMsg = (message, type = "success") =>
-    setModal({ message, visible: true, type });
-
-  /* =========================
-     Sorting (like EmployeeMaster)
-     ========================= */
-  const sortedCompanies = useMemo(() => {
-    const list = Array.isArray(data) ? [...data] : [];
-
-    const getOrder = (row) => {
-      const raw = row?.sort_order;
-      const n = Number(raw);
-      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
-    };
-
-    list.sort((a, b) => {
-      const ao = getOrder(a);
-      const bo = getOrder(b);
-      if (ao !== bo) return ao - bo;
-
-      const ac = (a?.company_code || "").toString();
-      const bc = (b?.company_code || "").toString();
-      return ac.localeCompare(bc);
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      const sa = (a.sort_order === null || a.sort_order === "") ? 999 : Number(a.sort_order);
+      const sb = (b.sort_order === null || b.sort_order === "") ? 999 : Number(b.sort_order);
+      return sa - sb;
     });
-
-    return list;
   }, [data]);
 
   const {
-    search,
-    setSearch,
-    currentPage,
-    setCurrentPage,
-    itemsPerPage,
-    setItemsPerPage,
-    paginatedData,
-    effectiveItemsPerPage,
-    filteredData,
-    totalPages,
-  } = useTable(sortedCompanies);
+    search, setSearch, currentPage, setCurrentPage, itemsPerPage,
+    setItemsPerPage, paginatedData, effectiveItemsPerPage, filteredData, totalPages,
+  } = useTable(sortedData);
 
-  /* =========================
-     Auto Company Code like COM00001
-     ========================= */
-  const nextCompanyCode = useMemo(() => {
-    const list = Array.isArray(data) ? data : [];
-    const codes = list
-      .map((x) => (x?.company_code || "").toString())
-      .filter((c) => c.toUpperCase().startsWith("COM"));
-
-    let maxNum = 0;
-    for (const code of codes) {
-      const num = parseInt(code.toUpperCase().replace("COM", ""), 10);
-      if (!isNaN(num) && num > maxNum) maxNum = num;
-    }
-
-    const next = maxNum + 1;
-    return `COM${String(next).padStart(5, "0")}`;
-  }, [data]);
-
+  /* ================= HELPERS ================= */
   const resetForm = () => {
     setShowForm(false);
     setIsEdit(false);
     setSelectedRow(null);
-
-    setLogoFile(null);
-
-    setDistrictIsOther(false);
-    setCityIsOther(false);
-    setOtherDistrictText("");
-    setOtherCityText("");
-
-    setFormData({
-      company_code: "",
-      company_name: "",
-      email: "",
-      phone: "",
-      mobile: "",
-      landmark: "",
-      address1: "",
-      address2: "",
-      fax: "",
-      contact_person: "",
-      country_code: "",
-      state_code: "",
-      district_code: "",
-      city_code: "",
-      currency: "",
-      reg_number: "",
-      gst_number: "",
-      timezone: "",
-      company_logo: "",
-      status: 1,
-      sort_order: "",
-    });
+    setOpenDropdown(null);
+    setFormData(initialForm);
+    setOtherValues({ district: "", city: "" });
+    setDSearch({ cn: "", st: "", dt: "", ct: "" });
   };
 
-  /* =========================
-     If editing and district/city not in dropdown -> treat as Other
-     ========================= */
-  useEffect(() => {
-    const dExists = (districtData || []).some(
-      (d) => d.district_code === formData.district_code
-    );
-    if (formData.district_code && !dExists) {
-      setDistrictIsOther(true);
-      setOtherDistrictText(formData.district_code);
-    } else if (!districtIsOther) {
-      setOtherDistrictText("");
+  const showModal = (message, type = "success") => setModal({ visible: true, message, type });
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setFormData({ ...formData, company_logo: reader.result });
+      reader.readAsDataURL(file);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.district_code, districtData]);
+  };
 
-  useEffect(() => {
-    const cExists = (cityData || []).some(
-      (c) => c.city_code === formData.city_code
-    );
-    if (formData.city_code && !cExists) {
-      setCityIsOther(true);
-      setOtherCityText(formData.city_code);
-    } else if (!cityIsOther) {
-      setOtherCityText("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.city_code, cityData]);
+  /* ================= SEARCHABLE DROPDOWN ================= */
+  const SearchDropdown = ({ label, options, valKey, dispKey, stateKey, dKey }) => {
+    const isLocation = stateKey === 'district_code' || stateKey === 'city_code';
+    const enhancedOptions = isLocation 
+      ? [...(options || []), { [valKey]: "OTHER", [dispKey]: "Other (Add New)" }]
+      : (options || []);
 
-  /* =========================
-     Searchable options
-     ========================= */
-  const countryOptions = useMemo(
-    () =>
-      (countryData || []).map((c) => ({
-        value: c.country_code,
-        label: c.country_name,
-      })),
-    [countryData]
-  );
+    const selected = enhancedOptions.find(o => o[valKey] === formData[stateKey]);
+    const display = selected ? selected[dispKey] : `Select ${label}`;
 
-  const stateOptions = useMemo(
-    () =>
-      (stateData || []).map((s) => ({
-        value: s.state_code,
-        label: s.state_name,
-      })),
-    [stateData]
-  );
-
-  const districtOptions = useMemo(() => {
-    const base = (districtData || []).map((d) => ({
-      value: d.district_code,
-      label: d.district_name,
-    }));
-    return [{ value: "OTHER", label: "Other" }, ...base];
-  }, [districtData]);
-
-  const cityOptions = useMemo(() => {
-    const base = (cityData || []).map((c) => ({
-      value: c.city_code,
-      label: c.city_name,
-    }));
-    return [{ value: "OTHER", label: "Other" }, ...base];
-  }, [cityData]);
-
-  const statusOptions = useMemo(
-    () => [
-      { value: 1, label: "Active" },
-      { value: 0, label: "Inactive" },
-    ],
-    []
-  );
-
-  const statusBadge = (s) => {
-    const isActive = Number(s) === 1;
     return (
-      <span
-        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-          isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-        }`}
-      >
-        {isActive ? "Active" : "Inactive"}
-      </span>
+      <div className="space-y-1.5 relative">
+        <label className="form-label">{label}</label>
+        <div className="form-input w-full flex justify-between items-center cursor-pointer" 
+             onClick={() => setOpenDropdown(openDropdown === dKey ? null : dKey)}>
+          <span className={formData[stateKey] ? "" : "opacity-50"}>{display}</span>
+          <FaChevronDown size={12} className="opacity-40" />
+        </div>
+        {openDropdown === dKey && (
+          <div className="absolute z-60 w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" 
+               style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
+            <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-hover)" }}>
+              <FaSearch className="opacity-40" size={14} />
+              <input autoFocus className="bg-transparent outline-none text-sm w-full" placeholder={`Search ${label}...`} 
+                     value={dSearch[dKey]} onChange={(e) => setDSearch({...dSearch, [dKey]: e.target.value})} />
+            </div>
+            <div className="max-h-48 overflow-y-auto custom-scrollbar">
+              {enhancedOptions.filter(o => (o[dispKey] || "").toLowerCase().includes(dSearch[dKey].toLowerCase())).map(opt => (
+                <div key={opt[valKey]} className={`px-4 py-3 hover:bg-emerald-500/10 cursor-pointer text-sm transition-colors ${opt[valKey] === 'OTHER' ? 'text-emerald-500 font-bold border-t' : ''}`}
+                     style={{ borderTopColor: opt[valKey] === 'OTHER' ? "var(--border-color)" : "transparent" }}
+                     onClick={() => { setFormData({ ...formData, [stateKey]: opt[valKey] }); setOpenDropdown(null); }}>
+                  {opt[dispKey]}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     );
   };
 
- 
-
-
-  /* =========================
-     Submit (multipart)
-     ========================= */
+  /* ================= SUBMIT & DELETE ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    try {
-      const urlBase = `${get_domain()}/api/`;
-      const fd = new FormData();
-      
-      const normalized = {
+    
+    // Prepare payload
+    const payload = { 
         ...formData,
-        
-      };
-      // ✅ do NOT send file object for photo (backend expects string)
-      Object.keys(normalized).forEach((k) => {
-        if (k === "photo") return; // handle separately
-        if (normalized[k] !== null && normalized[k] !== undefined) {
-          fd.append(k, normalized[k]);
-        }
-      });
+        // If "OTHER" is selected, store the manual name in the code field
+        district_code: formData.district_code === "OTHER" ? otherValues.district : formData.district_code,
+        city_code: formData.city_code === "OTHER" ? otherValues.city : formData.city_code,
+        sort_order: formData.sort_order === "" ? null : Number(formData.sort_order),
+        status: Number(formData.status)
+    };
 
-      // ✅ send only the file name as string
-      if (logoFile) {
-        fd.append("photo", logoFile.name);
-      } else if (normalized.photo) {
-        fd.append("photo", normalized.photo);
-      }
-
-      // normalize: "" -> null for backend
-      const payload = { ...formData };
-      Object.keys(payload).forEach((k) => {
-        if (payload[k] === "") payload[k] = null;
-      });
-
-      // force numeric
-      payload.status = Number(payload.status);
-      payload.sort_order =
-        payload.sort_order === "" ||
-        payload.sort_order === null ||
-        payload.sort_order === undefined
-          ? null
-          : Number(payload.sort_order);
-
-      // ✅ FIX for: {"company_logo":["Not a valid string."]}
-      // Backend expects company_logo as STRING, not a File.
-      // If user selects a file, send it as base64 string.
-      
-      // else: keep existing payload.company_logo (string) on edit,
-      // and if empty on create, it will become null and won't be appended.
-
-      // append
-      Object.keys(payload).forEach((k) => {
-        if (payload[k] !== null && payload[k] !== undefined) {
-          fd.append(k, payload[k]);
-        }
-      });
-
-      let res;
-      if (isEdit) {
-        res = await axios.put(
-          `${urlBase}${PATH}/update/${formData.company_code}/`,
-          fd,
-          {
-            headers: { ...authHeader, "Content-Type": "multipart/form-data" },
-          }
-        );
-      } else {
-        res = await axios.post(`${urlBase}${PATH}/create/`, fd, {
-          headers: { ...authHeader, "Content-Type": "multipart/form-data" },
-        });
-      }
-
-      if (res?.status === 200 || res?.status === 201) {
-        showModalMsg(
-          `Company ${isEdit ? "updated" : "created"} successfully!`
-        );
-        resetForm();
-        refresh();
-      } else {
-        showModalMsg(
-          res?.data ? JSON.stringify(res.data) : "Operation failed!",
-          "error"
-        );
-      }
-    } catch (err) {
-      const msg =
-        err?.response?.data?.error ||
-        err?.response?.data?.detail ||
-        JSON.stringify(err?.response?.data || {}) ||
-        "Operation failed!";
-      showModalMsg(msg, "error");
+    const actionPath = isEdit ? `${PATH}/update/${formData.company_code}/` : `${PATH}/create/`;
+    const result = isEdit ? await updateItem(actionPath, payload) : await createItem(actionPath, payload);
+    
+    if (result.success) {
+      showModal(`Company ${isEdit ? "updated" : "created"} successfully!`);
+      resetForm();
+      refresh();
+    } else {
+      showModal(result.error || "Failed to save", "error");
     }
   };
 
   const handleDelete = async () => {
     if (!selectedRow) return;
-    const ok = window.confirm(`Delete Company ${selectedRow.company_code}?`);
-    if (!ok) return;
-
-    try {
-      const urlBase = `${get_domain()}/api/`;
-      await axios.delete(
-        `${urlBase}${PATH}/delete/${selectedRow.company_code}/`,
-        {
-          headers: { ...authHeader },
-        }
-      );
-      showModalMsg("Company deleted successfully!");
-      setSelectedRow(null);
+    const result = await deleteItem(`${PATH}/delete/${selectedRow.company_code}/`);
+    if (result.success) {
+      showModal("Company deleted successfully!");
+      resetForm();
       refresh();
-    } catch (err) {
-      const msg =
-        err?.response?.data?.error ||
-        err?.response?.data?.detail ||
-        JSON.stringify(err?.response?.data || {}) ||
-        "Delete failed!";
-      showModalMsg(msg, "error");
+    } else {
+      showModal(result.error || "Delete failed", "error");
     }
   };
 
-  if (loading)
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Loading Company Master...</p>
-        </div>
-      </div>
-    );
+  if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div></div>;
 
   return (
     <div className="app-container">
-      {/* MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body">
-              <div className="modal-icon-container">
-                {modal.type === "success" ? (
-                  <div className="modal-icon-success">
-                    <FaCheckCircle />
-                  </div>
-                ) : (
-                  <div className="modal-icon-error">
-                    <FaTimesCircle />
-                  </div>
-                )}
-              </div>
-              <h3
-                className={`modal-title ${
-                  modal.type === "success"
-                    ? "modal-title-success"
-                    : "modal-title-error"
-                }`}
-              >
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-              <p className="modal-message mb-6">{modal.message}</p>
-              <button
-                className="btn-primary w-full"
-                onClick={() => setModal({ ...modal, visible: false })}
-              >
-                OK
-              </button>
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
             </div>
+            <h3 className={`text-xl font-black mb-2 uppercase ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>{modal.type === "success" ? "Success" : "Error"}</h3>
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            <button className="btn-primary w-full justify-center py-3" onClick={() => setModal({ ...modal, visible: false })}>Continue</button>
           </div>
         </div>
       )}
 
-      {/* HEADER */}
       <div className="section-header">
-        <h4 className="text-xl font-bold text-gray-800">Company Master</h4>
-
+        <h4 className="page-title">Company Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
-            <button
-              className="btn-primary"
-              onClick={() => {
-                setIsEdit(false);
-                setSelectedRow(null);
-                setLogoFile(null);
-
-                setDistrictIsOther(false);
-                setCityIsOther(false);
-                setOtherDistrictText("");
-                setOtherCityText("");
-
-                setFormData({
-                  company_code: nextCompanyCode,
-                  company_name: "",
-                  email: "",
-                  phone: "",
-                  mobile: "",
-                  landmark: "",
-                  address1: "",
-                  address2: "",
-                  fax: "",
-                  contact_person: "",
-                  country_code: "",
-                  state_code: "",
-                  district_code: "",
-                  city_code: "",
-                  currency: "",
-                  reg_number: "",
-                  gst_number: "",
-                  timezone: "",
-                  company_logo: "",
-                  status: 1,
-                  sort_order: "",
-                });
-
-                setShowForm(true);
-              }}
-            >
-              <FaPlus size={14} /> Add New
-            </button>
-
+            <button className="btn-primary" onClick={() => { setFormData({ ...initialForm, company_code: nextCompanyCode }); setShowForm(true); }}><FaPlus size={14} /> Add New</button>
             {selectedRow && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
-                <button
-                  className="btn-warning"
-                  onClick={() => {
-                    setFormData({ ...selectedRow });
-                    setIsEdit(true);
-                    setShowForm(true);
-                    setLogoFile(null);
-                  }}
-                >
-                  <FaEdit size={14} /> Edit
-                </button>
-
-                <button className="btn-danger" onClick={handleDelete}>
-                  <FaTrash size={14} /> Delete
-                </button>
+                <button className="btn-warning" onClick={() => { setFormData({ ...selectedRow }); setIsEdit(true); setShowForm(true); }}><FaEdit size={14} /> Edit</button>
+                <button className="btn-danger" onClick={handleDelete}><FaTrash size={14} /> Delete</button>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* FORM */}
       {showForm && (
-        <div className="form-container">
-          <h6 className="text-lg font-bold text-gray-800">
-            {isEdit ? "Update Company" : "Add New Company"}
-          </h6>
-          <div className="border-b border-gray-200 mt-3 mb-6"></div>
-
-          <form
-            className="grid grid-cols-1 gap-y-10 mt-6"
-            onSubmit={handleSubmit}
-          >
-            {/* ================= SECTION 1: BASIC ================= */}
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">Basic</h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+        <div className="form-container animate-in zoom-in-95 duration-200">
+          <form onSubmit={handleSubmit} className="space-y-12">
+            <section>
+              <h6 className="form-section-title uppercase tracking-tighter mb-6 text-emerald-500">Company Identity</h6>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
                 <div className="space-y-1.5">
                   <label className="form-label">Company Name</label>
-                  <input
-                    className="form-input"
-                    value={formData.company_name || ""}
-                    required
-                    onChange={(e) =>
-                      setFormData({ ...formData, company_name: e.target.value })
-                    }
-                  />
+                  <input className="form-input w-full" value={formData.company_name} required onChange={e => setFormData({...formData, company_name: e.target.value})} />
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Reg Number</label>
-                  <input
-                    className="form-input"
-                    value={formData.reg_number || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, reg_number: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* ================= SECTION 2: CONTACT ================= */}
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">Contact</h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Email</label>
-                  <input
-                    className="form-input"
-                    value={formData.email || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Phone</label>
-                  <input
-                    className="form-input"
-                    value={formData.phone || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Mobile</label>
-                  <input
-                    className="form-input"
-                    value={formData.mobile || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, mobile: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Fax</label>
-                  <input
-                    className="form-input"
-                    value={formData.fax || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, fax: e.target.value })
-                    }
-                  />
-                </div>
-
                 <div className="space-y-1.5">
                   <label className="form-label">Contact Person</label>
-                  <input
-                    className="form-input"
-                    value={formData.contact_person || ""}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        contact_person: e.target.value,
-                      })
-                    }
-                  />
+                  <input className="form-input w-full" value={formData.contact_person || ""} onChange={e => setFormData({...formData, contact_person: e.target.value})} />
                 </div>
+                <div className="space-y-1.5"><label className="form-label">GST Number</label><input className="form-input w-full" value={formData.gst_number || ""} onChange={e => setFormData({...formData, gst_number: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Registration No.</label><input className="form-input w-full" value={formData.reg_number || ""} onChange={e => setFormData({...formData, reg_number: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Logo</label><input type="file" className="form-input w-full text-xs" onChange={handleLogoChange} /></div>
               </div>
-            </div>
+            </section>
 
-            {/* ================= SECTION 3: ADDRESS ================= */}
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">Address</h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Landmark</label>
-                  <input
-                    className="form-input"
-                    value={formData.landmark || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, landmark: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Address 1</label>
-                  <input
-                    className="form-input"
-                    value={formData.address1 || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address1: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Address 2</label>
-                  <input
-                    className="form-input"
-                    value={formData.address2 || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, address2: e.target.value })
-                    }
-                  />
-                </div>
+            <section>
+              <h6 className="form-section-title uppercase tracking-tighter mb-6 text-emerald-500">Contact Details</h6>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
+                <div className="space-y-1.5"><label className="form-label">Email</label><input type="email" className="form-input w-full" value={formData.email || ""} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Mobile</label><input className="form-input w-full" value={formData.mobile || ""} onChange={e => setFormData({...formData, mobile: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Phone</label><input className="form-input w-full" value={formData.phone || ""} onChange={e => setFormData({...formData, phone: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Fax</label><input className="form-input w-full" value={formData.fax || ""} onChange={e => setFormData({...formData, fax: e.target.value})} /></div>
               </div>
-            </div>
+            </section>
 
-            {/* ================= SECTION 4: LOCATION ================= */}
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">Location</h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <section>
+              <h6 className="form-section-title uppercase tracking-tighter mb-6 text-emerald-500">Location & Address</h6>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
+                <div className="space-y-1.5"><label className="form-label">Landmark</label><input className="form-input w-full" value={formData.landmark || ""} onChange={e => setFormData({...formData, landmark: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Address Line 1</label><input className="form-input w-full" value={formData.address1 || ""} onChange={e => setFormData({...formData, address1: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Address Line 2</label><input className="form-input w-full" value={formData.address2 || ""} onChange={e => setFormData({...formData, address2: e.target.value})} /></div>
+                <SearchDropdown label="Country" options={countries} valKey="country_code" dispKey="country_name" stateKey="country_code" dKey="cn" />
+                <SearchDropdown label="State" options={states} valKey="state_code" dispKey="state_name" stateKey="state_code" dKey="st" />
+                
                 <div className="space-y-1.5">
-                  <label className="form-label">Country</label>
-                  <SearchableSelect
-                    value={formData.country_code || ""}
-                    options={countryOptions}
-                    placeholder="Select Country"
-                    disabled={!!formData.country_code}
-                    onChange={(val) =>
-                      setFormData({ ...formData, country_code: val })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">State</label>
-                  <SearchableSelect
-                    value={formData.state_code || ""}
-                    options={stateOptions}
-                    placeholder="Select State"
-                    disabled={!!formData.state_code}
-                    onChange={(val) =>
-                      setFormData({ ...formData, state_code: val })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">District</label>
-                  <SearchableSelect
-                    value={
-                      districtIsOther ? "OTHER" : formData.district_code || ""
-                    }
-                    options={districtOptions}
-                    placeholder="Select District"
-                    disabled={!!formData.district_code}
-                    onChange={(val) => {
-                      if (val === "OTHER") {
-                        setDistrictIsOther(true);
-                        setOtherDistrictText("");
-                        setFormData({ ...formData, district_code: "" });
-                      } else {
-                        setDistrictIsOther(false);
-                        setOtherDistrictText("");
-                        setFormData({ ...formData, district_code: val });
-                      }
-                    }}
-                  />
-
-                  {districtIsOther && (
-                    <input
-                      className="form-input mt-2"
-                      placeholder="Enter Other District"
-                      value={otherDistrictText}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        setOtherDistrictText(v);
-                        setFormData({ ...formData, district_code: v });
-                      }}
-                    />
+                  <SearchDropdown label="District" options={districts} valKey="district_code" dispKey="district_name" stateKey="district_code" dKey="dt" />
+                  {formData.district_code === "OTHER" && (
+                    <input className="form-input w-full mt-2 animate-in slide-in-from-top-2" placeholder="Enter District Name" value={otherValues.district} onChange={e => setOtherValues({...otherValues, district: e.target.value})} />
                   )}
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="form-label">City</label>
-                  <SearchableSelect
-                    value={cityIsOther ? "OTHER" : formData.city_code || ""}
-                    options={cityOptions}
-                    placeholder="Select City"
-                    disabled={!!formData.city_code}
-                    onChange={(val) => {
-                      if (val === "OTHER") {
-                        setCityIsOther(true);
-                        setOtherCityText("");
-                        setFormData({ ...formData, city_code: "" });
-                      } else {
-                        setCityIsOther(false);
-                        setOtherCityText("");
-                        setFormData({ ...formData, city_code: val });
-                      }
-                    }}
-                  />
-
-                  {cityIsOther && (
-                    <input
-                      className="form-input mt-2"
-                      placeholder="Enter Other City"
-                      value={otherCityText}
-                      onChange={(e) => {
-                        const v = e.target.value;
-                        setOtherCityText(v);
-                        setFormData({ ...formData, city_code: v });
-                      }}
-                    />
+                  <SearchDropdown label="City" options={cities} valKey="city_code" dispKey="city_name" stateKey="city_code" dKey="ct" />
+                  {formData.city_code === "OTHER" && (
+                    <input className="form-input w-full mt-2 animate-in slide-in-from-top-2" placeholder="Enter City Name" value={otherValues.city} onChange={e => setOtherValues({...otherValues, city: e.target.value})} />
                   )}
                 </div>
+
+                <div className="space-y-1.5"><label className="form-label">Currency</label><input className="form-input w-full" value={formData.currency || ""} onChange={e => setFormData({...formData, currency: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Timezone</label><input className="form-input w-full" value={formData.timezone || ""} onChange={e => setFormData({...formData, timezone: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Status</label>
+                  <select className="form-input w-full" value={formData.status} onChange={e => setFormData({ ...formData, status: Number(e.target.value) })}>
+                    <option value={1}>Active</option><option value={0}>Inactive</option>
+                  </select>
+                </div>
+                <div className="space-y-1.5"><label className="form-label">Sort Order</label><input type="number" className="form-input w-full" value={formData.sort_order} onChange={e => setFormData({...formData, sort_order: e.target.value})} /></div>
               </div>
-            </div>
+            </section>
 
-            {/* ================= SECTION 5: OTHER ================= */}
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">Other</h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Currency</label>
-                  <input
-                    className="form-input"
-                    value={formData.currency || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, currency: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">GST Number</label>
-                  <input
-                    className="form-input"
-                    value={formData.gst_number || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, gst_number: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Timezone</label>
-                  <input
-                    className="form-input"
-                    value={formData.timezone || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, timezone: e.target.value })
-                    }
-                  />
-                </div>
-
-                {/* ✅ FIX 3: Photo sends filename string */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Photo</label>
-                  <input
-                    type="file"
-                    className={`form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 ${
-                      !formData.photo ? "text-gray-400" : "text-gray-900"
-                    }`}
-                    accept="image/*"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0] || null;
-                      setLogoFile(f);
-                      setFormData({ ...formData, photo: f ? f.name : "" });
-                    }}
-                  />
-                  {formData.photo ? (
-                    <p className="text-xs text-gray-500 mt-1">
-                      Selected Photo: {formData.photo}
-                    </p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Status</label>
-                  <SearchableSelect
-                    value={Number(formData.status)}
-                    options={statusOptions}
-                    placeholder="Select Status"
-                    onChange={(val) =>
-                      setFormData({ ...formData, status: Number(val) })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Sort Order</label>
-                  <input
-                    className="form-input"
-                    type="number"
-                    value={formData.sort_order ?? ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sort_order: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 border-t border-gray-50 pt-8">
-              <button className="btn-primary px-10">
-                {isEdit ? "Update" : "Save"}
-              </button>
-              <button type="button" className="btn-ghost" onClick={resetForm}>
-                Cancel
-              </button>
+            <div className="flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update" : "Save"}</button>
+              <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
         </div>
       )}
 
-      {/* TABLE */}
       {!showForm && (
-        <div className="data-table-container">
-          <TableToolbar
-            itemsPerPage={itemsPerPage}
-            setItemsPerPage={setItemsPerPage}
-            search={search}
-            setSearch={setSearch}
-            setCurrentPage={setCurrentPage}
-          />
-
+        <div className="data-table-container animate-in fade-in duration-500">
+          <TableToolbar itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} />
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="table-header-row">
-                  <th className="table-admin-th w-16"></th>
-                  <th className="table-admin-th">Company Code</th>
-                  <th className="table-admin-th">Company Name</th>
-                  <th className="table-admin-th">Email</th>
-                  <th className="table-admin-th">Phone</th>
-                  <th className="table-admin-th">Status</th>
+                <tr>
+                  <th className="text-admin-th w-16"></th>
+                  <th className="text-admin-th">Code</th>
+                  <th className="text-admin-th">Company Name</th>
+                  <th className="text-admin-th">Contact Person</th>
+                  <th className="text-admin-th">GSTIN</th>
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
-
-              <tbody className="divide-y divide-gray-50">
-                {paginatedData.length > 0 ? (
-                  paginatedData.map((m) => (
-                    <tr
-                      key={m.company_code}
-                      onClick={() =>
-                        setSelectedRow(
-                          selectedRow?.company_code === m.company_code ? null : m
-                        )
-                      }
-                      className={`table-row ${
-                        selectedRow?.company_code === m.company_code
-                          ? "table-row-active"
-                          : "table-row-hover"
-                      }`}
-                    >
-                      <td className="text-admin-td">
-                        <div
-                          className={`selection-indicator rounded-full ${
-                            selectedRow?.company_code === m.company_code
-                              ? "selection-indicator-active"
-                              : "selection-indicator-inactive"
-                          }`}
-                        >
-                          {selectedRow?.company_code === m.company_code && (
-                            <div className="selection-dot rounded-full" />
-                          )}
-                        </div>
-                      </td>
-
-                      <td className="text-admin-td">{m.company_code}</td>
-                      <td className="text-admin-td">{m.company_name || "-"}</td>
-                      <td className="text-admin-td">{m.email || "-"}</td>
-                      <td className="text-admin-td">{m.phone || "-"}</td>
-                      <td className="text-admin-td">{statusBadge(m.status)}</td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="table-td py-20 text-center">
-                      <div className="empty-state-container">
-                        <FaBuilding size={48} className="mb-4 text-gray-400" />
-                        <p className="text-xl font-bold text-gray-500">
-                          No companies found
-                        </p>
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
+                {paginatedData.length > 0 ? paginatedData.map((item) => (
+                  <tr key={item.company_code} onClick={() => setSelectedRow(selectedRow?.company_code === item.company_code ? null : item)}
+                      className={`group cursor-pointer transition-colors ${selectedRow?.company_code === item.company_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}>
+                    <td className="px-6 py-4">
+                      <div className={`selection-indicator ${selectedRow?.company_code === item.company_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
+                        {selectedRow?.company_code === item.company_code && <div className="selection-dot" />}
                       </div>
+                    </td>
+                    <td className="text-admin-td">{item.company_code}</td>
+                    <td className="text-admin-td ">{item.company_name}</td>
+                    <td className="text-admin-td">{item.contact_person || "---"}</td>
+                    <td className="text-admin-td">{item.gst_number || "---"}</td>
+                    <td className="text-admin-td">
+                      <span className={`badge ${item.status === 1 ? "badge-success" : "badge-danger"}`}>{item.status === 1 ? "Active" : "Inactive"}</span>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-24 text-center">
+                      <FaBuilding size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No Companies Found</p>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-
-          <Pagination
-            totalEntries={filteredData.length}
-            itemsPerPage={effectiveItemsPerPage}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            totalPages={totalPages}
-          />
+          <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
         </div>
       )}
     </div>

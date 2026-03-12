@@ -12,11 +12,11 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaUniversity,
+  FaChevronDown,
 } from "react-icons/fa";
 
 /* =========================
    Reusable Searchable Select
-   (Styled for Dark/Light external CSS)
    ========================= */
 const SearchableSelect = ({
   value,
@@ -57,41 +57,42 @@ const SearchableSelect = ({
       <button
         type="button"
         className={`form-input w-full text-left flex items-center justify-between ${
-          disabled ? "opacity-50 cursor-not-allowed" : ""
+          disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
         }`}
         disabled={disabled}
         onClick={() => !disabled && setOpen((s) => !s)}
       >
-        <span className={selectedLabel ? "" : "opacity-40"}>
+        <span className={selectedLabel ? "text-inherit" : "opacity-40"}>
           {selectedLabel || placeholder}
         </span>
-        <span className="opacity-50">▾</span>
+        <FaChevronDown size={10} className={`transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-emerald-500/20 bg-surface shadow-2xl overflow-hidden animate-in zoom-in-95 duration-150" 
-             style={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-color)" }}>
-          <div className="p-3 border-b" style={{ borderColor: "var(--border-color)" }}>
+        <div className="absolute z-60 mt-2 w-full rounded-xl border shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150" 
+             style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
+          <div className="p-3 border-b" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-hover)" }}>
             <input
               autoFocus
-              className="form-input w-full text-sm"
+              className="bg-transparent outline-none text-sm w-full"
               placeholder="Search..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
             />
           </div>
-          <div className="max-h-60 overflow-y-auto">
+          <div className="max-h-48 overflow-y-auto custom-scrollbar">
             {filtered.length > 0 ? (
               filtered.map((o) => (
                 <button
                   key={String(o.value)}
                   type="button"
                   className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between
-                    ${String(o.value) === String(value) ? "bg-emerald-500/10 text-emerald-500" : "hover:bg-emerald-500/5"}
+                    ${String(o.value) === String(value) ? "bg-emerald-500/20 text-emerald-500" : "hover:bg-emerald-500/10"}
                   `}
                   onClick={() => {
                     onChange(o.value);
                     setOpen(false);
+                    setQ("");
                   }}
                 >
                   <span>{o.label}</span>
@@ -99,7 +100,7 @@ const SearchableSelect = ({
                 </button>
               ))
             ) : (
-              <div className="px-4 py-6 text-center opacity-40 text-xs uppercase font-bold tracking-widest">No Results</div>
+              <div className="px-4 py-6 text-center opacity-40 text-xs uppercase font-bold">No Results</div>
             )}
           </div>
         </div>
@@ -113,8 +114,9 @@ const BankDetails = () => {
 
   // Dropdowns
   const { data: employeeData } = useCrud("employee_master/");
-  const { data: financialyearDataRaw } = useCrud("financialyear-master/");
+  const { data: financialyearData } = useCrud("financialyear-master/");
   const { data: companyData } = useCrud("company_master/");
+  const { data: branchData } = useCrud("branches/"); // New Branch CRUD
 
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -126,7 +128,7 @@ const BankDetails = () => {
     employee_code: "",
     bank_address: "",
     bank_phone: "",
-    bank_branch: "",
+    bank_branch: "", // This will now store the branch_code
     bank_ifsc: "",
     bank_accountno: "",
     bank_ddpayableaddress: "",
@@ -138,6 +140,27 @@ const BankDetails = () => {
 
   const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
 
+  /* ================= OPTIONS MAPPING ================= */
+  const employeeOptions = useMemo(() => (employeeData || []).map(e => ({
+    value: e.employee_code,
+    label: `${e.employee_name || e.employee_firstname || ""} ${e.employee_lastname || ""}`.trim()
+  })), [employeeData]);
+
+  const fyOptions = useMemo(() => (financialyearData || []).map(fy => ({ 
+    value: fy.financialyear_code, 
+    label: fy.financialyear_name || `${fy.start_year}-${fy.end_year}`
+  })), [financialyearData]);
+
+  const companyOptions = useMemo(() => (companyData || []).map(c => ({
+    value: c.company_code,
+    label: c.company_name
+  })), [companyData]);
+
+  const branchOptions = useMemo(() => (branchData || []).map(b => ({
+    value: b.branch_code,
+    label: b.branch_name
+  })), [branchData]);
+
   /* ================= TABLE LOGIC ================= */
   const sortedData = useMemo(() => {
     const list = Array.isArray(data) ? [...data] : [];
@@ -148,22 +171,6 @@ const BankDetails = () => {
     search, setSearch, currentPage, setCurrentPage, itemsPerPage, setItemsPerPage,
     paginatedData, effectiveItemsPerPage, filteredData, totalPages,
   } = useTable(sortedData);
-
-  /* ================= OPTIONS MAPPING ================= */
-  const employeeOptions = useMemo(() => (employeeData || []).map(e => ({
-    value: e.employee_code,
-    label: `${e.employee_firstname} ${e.employee_lastname || ""}`.trim()
-  })), [employeeData]);
-
-  const fyOptions = useMemo(() => {
-    const rawList = Array.isArray(financialyearDataRaw) ? financialyearDataRaw : (financialyearDataRaw?.data || []);
-    return rawList.map(fy => ({ value: fy.financialyear_code, label: fy.financialyear_name }));
-  }, [financialyearDataRaw]);
-
-  const companyOptions = useMemo(() => (companyData || []).map(c => ({
-    value: c.company_code,
-    label: c.company_name
-  })), [companyData]);
 
   /* ================= ACTIONS ================= */
   const resetForm = () => {
@@ -183,7 +190,7 @@ const BankDetails = () => {
     const payload = { 
       ...formData, 
       status: Number(formData.status),
-      sort_order: formData.sort_order ? Number(formData.sort_order) : null 
+      sort_order: formData.sort_order === "" ? null : Number(formData.sort_order) 
     };
 
     const actionPath = isEdit ? `bankdetails/update/${formData.bank_code}/` : `bankdetails/create/`;
@@ -218,22 +225,17 @@ const BankDetails = () => {
 
   return (
     <div className="app-container">
-      {/* GLOBAL MODAL */}
+      {/* MODAL */}
       {modal.visible && (
-        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
-            <div className="mb-4 flex justify-center">
-              {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
-            </div>
-            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
-              {modal.type === "success" ? "Success" : "Error"}
-            </h3>
-            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
-            <button className="btn-primary w-full justify-center py-3" onClick={() => setModal({ ...modal, visible: false })}>Continue</button>
+        <div className="modal-overlay fixed inset-0 bg-black/50 z-[100] flex items-center justify-center">
+          <div className="bg-white rounded-xl p-8 max-w-sm w-full text-center shadow-2xl">
+            <div className="mb-4">{modal.type === "success" ? <FaCheckCircle size={50} className="text-emerald-500 mx-auto" /> : <FaTimesCircle size={50} className="text-red-500 mx-auto" />}</div>
+            <h3 className={`text-xl font-bold mb-2 ${modal.type === "success" ? "text-emerald-700" : "text-red-700"}`}>{modal.type === "success" ? "Success" : "Error"}</h3>
+            <p className="text-gray-600 mb-6">{modal.message}</p>
+            <button className="bg-emerald-600 text-white w-full py-2.5 rounded-lg font-semibold" onClick={() => setModal({ ...modal, visible: false })}>OK</button>
           </div>
         </div>
       )}
-
       {/* HEADER */}
       <div className="section-header">
         <h4 className="page-title">Bank Master</h4>
@@ -242,7 +244,7 @@ const BankDetails = () => {
             <button className="btn-primary" onClick={() => setShowForm(true)}><FaPlus size={14} /> Add New</button>
             {selectedRow && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
-                <button className="btn-warning" onClick={() => { setFormData(selectedRow); setIsEdit(true); setShowForm(true); }}><FaEdit size={14} /> Edit</button>
+                <button className="btn-warning" onClick={() => { setFormData({ ...selectedRow, sort_order: selectedRow.sort_order ?? "" }); setIsEdit(true); setShowForm(true); }}><FaEdit size={14} /> Edit</button>
                 <button className="btn-danger" onClick={handleDelete}><FaTrash size={14} /> Delete</button>
               </div>
             )}
@@ -250,7 +252,7 @@ const BankDetails = () => {
         )}
       </div>
 
-      {/* FORM (2-COLUMN GRID) */}
+      {/* FORM */}
       {showForm && (
         <div className="form-container animate-in zoom-in-95 duration-200">
           <h6 className="form-section-title uppercase tracking-tighter">
@@ -258,49 +260,68 @@ const BankDetails = () => {
           </h6>
           <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
             
-            {/* INFORMATION SECTION */}
-            <div className="md:col-span-2"><h6 className="form-label text-emerald-600">Basic Info</h6></div>
+            {/* BASIC INFO */}
+            <div className="md:col-span-2"><h6 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Basic Information</h6></div>
+            
             <div className="space-y-1.5">
               <label className="form-label">Bank Code</label>
               <input className="form-input w-full" value={formData.bank_code} disabled={isEdit} required onChange={e => setFormData({ ...formData, bank_code: e.target.value.toUpperCase() })} placeholder="E.G. HDFC01" />
             </div>
+            
             <div className="space-y-1.5">
               <label className="form-label">Bank Name</label>
               <input className="form-input w-full" value={formData.bank_name} required onChange={e => setFormData({ ...formData, bank_name: e.target.value })} placeholder="E.G. HDFC Bank" />
             </div>
 
-            {/* RELATIONS SECTION */}
-            <div className="md:col-span-2 mt-4"><h6 className="form-label text-emerald-600">Associations</h6></div>
-            <div className="space-y-1.5">
-              <label className="form-label">Employee</label>
-              <SearchableSelect value={formData.employee_code} options={employeeOptions} onChange={val => setFormData({ ...formData, employee_code: val })} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="form-label">Financial Year</label>
-              <SearchableSelect value={formData.financialyear_code} options={fyOptions} onChange={val => setFormData({ ...formData, financialyear_code: val })} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="form-label">Company</label>
-              <SearchableSelect value={formData.company_code} options={companyOptions} onChange={val => setFormData({ ...formData, company_code: val })} />
-            </div>
-
-            {/* CONTACT/TECH SECTION */}
-            <div className="md:col-span-2 mt-4"><h6 className="form-label text-emerald-600">Bank Details</h6></div>
-            <div className="space-y-1.5">
-              <label className="form-label">Branch</label>
-              <input className="form-input w-full" value={formData.bank_branch} onChange={e => setFormData({ ...formData, bank_branch: e.target.value })} />
-            </div>
-            <div className="space-y-1.5">
-              <label className="form-label">IFSC Code</label>
-              <input className="form-input w-full" value={formData.bank_ifsc} onChange={e => setFormData({ ...formData, bank_ifsc: e.target.value.toUpperCase() })} />
-            </div>
             <div className="space-y-1.5">
               <label className="form-label">Account No</label>
-              <input className="form-input w-full" value={formData.bank_accountno} onChange={e => setFormData({ ...formData, bank_accountno: e.target.value })} />
+              <input className="form-input w-full" value={formData.bank_accountno} onChange={e => setFormData({ ...formData, bank_accountno: e.target.value })} placeholder="E.G. 50100234..." />
             </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">IFSC Code</label>
+              <input className="form-input w-full uppercase" value={formData.bank_ifsc} onChange={e => setFormData({ ...formData, bank_ifsc: e.target.value.toUpperCase() })} placeholder="HDFC000..." />
+            </div>
+
+            {/* ASSOCIATIONS */}
+            <div className="md:col-span-2 mt-4"><h6 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Associations</h6></div>
+            
+            <div className="space-y-1.5">
+              <label className="form-label">Employee</label>
+              <SearchableSelect value={formData.employee_code} options={employeeOptions} placeholder="Select Employee" onChange={val => setFormData({ ...formData, employee_code: val })} />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Financial Year</label>
+              <SearchableSelect value={formData.financialyear_code} options={fyOptions} placeholder="Select Financial Year" onChange={val => setFormData({ ...formData, financialyear_code: val })} />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Company</label>
+              <SearchableSelect value={formData.company_code} options={companyOptions} placeholder="Select Company" onChange={val => setFormData({ ...formData, company_code: val })} />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Branch</label>
+              <SearchableSelect value={formData.bank_branch} options={branchOptions} placeholder="Select Branch" onChange={val => setFormData({ ...formData, bank_branch: val })} />
+            </div>
+
+            {/* ADDITIONAL DETAILS */}
+            <div className="md:col-span-2 mt-4"><h6 className="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Additional Details</h6></div>
+
+            <div className="space-y-1.5 md:col-span-2">
+              <label className="form-label">Bank Address</label>
+              <textarea className="form-input w-full h-20 pt-2" value={formData.bank_address} onChange={e => setFormData({ ...formData, bank_address: e.target.value })} placeholder="Full Address..." />
+            </div>
+
+            <div className="space-y-1.5">
+               <label className="form-label">Sort Order</label>
+               <input type="number" className="form-input w-full" value={formData.sort_order} onChange={e => setFormData({ ...formData, sort_order: e.target.value })} placeholder="E.G. 1" />
+            </div>
+
             <div className="space-y-1.5">
               <label className="form-label">Status</label>
-              <select className="form-input w-full cursor-pointer" style={{ colorScheme: "dark" }} value={formData.status} onChange={e => setFormData({ ...formData, status: parseInt(e.target.value) })}>
+              <select className="form-input w-full cursor-pointer appearance-none" style={{ colorScheme: "dark" }} value={formData.status} onChange={e => setFormData({ ...formData, status: parseInt(e.target.value) })}>
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
               </select>
@@ -328,7 +349,7 @@ const BankDetails = () => {
                   <th className="text-admin-th">Branch</th>
                   <th className="text-admin-th">IFSC</th>
                   <th className="text-admin-th">Account No</th>
-                  <th className="text-admin-th text-center">Status</th>
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
@@ -343,8 +364,8 @@ const BankDetails = () => {
                       </td>
                       <td className="text-admin-td">{row.bank_code}</td>
                       <td className="text-admin-td">{row.bank_name}</td>
-                      <td className="text-admin-td">{row.bank_branch || "N/A"}</td>
-                      <td className="text-admin-td">{row.bank_ifsc || "-"}</td>
+                      <td className="text-admin-td">{row.bank_branch}</td>
+                      <td className="text-admin-td">{row.bank_ifsc}</td>
                       <td className="text-admin-td">{row.bank_accountno || "-"}</td>
                       <td className="text-admin-td ">
                         <span className={`badge ${row.status === 1 ? "badge-success" : "badge-danger"}`}>
@@ -357,7 +378,7 @@ const BankDetails = () => {
                   <tr>
                     <td colSpan="6" className="px-6 py-24 text-center">
                       <FaUniversity size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
-                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No Bank Details</p>
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No Bank Details Found</p>
                     </td>
                   </tr>
                 )}

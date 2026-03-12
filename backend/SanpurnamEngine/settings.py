@@ -23,7 +23,7 @@ SECRET_KEY = 'django-insecure-17#y_@(bqp0+*i6!q4zhtby9)=c-rsiqglof(tnv8pbu9zd&cr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["hms.yourhrms.in","localhost","127.0.0.1"]
 
 
 # Application definition
@@ -80,8 +80,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'hmis',
-        'USER': 'root',
-        'PASSWORD': 'fatima1415',
+        'USER': 'username',
+        'PASSWORD':'password',
         'HOST': 'localhost',
         'PORT': '3306',
     }

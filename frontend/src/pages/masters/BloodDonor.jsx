@@ -1,139 +1,34 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import {
-  useCrud,
-  useTable,
-  Pagination,
-  TableToolbar,
-} from "../../components/common/BaseCRUD";
-import {
-  FaPlus,
-  FaEdit,
-  FaTrash,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaHandHoldingHeart,
+import React, { useState, useMemo } from "react";
+import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
+import { 
+  FaPlus, 
+  FaEdit, 
+  FaTrash, 
+  FaCheckCircle, 
+  FaTimesCircle, 
+  FaSearch, 
+  FaChevronDown, 
+  FaUserFriends 
 } from "react-icons/fa";
 
-/* =========================
-   Reusable Searchable Select
-   (same behavior like EmployeeMaster searchable dropdowns)
-   ========================= */
-const SearchableSelect = ({
-  value,
-  onChange,
-  options = [],
-  placeholder = "Select",
-  disabled = false,
-  className = "form-input",
-  panelWidth = "w-full",
-}) => {
-  const [open, setOpen] = useState(false);
-  const [q, setQ] = useState("");
-  const wrapRef = useRef(null);
-
-  const selectedLabel = useMemo(() => {
-    const found = options.find((o) => String(o.value) === String(value));
-    return found ? found.label : "";
-  }, [options, value]);
-
-  const filtered = useMemo(() => {
-    const query = (q || "").toLowerCase().trim();
-    if (!query) return options;
-    return options.filter(
-      (o) =>
-        (o.label || "").toLowerCase().includes(query) ||
-        String(o.value || "").toLowerCase().includes(query)
-    );
-  }, [options, q]);
-
-  useEffect(() => {
-    const onDoc = (e) => {
-      if (!wrapRef.current) return;
-      if (!wrapRef.current.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
-
-  useEffect(() => {
-    if (!open) setQ("");
-  }, [open]);
-
-  return (
-    <div className="relative" ref={wrapRef}>
-      <button
-        type="button"
-        className={`${className} text-left flex items-center justify-between ${
-          disabled ? "opacity-70 cursor-not-allowed" : ""
-        }`}
-        disabled={disabled}
-        onClick={() => !disabled && setOpen((s) => !s)}
-      >
-        <span className={`${selectedLabel ? "text-gray-900" : "text-gray-400"}`}>
-          {selectedLabel || placeholder}
-        </span>
-        <span className="ml-3 text-gray-500">▾</span>
-      </button>
-
-      {open && !disabled && (
-        <div
-          className={`absolute z-50 mt-2 ${panelWidth} rounded-lg border border-gray-200 bg-white shadow-lg overflow-hidden`}
-        >
-          <div className="p-3 border-b border-gray-100">
-            <input
-              autoFocus
-              className="w-full px-3 py-2 rounded-lg border border-gray-200 outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
-              placeholder="Search..."
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-            />
-          </div>
-
-          <div className="max-h-64 overflow-y-auto">
-            {filtered.length > 0 ? (
-              filtered.map((o) => (
-                <button
-                  key={String(o.value)}
-                  type="button"
-                  className={`w-full text-left px-4 py-3 flex items-center justify-between transition ${
-                    String(o.value) === String(value) ? "bg-blue-50" : ""
-                  } hover:bg-blue-900 hover:text-white`}
-                  onClick={() => {
-                    onChange(o.value);
-                    setOpen(false);
-                  }}
-                >
-                  <span className="text-inherit">{o.label}</span>
-                  {String(o.value) === String(value) && (
-                    <span className="text-blue-600 font-semibold group-hover:text-white">
-                      ✓
-                    </span>
-                  )}
-                </button>
-              ))
-            ) : (
-              <div className="px-4 py-6 text-sm text-gray-500">
-                No results found
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 const BloodDonor = () => {
-  const { data, loading, refresh, createItem, updateItem, deleteItem } =
-    useCrud("blood_donor/");
+  const DONOR_PATH = "blood_donors";
+  const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${DONOR_PATH}/`);
+  
+  // Fetching Related Master Data
+  const { data: bloodGroups } = useCrud("blood_group_master/");
 
-  const { data: bloodGroups } = useCrud("blood_group_master/"); // dropdown list
-
+  /* ================= UI STATE ================= */
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [selectedRow, setSelectedRow] = useState(null);
+
+  // Dropdown UI States
+  const [openDropdown, setOpenDropdown] = useState(null); 
+  const [bgSearch, setBgSearch] = useState("");
 
   const [formData, setFormData] = useState({
+    blood_donor_code: "",
     donor_firstname: "",
     donor_middlename: "",
     donor_lastname: "",
@@ -149,42 +44,19 @@ const BloodDonor = () => {
     sort_order: "",
   });
 
-  const [modal, setModal] = useState({
-    message: "",
-    visible: false,
-    type: "success",
-  });
+  const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
 
-  const showModal = (message, type = "success") =>
-    setModal({ message, visible: true, type });
-
-  /* ================= SORT ORDER like EmployeeMaster ================= */
-  const sortedBloodDonors = useMemo(() => {
-    const list = Array.isArray(data) ? [...data] : [];
-
-    const getOrder = (row) => {
-      const raw = row?.sort_order;
-      const n = Number(raw);
-      return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
-    };
-
-    list.sort((a, b) => {
-      const ao = getOrder(a);
-      const bo = getOrder(b);
-      if (ao !== bo) return ao - bo;
-
-      // tie-break by name then id
-      const an = `${a?.donor_firstname || ""} ${a?.donor_lastname || ""}`.trim();
-      const bn = `${b?.donor_firstname || ""} ${b?.donor_lastname || ""}`.trim();
-      const nameCmp = an.localeCompare(bn);
-      if (nameCmp !== 0) return nameCmp;
-
-      return Number(a?.id || 0) - Number(b?.id || 0);
+  /* ================= SORTING LOGIC ================= */
+  const sortedData = useMemo(() => {
+    if (!data) return [];
+    return [...data].sort((a, b) => {
+      const sa = (a.sort_order === null || a.sort_order === "" || a.sort_order === undefined) ? 999 : Number(a.sort_order);
+      const sb = (b.sort_order === null || b.sort_order === "" || b.sort_order === undefined) ? 999 : Number(b.sort_order);
+      return sa - sb;
     });
-
-    return list;
   }, [data]);
 
+  /* ================= TABLE LOGIC ================= */
   const {
     search,
     setSearch,
@@ -196,183 +68,146 @@ const BloodDonor = () => {
     effectiveItemsPerPage,
     filteredData,
     totalPages,
-  } = useTable(sortedBloodDonors);
+  } = useTable(sortedData);
 
-  /* ===== searchable dropdown options ===== */
-  const bloodGroupOptions = useMemo(
-    () =>
-      (bloodGroups || []).map((bg) => ({
-        value: bg.blood_group_code,
-        label: `${bg.blood_group_code}`,
-      })),
-    [bloodGroups]
-  );
-
+  /* ================= HELPERS ================= */
   const resetForm = () => {
     setShowForm(false);
     setIsEdit(false);
-    setSelected(null);
-    setFormData({
-      donor_firstname: "",
-      donor_middlename: "",
-      donor_lastname: "",
-      blood_group_code: "",
-      gender: "",
-      age: "",
-      phone: "",
-      email: "",
-      address1: "",
-      address2: "",
+    setSelectedRow(null);
+    setOpenDropdown(null);
+    setBgSearch("");
+    setFormData({ 
+      blood_donor_code: "", 
+      donor_firstname: "", 
+      donor_middlename: "", 
+      donor_lastname: "", 
+      blood_group_code: "", 
+      gender: "", 
+      age: "", 
+      phone: "", 
+      email: "", 
+      address1: "", 
+      address2: "", 
       last_donation_date: "",
-      status: 1,
-      sort_order: "",
+      status: 1, 
+      sort_order: "" 
     });
   };
 
+  const showModal = (message, type = "success") => setModal({ visible: true, message, type });
+
+  const filteredBloodGroups = useMemo(() => {
+    if (!bloodGroups) return [];
+    return bloodGroups.filter(bg =>
+      bg.blood_group_name.toLowerCase().includes(bgSearch.toLowerCase())
+    );
+  }, [bloodGroups, bgSearch]);
+
+  // Find the name for display based on the selected code
+  const selectedBGDisplay = useMemo(() => {
+    if (!formData.blood_group_code || !bloodGroups) return "Select Blood Group";
+    const found = bloodGroups.find(bg => bg.blood_group_code === formData.blood_group_code);
+    return found ? found.blood_group_name : "Select Blood Group";
+  }, [formData.blood_group_code, bloodGroups]);
+
+  /* ================= SUBMIT ================= */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.blood_group_code) {
+      showModal("Please select a Blood Group", "error");
+      return;
+    }
 
-    const payload = {
-      ...formData,
-      age: formData.age === "" ? null : Number(formData.age),
-      sort_order: formData.sort_order === "" ? null : Number(formData.sort_order),
-      status: Number(formData.status),
-      last_donation_date: formData.last_donation_date
-        ? formData.last_donation_date
-        : null,
-    };
+    const actionPath = isEdit 
+      ? `${DONOR_PATH}/update/${formData.blood_donor_code}/` 
+      : `${DONOR_PATH}/create/`;
 
-    const result = isEdit
-      ? await updateItem(`blood_donor/update/${selected?.id}/`, payload)
-      : await createItem(`blood_donor/create/`, payload);
+    const payload = { ...formData };
+    if (!isEdit) delete payload.blood_donor_code;
+
+    // Optional fields logic: Convert empty strings to null for backend
+    payload.sort_order = (payload.sort_order === "" || payload.sort_order === null) ? null : Number(payload.sort_order);
+    payload.last_donation_date = payload.last_donation_date === "" ? null : payload.last_donation_date;
+    payload.address1 = payload.address1 || null;
+    payload.address2 = payload.address2 || null;
+
+    // Format age as number
+    payload.age = payload.age === "" ? null : Number(payload.age);
+
+    const result = isEdit 
+      ? await updateItem(actionPath, payload) 
+      : await createItem(actionPath, payload);
 
     if (result.success) {
-      showModal(`Blood Donor ${isEdit ? "updated" : "created"} successfully!`);
+      showModal(`Donor ${isEdit ? "updated" : "created"} successfully!`);
       resetForm();
       refresh();
     } else {
-      showModal(result.error || "Operation failed!", "error");
+      const errorMsg = typeof result.error === 'object' 
+        ? Object.entries(result.error).map(([k, v]) => `${k}: ${v}`).join(", ")
+        : result.error;
+      showModal(errorMsg || "Failed to save data", "error");
     }
   };
 
+  /* ================= DELETE ================= */
   const handleDelete = async () => {
-    if (!selected) return;
-    const result = await deleteItem(`blood_donor/delete/${selected.id}/`);
+    if (!selectedRow || !selectedRow.blood_donor_code) return;
+    const result = await deleteItem(`${DONOR_PATH}/delete/${selectedRow.blood_donor_code}/`);
     if (result.success) {
-      showModal("Blood Donor deleted successfully!");
-      setSelected(null);
+      showModal("Donor deleted successfully!");
+      setSelectedRow(null);
       refresh();
     } else {
       showModal(result.error || "Delete failed!", "error");
     }
   };
 
-  const statusBadge = (s) => {
-    const isActive = Number(s) === 1;
-    return (
-      <span
-        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-          isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-        }`}
-      >
-        {isActive ? "Active" : "Inactive"}
-      </span>
-    );
-  };
-
-  if (loading)
-    return (
-      <div className="loading-overlay">
-        <div className="loading-spinner-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Loading Blood Donor Data...</p>
-        </div>
-      </div>
-    );
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+    </div>
+  );
 
   return (
     <div className="app-container">
+      {/* MODAL */}
       {modal.visible && (
-        <div className="modal-overlay">
-          <div className="modal-container">
-            <div className="modal-body">
-              <div className="modal-icon-container">
-                {modal.type === "success" ? (
-                  <div className="modal-icon-success">
-                    <FaCheckCircle />
-                  </div>
-                ) : (
-                  <div className="modal-icon-error">
-                    <FaTimesCircle />
-                  </div>
-                )}
-              </div>
-              <h3
-                className={`modal-title ${
-                  modal.type === "success"
-                    ? "modal-title-success"
-                    : "modal-title-error"
-                }`}
-              >
-                {modal.type === "success" ? "Success" : "Error"}
-              </h3>
-              <p className="modal-message mb-6">{modal.message}</p>
-              <button
-                className="btn-primary w-full"
-                onClick={() => setModal({ ...modal, visible: false })}
-              >
-                OK
-              </button>
+        <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
+            <div className="mb-4 flex justify-center">
+              {modal.type === "success" ? <FaCheckCircle className="text-6xl text-emerald-500" /> : <FaTimesCircle className="text-6xl text-rose-500" />}
             </div>
+            <h3 className={`text-xl font-black mb-2 uppercase tracking-tight ${modal.type === "success" ? "text-emerald-500" : "text-rose-500"}`}>
+              {modal.type === "success" ? "Success" : "Error"}
+            </h3>
+            <p className="mb-6 font-medium opacity-80">{modal.message}</p>
+            <button className="btn-primary w-full justify-center py-3" onClick={() => setModal({ ...modal, visible: false })}>
+              Continue
+            </button>
           </div>
         </div>
       )}
 
       {/* HEADER */}
       <div className="section-header">
-        <h4 className="text-xl font-bold text-gray-800">Blood Donor</h4>
-
+        <h4 className="page-title">Blood Donor Master</h4>
         {!showForm && (
           <div className="flex items-center gap-2">
-            <button
-              className="btn-primary"
-              onClick={() => {
-                setIsEdit(false);
-                setSelected(null);
-                resetForm();
-                setShowForm(true);
-              }}
-            >
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
               <FaPlus size={14} /> Add New
             </button>
-
-            {selected && (
+            {selectedRow && (
               <div className="flex items-center gap-2 animate-in slide-in-from-right-5">
-                <button
-                  className="btn-warning"
-                  onClick={() => {
-                    setFormData({
-                      donor_firstname: selected.donor_firstname || "",
-                      donor_middlename: selected.donor_middlename || "",
-                      donor_lastname: selected.donor_lastname || "",
-                      blood_group_code: selected.blood_group_code || "",
-                      gender: selected.gender || "",
-                      age: selected.age ?? "",
-                      phone: selected.phone || "",
-                      email: selected.email || "",
-                      address1: selected.address1 || "",
-                      address2: selected.address2 || "",
-                      last_donation_date: selected.last_donation_date || "",
-                      status: selected.status ?? 1,
-                      sort_order: selected.sort_order ?? "",
-                    });
-                    setIsEdit(true);
-                    setShowForm(true);
-                  }}
-                >
+                <button className="btn-warning" onClick={() => {
+                  setFormData({ ...selectedRow, sort_order: selectedRow.sort_order ?? "" });
+                  setIsEdit(true);
+                  setShowForm(true);
+                }}>
                   <FaEdit size={14} /> Edit
                 </button>
-
                 <button className="btn-danger" onClick={handleDelete}>
                   <FaTrash size={14} /> Delete
                 </button>
@@ -384,214 +219,108 @@ const BloodDonor = () => {
 
       {/* FORM */}
       {showForm && (
-        <div className="form-container">
-          {/* Title + line like EmployeeMaster */}
-          <div className="mb-8 border-b border-gray-50 pb-5">
-            <h6 className="text-lg font-bold text-gray-800">
-              {isEdit ? "Update Donor Info" : "Add New Donor"}
-            </h6>
-            <div className="border-b border-gray-200 mt-3 mb-6"></div>
-          </div>
+        <div className="form-container animate-in zoom-in-95 duration-200">
+          <h6 className="form-section-title uppercase tracking-tighter">
+            {isEdit ? "Update Donor" : "Add New Donor"}
+          </h6>
 
-          <form className="grid grid-cols-1 gap-y-10" onSubmit={handleSubmit}>
-            {/* SECTION 1 */}
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">
-                Information
-              </h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-
-              {/* 1 row = 2 columns */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">First Name</label>
-                  <input
-                    className="form-input"
-                    value={formData.donor_firstname}
-                    required
-                    onChange={(e) =>
-                      setFormData({ ...formData, donor_firstname: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Middle Name</label>
-                  <input
-                    className="form-input"
-                    value={formData.donor_middlename}
-                    onChange={(e) =>
-                      setFormData({ ...formData, donor_middlename: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Last Name</label>
-                  <input
-                    className="form-input"
-                    value={formData.donor_lastname}
-                    required
-                    onChange={(e) =>
-                      setFormData({ ...formData, donor_lastname: e.target.value })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Blood Group</label>
-                  <SearchableSelect
-                    className="form-input"
-                    value={formData.blood_group_code || ""}
-                    disabled={!!formData.blood_group_code}
-                    placeholder="Select Blood Group"
-                    options={bloodGroupOptions}
-                    onChange={(val) =>
-                      setFormData({ ...formData, blood_group_code: val })
-                    }
-                  />
-                </div>
-
-                {/* ✅ Gender - now same look like Blood Group (placeholder grey + blue focus) */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Gender</label>
-                  <select
-                    className={`form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 ${
-                      !formData.gender ? "text-gray-400" : "text-gray-900"
-                    }`}
-                    value={formData.gender || ""}
-                    disabled={!!formData.gender}
-                    onChange={(e) =>
-                      setFormData({ ...formData, gender: e.target.value })
-                    }
-                  >
-                    <option value="" disabled>
-                      Select Gender
-                    </option>
-                    <option value="Male" className="text-gray-900">
-                      Male
-                    </option>
-                    <option value="Female" className="text-gray-900">
-                      Female
-                    </option>
-                    <option value="Other" className="text-gray-900">
-                      Other
-                    </option>
-                  </select>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Age</label>
-                  <input
-                    type="number"
-                    className="form-input"
-                    value={formData.age}
-                    onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                  />
-                </div>
-
-
-                {/* ✅ Last Donation Date - same look + grey when empty + blue focus */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Last Donation Date</label>
-                  <input
-                    type="datetime-local"
-                    className={`form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 ${
-                      !formData.last_donation_date ? "text-gray-400" : "text-gray-900"
-                    }`}
-                    value={formData.last_donation_date || ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, last_donation_date: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
+          <form className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6" onSubmit={handleSubmit}>
+            
+            <div className="space-y-1.5">
+              <label className="form-label">First Name</label>
+              <input className="form-input w-full" value={formData.donor_firstname} required onChange={e => setFormData({ ...formData, donor_firstname: e.target.value })} placeholder="John" />
             </div>
 
-            {/* SECTION 2 */}
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">Contact</h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Phone</label>
-                  <input
-                    className="form-input"
-                    value={formData.phone || ""}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Email</label>
-                  <input
-                    className="form-input"
-                    value={formData.email || ""}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-              </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Middle Name</label>
+              <input className="form-input w-full" value={formData.donor_middlename || ""} required onChange={e => setFormData({ ...formData, donor_middlename: e.target.value })} placeholder="Robert" />
             </div>
 
-            {/* SECTION 3 */}
-            <div>
-              <h6 className="text-md font-bold text-green-700 mb-4">Address</h6>
-              <div className="border-b border-gray-200 mt-3 mb-6"></div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-1.5">
-                  <label className="form-label">Address 1</label>
-                  <textarea
-                    className="form-input"
-                    value={formData.address1 || ""}
-                    onChange={(e) => setFormData({ ...formData, address1: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="form-label">Address 2</label>
-                  <textarea
-                    className="form-input"
-                    value={formData.address2 || ""}
-                    onChange={(e) => setFormData({ ...formData, address2: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="form-label">Sort Order</label>
-                  <input
-                    className="form-input"
-                    type="number"
-                    value={formData.sort_order ?? ""}
-                    onChange={(e) =>
-                      setFormData({ ...formData, sort_order: e.target.value })
-                    }
-                  />
-                </div>
-
-                {/* ✅ Status - same look + blue focus */}
-                <div className="space-y-1.5">
-                  <label className="form-label">Status</label>
-                  <select
-                    className="form-input focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600"
-                    value={Number(formData.status)}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: Number(e.target.value) })
-                    }
-                  >
-                    <option value={1}>Active</option>
-                    <option value={0}>Inactive</option>
-                  </select>
-                </div>
-              </div>
+            <div className="space-y-1.5">
+              <label className="form-label">Last Name</label>
+              <input className="form-input w-full" value={formData.donor_lastname} required onChange={e => setFormData({ ...formData, donor_lastname: e.target.value })} placeholder="Doe" />
             </div>
 
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 border-t border-gray-50 pt-8 mt-4">
-              <button className="btn-primary px-10">
-                {isEdit ? "Update" : "Save"}
-              </button>
-              <button type="button" className="btn-ghost" onClick={resetForm}>
-                Cancel
-              </button>
+            {/* BLOOD GROUP DROPDOWN - Display ONLY Name, Store Code */}
+            <div className="space-y-1.5 relative">
+              <label className="form-label">Blood Group</label>
+              <div className="form-input w-full flex justify-between items-center cursor-pointer" onClick={() => setOpenDropdown(openDropdown === 'bg' ? null : 'bg')}>
+                <span className={formData.blood_group_code ? "" : "opacity-50"}>{selectedBGDisplay}</span>
+                <FaChevronDown size={12} className="opacity-50" />
+              </div>
+              {openDropdown === 'bg' && (
+                <div className="absolute z-60 w-full mt-2 rounded-xl shadow-2xl border overflow-hidden animate-in fade-in zoom-in-95 duration-150" style={{ backgroundColor: "var(--input-bg)", borderColor: "var(--border-color)" }}>
+                  <div className="p-3 border-b flex items-center gap-2" style={{ borderColor: "var(--border-color)", backgroundColor: "var(--bg-hover)" }}>
+                    <FaSearch className="opacity-40" size={14} />
+                    <input autoFocus className="bg-transparent outline-none text-sm w-full" placeholder="Search group..." value={bgSearch} onChange={(e) => setBgSearch(e.target.value)} />
+                  </div>
+                  <div className="max-h-48 overflow-y-auto custom-scrollbar">
+                    {filteredBloodGroups.map(bg => (
+                      <div key={bg.blood_group_code} className="px-4 py-3 hover:bg-emerald-500/10 cursor-pointer text-sm transition-colors font-bold" onClick={() => { setFormData({ ...formData, blood_group_code: bg.blood_group_code }); setOpenDropdown(null); }}>
+                        {bg.blood_group_name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Gender</label>
+              <select className="form-input w-full cursor-pointer appearance-none" required style={{ colorScheme: "dark" }} value={formData.gender || ""} onChange={e => setFormData({ ...formData, gender: e.target.value })}>
+                <option value="" disabled>Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Age</label>
+              <input type="number" className="form-input w-full" required value={formData.age} onChange={e => setFormData({ ...formData, age: e.target.value })} placeholder="E.G. 25" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Phone</label>
+              <input className="form-input w-full" required value={formData.phone || ""} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="10 Digit Number" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Email</label>
+              <input type="email" className="form-input w-full" required value={formData.email || ""} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="john@example.com" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Address 1 (Optional)</label>
+              <textarea className="form-input w-full" value={formData.address1 || ""} onChange={e => setFormData({ ...formData, address1: e.target.value })} placeholder="Apartment, Street..." rows="1" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Address 2 (Optional)</label>
+              <textarea className="form-input w-full" value={formData.address2 || ""} onChange={e => setFormData({ ...formData, address2: e.target.value })} placeholder="Landmark, City..." rows="1" />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Last Donation Date (Optional)</label>
+              <input type="date" className="form-input w-full" value={formData.last_donation_date ? formData.last_donation_date.split('T')[0] : ""} onChange={e => setFormData({ ...formData, last_donation_date: e.target.value })} />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Sort Order (Optional)</label>
+              <input type="number" className="form-input w-full" value={formData.sort_order} placeholder="E.G. 1" onChange={(e) => setFormData({ ...formData, sort_order: e.target.value })} />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="form-label">Status</label>
+              <select className="form-input w-full cursor-pointer appearance-none" style={{ colorScheme: "dark" }} value={formData.status} onChange={e => setFormData({ ...formData, status: Number(e.target.value) })}>
+                <option value={1}>Active</option>
+                <option value={0}>Inactive</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2 flex justify-end gap-3 border-t pt-8 mt-4" style={{ borderColor: "var(--border-color)" }}>
+              <button type="submit" className="btn-primary px-12 py-3">{isEdit ? "Update" : "Save"}</button>
+              <button type="button" className="btn-ghost" onClick={resetForm}>Cancel</button>
             </div>
           </form>
         </div>
@@ -599,78 +328,59 @@ const BloodDonor = () => {
 
       {/* TABLE */}
       {!showForm && (
-        <div className="data-table-container">
-          <TableToolbar
-            itemsPerPage={itemsPerPage}
-            setItemsPerPage={setItemsPerPage}
-            search={search}
-            setSearch={setSearch}
-            setCurrentPage={setCurrentPage}
-          />
-
+        <div className="data-table-container animate-in fade-in duration-500">
+          <TableToolbar itemsPerPage={itemsPerPage} setItemsPerPage={setItemsPerPage} search={search} setSearch={setSearch} setCurrentPage={setCurrentPage} />
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="table-header-row">
-                  <th className="table-admin-th w-16"></th>
-                  <th className="table-admin-th">Name</th>
-                  <th className="table-admin-th">Blood Group</th>
-                  <th className="table-admin-th">Gender</th>
-                  <th className="table-admin-th">Status</th>
+                <tr>
+                  <th className="text-admin-th w-16"></th>
+                  <th className="text-admin-th">Code</th>
+                  <th className="text-admin-th">Name</th>
+                  <th className="text-admin-th">Blood Group</th>
+                  <th className="text-admin-th">Phone</th>
+                  <th className="text-admin-th">Status</th>
                 </tr>
               </thead>
-
-              <tbody className="divide-y divide-gray-50">
+              <tbody className="divide-y" style={{ borderColor: "var(--border-color)" }}>
                 {paginatedData.length > 0 ? (
-                  paginatedData.map((x) => (
-                    <tr
-                      key={x.id}
-                      onClick={() => setSelected(selected?.id === x.id ? null : x)}
-                      className={`table-row ${
-                        selected?.id === x.id ? "table-row-active" : "table-row-hover"
-                      }`}
-                    >
-                      <td className="text-admin-td">
-                        <div
-                          className={`selection-indicator rounded-full ${
-                            selected?.id === x.id
-                              ? "selection-indicator-active"
-                              : "selection-indicator-inactive"
-                          }`}
-                        >
-                          {selected?.id === x.id && <div className="selection-dot rounded-full" />}
-                        </div>
-                      </td>
-
-                      <td className="text-admin-td">
-                        {x.donor_firstname} {x.donor_lastname}
-                      </td>
-                      <td className="text-admin-td">{x.blood_group_code || "-"}</td>
-                      <td className="text-admin-td">{x.gender || "-"}</td>
-                      <td className="text-admin-td">{statusBadge(x.status)}</td>
-                    </tr>
-                  ))
+                  paginatedData.map((item) => {
+                    const bgObj = bloodGroups?.find(b => b.blood_group_code === item.blood_group_code);
+                    return (
+                      <tr key={item.blood_donor_code} onClick={() => setSelectedRow(selectedRow?.blood_donor_code === item.blood_donor_code ? null : item)} className={`group cursor-pointer transition-colors ${selectedRow?.blood_donor_code === item.blood_donor_code ? "bg-emerald-500/10" : "hover:bg-emerald-500/5"}`}>
+                        <td className="px-6 py-4">
+                          <div className={`selection-indicator ${selectedRow?.blood_donor_code === item.blood_donor_code ? "selection-indicator-active" : "group-hover:border-emerald-500/50"}`}>
+                            {selectedRow?.blood_donor_code === item.blood_donor_code && <div className="selection-dot" />}
+                          </div>
+                        </td>
+                        <td className="text-admin-td">{item.blood_donor_code}</td>
+                        <td className="text-admin-td">{`${item.donor_firstname} ${item.donor_lastname}`}</td>
+                        <td className="text-admin-td">
+                         {bgObj ? bgObj.blood_group_name : item.blood_group_code}
+                        </td>
+                        <td className="text-admin-td">{item.phone || "N/A"}</td>
+                        <td className="text-admin-td">
+                          <span className={`badge ${item.status === 1 ? "badge-success" : "badge-danger"}`}>
+                            {item.status === 1 ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td colSpan="6" className="table-td py-20 text-center">
-                      <div className="empty-state-container">
-                        <FaHandHoldingHeart size={48} className="mb-4 text-gray-400" />
-                        <p className="text-xl font-bold text-gray-500">No donors found</p>
-                      </div>
+                    <td colSpan="6" className="px-6 py-24 text-center">
+                      <FaUserFriends size={64} className="mb-6 mx-auto opacity-10 text-emerald-500 animate-pulse" />
+                      <p className="text-xl font-black opacity-30 uppercase tracking-widest">No donors found</p>
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-
-          <Pagination
-            totalEntries={filteredData.length}
-            itemsPerPage={effectiveItemsPerPage}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            totalPages={totalPages}
-          />
+          <div className="pagination-container">
+            <Pagination totalEntries={filteredData.length} itemsPerPage={effectiveItemsPerPage} currentPage={currentPage} setCurrentPage={setCurrentPage} totalPages={totalPages} />
+          </div>
         </div>
       )}
     </div>

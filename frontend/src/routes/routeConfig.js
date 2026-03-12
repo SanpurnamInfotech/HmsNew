@@ -20,7 +20,7 @@ import BloodGroupMaster from '../pages/masters/BloodGroupMaster';
 import BloodDonor from '../pages/masters/BloodDonor';
 import BankDetails from "../pages/masters/BankDetails";
 import BedAllotment from "../pages/masters/BedAllotment";
-// import PatientMst from "../pages/masters/PatientMst.";
+import Patient from "../pages/masters/Patient.jsx"
 import PrescriptionReport from "../pages/PrescriptionReport.jsx";
 import IcdMasterMst from "../pages/masters/IcdMasterMst.jsx";
 import DsmMaster from "../pages/masters/DsmMaster.jsx";
@@ -46,10 +46,16 @@ import AppointmentTypeMasterMst from "../pages/masters/AppointmentTypeMasterMst.
 import AppointmentMst from "../pages/masters/AppointmentMst.jsx";
 import EctMst from "../pages/masters/EctMst.jsx";
 import FollowUpMst from "../pages/masters/FollowUpMst.jsx";
-import DoctorMst from "../pages/masters/DoctorMst.jsx";
+import TransactionsMst from "../pages/masters/TransactionsMst.jsx";
+import BedMaster from "../pages/masters/BedMaster.jsx";
+import DoctorMst from "../pages/masters/DoctorMst.jsx"
+import Opd from "../pages/masters/Opd.jsx"
 import TransactionmodesMst from "../pages/masters/TransactionmodesMst.jsx";
-import Discharge_summaryMst from "../pages/masters/Discharge_summaryMst.jsx";
-import Opd from "../pages/masters/Opd.jsx";
+import Discharge_summaryMst  from "../pages/masters/Discharge_summaryMst.jsx";
+import OpdBillMaster from "../pages/masters/OpdBillMaster.jsx";
+import OpdBilling from "../pages/masters/OpdBilling.jsx";
+import OpdBillingDetails from "../pages/masters/OpdBillingDetails.jsx";
+
 
 
 
@@ -72,7 +78,7 @@ export const adminRoutes = [
   { path: "blood_donor", label: "Blood Donor", component: BloodDonor },
   { path: "bank_details", label: "Bank Details", component: BankDetails },
   { path: "bed_allotment", label: "Bed Allotment", component: BedAllotment },
-  // { path: "patient", label: "PatientMst", component: PatientMst },
+  { path: "patient", label: "Patient", component: Patient },
   { path: "complaints", label: "Complaint Master", component: ComplaintMaster },
   { path: "expenses", label: "Expenses Master", component: ExpensesMst },
   { path: "mse_master", label: "MSE Master", component: MseMaster },
@@ -82,14 +88,14 @@ export const adminRoutes = [
   { path: "cities", label: "Cities Master", component: CitiesMst },
   { path: "mood_history", label: "Mood History Master", component: MoodHistoryMst },
   { path: "prescription_report", label: "Prescription Report", component: PrescriptionReport},
-  { path: "icd_master", label:"ICD Master", component:IcdMasterMst},
+  { path: "icd-master", label:"ICD Master", component:IcdMasterMst},
   { path: "dsm_master", label:"DSM Master", component:DsmMaster},
   { path: "room_type", label: "Room Type Master", component:RoomTypeMasterMst},
-  { path: "habit", label: "Habit Master", component:HabitMaster},
+  { path: "habit", label: "Habit Master", component:HabitMaster}, 
   { path: "hallucination", label:"Hallucination Master", component:HallucinationMaster},
   { path :"history", label:"History Master", component:HistoryMaster}, 
   { path :" mental_illness", label: "Mental Illness Master", component:MentalIllnessMaster},
-  { path: "medicine_category", label: "Medicine_category", component: MedicineCategory },
+  { path: "medicine-category", label: "Medicine_category", component: MedicineCategory },
   { path: "medicine", label: "Medicine" , component: MedicineMst },
   { path: "posssation", label: "Possation", component: Possation },
   { path: "financial_year", label: "financial year", component: FinancialYearMst },
@@ -98,6 +104,9 @@ export const adminRoutes = [
   { path: "usertype", label: "Usertype Master", component: UsertypeMst },
   { path: "hospital", label: "Hospital Master", component: Hospital_detailsMst },
   { path: "doctors", label: "Doctor", component: DoctorMst },
+  { path: "usertype", label: "Usertype Master", component: UsertypeMst },
+  { path: "hospital_details", label: "Hospital Master", component: Hospital_detailsMst },
+  // { path: "doctor", label: "Doctor", component: DoctorMst },
   { path: "appointment", label: "Appointment", component: AppointmentMst},
   { path: "appointment-type-master", label: "Appointment Type Master", component: AppointmentTypeMasterMst },
   { path: "ect", label: "ECT", component: EctMst },
@@ -107,7 +116,11 @@ export const adminRoutes = [
   
   { path: "Opd_casesheet", label: "OPD case sheet", component: Opd },
   { path: "discharge", label: "Discharge Summary", component: Discharge_summaryMst },
-  
+  { path: "transactions", label: "Transactions", component: TransactionsMst },
+  { path: "bed", label: "Bed", component: BedMaster },
+  { path: "opd_bill_master", label: "OPd Billing Master", component: OpdBillMaster },
+  { path: "opd_billing", label: "OPd Billing", component: OpdBilling },
+  { path: "opd_billing_details", label: "OPd Billing Details", component: OpdBillingDetails },
   
 ];
 
