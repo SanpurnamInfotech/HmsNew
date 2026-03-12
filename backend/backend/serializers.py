@@ -91,12 +91,10 @@ class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Doctor
         fields = '__all__'
-        read_only_fields = ['doctor_code']  # doctor_code ko manually change nahi karna
+        read_only_fields = ['doctor_code']  
 
     def create(self, validated_data):
-        # Make create robust: get the latest PK, extract trailing number from code
-        import re
-
+    
         last = Doctor.objects.order_by('-pk').first()
         new_number = 1
         if last and last.doctor_code:
@@ -189,10 +187,6 @@ class AdvicemasterSerializer(serializers.ModelSerializer):
         model = Advicemaster
         fields = "__all__"
 
-class CompanyMasterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CompanyMaster
-        fields = '__all__'
 
 class EmployeeMasterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1170,7 +1164,7 @@ class DischargeSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = DischargeSummary
         fields = "__all__"
-        # In fields ko manual input se protect karne ke liye read_only rakha hai
+    
         read_only_fields = [
             "createdon",
             "createdby",
@@ -1190,14 +1184,14 @@ class DischargeSummarySerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         request = self.context.get('request')
-        # Timestamp set karna
+     
         validated_data['createdon'] = timezone.now()
         validated_data['updatedon'] = timezone.now()
         
         # User tracking logic
         if request and hasattr(request, 'user'):
             try:
-                # Agar user logged in hai toh uski ID save karein
+                
                 validated_data['createdby'] = request.user.id
                 validated_data['updatedby'] = request.user.id
             except Exception:
@@ -1206,7 +1200,7 @@ class DischargeSummarySerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         request = self.context.get('request')
-        # Sirf update timestamp aur user badalna
+        
         validated_data['updatedon'] = timezone.now()
         
         if request and hasattr(request, 'user'):
@@ -1289,22 +1283,6 @@ class FinancialyearMasterSerializer(serializers.ModelSerializer):
         ]
 
 
-from rest_framework import serializers
-from .models import CompanyMaster
-
-
-class CompanyMasterSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CompanyMaster
-        fields = '__all__'
-        read_only_fields = [
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby'
-        ]
-    
 
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1342,10 +1320,10 @@ class CompanyMasterSerializer(serializers.ModelSerializer):
         if not validated_data.get('company_code'):
             last_company = CompanyMaster.objects.all().order_by('id').last()
             if not last_company:
-                new_code = "COMP-000001"
+                new_code = "COMP000001"
             else:
                 last_id = last_company.id
-                new_code = f"COMP-{str(last_id + 1).zfill(6)}"
+                new_code = f"COMP{str(last_id + 1).zfill(6)}"
             validated_data['company_code'] = new_code
             
         return super().create(validated_data)
@@ -1368,5 +1346,13 @@ class OpdBillMasterSerializer(serializers.ModelSerializer):
             
         return super().create(validated_data)
 
-
+class CurrencySerializer(serializers.ModelSerializer):    
+    class Meta:
+        model = Currency
+        fields = '__all__'
+                     
+class TimezonesSerializer(serializers.ModelSerializer):    
+    class Meta:
+        model = Timezones
+        fields = '__all__'
                      

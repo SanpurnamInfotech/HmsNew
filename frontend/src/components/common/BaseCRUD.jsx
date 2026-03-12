@@ -6,6 +6,18 @@ import { FaChevronLeft, FaChevronRight, FaSearch } from "react-icons/fa";
 export const domain = get_domain();
 export const API_BASE = `${domain}/api/`;
 
+// Helper to parse complex error objects from Django into readable strings
+const parseError = (err) => {
+  const errorData = err.response?.data;
+  if (typeof errorData === 'string') return errorData;
+  if (typeof errorData === 'object' && errorData !== null) {
+    return Object.entries(errorData)
+      .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(", ") : value}`)
+      .join(" | ");
+  }
+  return err.message || "An unexpected error occurred";
+};
+
 export const useCrud = (endpoint) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,10 +51,7 @@ export const useCrud = (endpoint) => {
       await refresh();
       return { success: true, data: res.data };
     } catch (err) { 
-      return { 
-        success: false, 
-        error: err.response?.data || err.response?.message || "Error" 
-      }; 
+      return { success: false, error: parseError(err) }; 
     }
   };
 
@@ -52,10 +61,7 @@ export const useCrud = (endpoint) => {
       await refresh();
       return { success: true, data: res.data };
     } catch (err) { 
-      return { 
-        success: false, 
-        error: err.response?.data || err.response?.message || "Error" 
-      }; 
+      return { success: false, error: parseError(err) }; 
     }
   };
 
@@ -65,10 +71,7 @@ export const useCrud = (endpoint) => {
       await refresh();
       return { success: true };
     } catch (err) { 
-      return { 
-        success: false, 
-        error: err.response?.data || err.response?.message || "Error" 
-      }; 
+      return { success: false, error: parseError(err) }; 
     }
   };
 
@@ -114,7 +117,9 @@ export const TableToolbar = ({ itemsPerPage, setItemsPerPage, search, setSearch,
           setCurrentPage(1); 
         }}
       >
-        {[5, 10, 25, 50].map(v => <option key={v} value={v}>{v}</option>)}
+        {[5, 10, 25, 50].map(v => (
+          <option key={v} value={v}>{v}</option>
+        ))}
         <option value="all">All</option>
       </select>
       <span>entries</span>
@@ -147,6 +152,7 @@ export const Pagination = ({ totalEntries, itemsPerPage, currentPage, setCurrent
 
       <nav className="pagination-nav">
         <button 
+          type="button"
           onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} 
           disabled={currentPage === 1} 
           className="pagination-btn rounded-l-md disabled:opacity-30"
@@ -156,6 +162,7 @@ export const Pagination = ({ totalEntries, itemsPerPage, currentPage, setCurrent
         
         {Array.from({ length: safeTotalPages }, (_, i) => i + 1).map((page) => (
           <button 
+            type="button"
             key={page} 
             onClick={() => setCurrentPage(page)} 
             className={`pagination-btn ${
@@ -169,6 +176,7 @@ export const Pagination = ({ totalEntries, itemsPerPage, currentPage, setCurrent
         ))}
 
         <button 
+          type="button"
           onClick={() => setCurrentPage(p => Math.min(p + 1, safeTotalPages))} 
           disabled={currentPage === safeTotalPages} 
           className="pagination-btn rounded-r-md disabled:opacity-30"

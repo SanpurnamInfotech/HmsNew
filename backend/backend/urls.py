@@ -218,15 +218,15 @@ urlpatterns = [
     path('api/possession-master/delete/<str:possession_code>/', PossessionMasterDeleteView.as_view(), name='possession-master-delete'),
     path('api/possession-master/<str:possession_code>/', PossessionMasterDetailView.as_view(), name='possession-master-detail'),    
         
-    path('api/financialyears/', FinancialyearMasterListView.as_view(), name='financialyear-list'),
+    path('api/financial_years/', FinancialyearMasterListView.as_view(), name='financialyear-list'),
 
-    path('api/financialyears/create/', FinancialyearMasterCreateView.as_view(), name='financialyear-create'),
+    path('api/financial_years/create/', FinancialyearMasterCreateView.as_view(), name='financialyear-create'),
 
-    path('api/financialyears/update/<str:financialyear_code>/', FinancialyearMasterUpdateView.as_view(), name='financialyear-update'),
+    path('api/financial_years/update/<str:financialyear_code>/', FinancialyearMasterUpdateView.as_view(), name='financialyear-update'),
 
-    path('api/financialyears/delete/<str:financialyear_code>/', FinancialyearMasterDeleteView.as_view(), name='financialyear-delete'),
+    path('api/financial_years/delete/<str:financialyear_code>/', FinancialyearMasterDeleteView.as_view(), name='financialyear-delete'),
 
-    path('api/financialyears/<str:financialyear_code>/', FinancialyearMasterDetailView.as_view(), name='financialyear-detail'),
+    path('api/financial_years/<str:financialyear_code>/', FinancialyearMasterDetailView.as_view(), name='financialyear-detail'),
 
     
     path('api/settings/', SettingsListView.as_view(), name='settings-list'),
@@ -355,17 +355,17 @@ urlpatterns = [
     path('api/usertype-master/delete/<str:usertype_code>/', UsertypeMasterDeleteView.as_view(), name='usertype-master-delete'),
     
     
-    path('api/designation/',DesignationListView.as_view(), name='designation-list'),
-    path('api/designation/create/',DesignationCreateView.as_view(), name='designation-create'),
-    path('api/designation/<str:designation_code>/',DesignationDetailView.as_view(), name='designation-detail'),
-    path('api/designation/update/<str:designation_code>/',DesignationUpdateView.as_view(), name='designation-update'),
-    path('api/designation/delete/<str:designation_code>/',DesignationDeleteView.as_view(), name='designation-delete'),
+    path('api/designations/',DesignationListView.as_view(), name='designation-list'),
+    path('api/designations/create/',DesignationCreateView.as_view(), name='designation-create'),
+    path('api/designations/<str:designation_code>/',DesignationDetailView.as_view(), name='designation-detail'),
+    path('api/designations/update/<str:designation_code>/',DesignationUpdateView.as_view(), name='designation-update'),
+    path('api/designations/delete/<str:designation_code>/',DesignationDeleteView.as_view(), name='designation-delete'),
     
-    path('api/division/',DivisionListView.as_view(), name='division-list'),
-    path('api/division/create/',DivisionCreateView.as_view(), name='division-create'),
-    path('api/division/<str:division_code>/',DivisionDetailView.as_view(), name='division-detail'),
-    path('api/division/update/<str:division_code>/',DivisionUpdateView.as_view(), name='division-update'),
-    path('api/division/delete/<str:division_code>/',DivisionDeleteView.as_view(), name='division-delete'),
+    path('api/divisions/',DivisionListView.as_view(), name='division-list'),
+    path('api/divisions/create/',DivisionCreateView.as_view(), name='division-create'),
+    path('api/divisions/<str:division_code>/',DivisionDetailView.as_view(), name='division-detail'),
+    path('api/divisions/update/<str:division_code>/',DivisionUpdateView.as_view(), name='division-update'),
+    path('api/divisions/delete/<str:division_code>/',DivisionDeleteView.as_view(), name='division-delete'),
     
     path('api/branches/', BranchListView.as_view(), name='branch-list'),
     path('api/branches/create/', BranchCreateView.as_view(), name='branch-create'),
@@ -391,6 +391,18 @@ urlpatterns = [
     path('api/opd-billing/<str:opd_billing_code>/', OpdBillingDetailView.as_view(), name='opd-billing-detail'),
     path('api/opd-billing/update/<str:opd_billing_code>/', OpdBillingUpdateView.as_view(), name='opd-billing-update'),
     path('api/opd-billing/delete/<str:opd_billing_code>/', OpdBillingDeleteView.as_view(), name='opd-billing-delete'),
+    
+    path('api/currencies/', CurrencyListView.as_view(), name='currency-list'),
+    path('api/currencies/create/', CurrencyCreateView.as_view(), name='currency-create'),
+    path('api/currencies/detail/<str:currency_code>/', CurrencyDetailView.as_view(), name='currency-detail'),
+    path('api/currencies/update/<str:currency_code>/', CurrencyUpdateView.as_view(), name='currency-update'),
+    path('api/currencies/delete/<str:currency_code>/', CurrencyDeleteView.as_view(), name='currency-delete'),
+    
+    path('api/timezones/', TimezonesListView.as_view(), name='timezone-list'),
+    path('api/timezones/create/', TimezonesCreateView.as_view(), name='timezone-create'),
+    path('api/timezones/detail/<str:timezone_code>/', TimezonesDetailView.as_view(), name='timezone-detail'),
+    path('api/timezones/update/<str:timezone_code>/', TimezonesUpdateView.as_view(), name='timezone-update'),
+    path('api/timezones/delete/<str:timezone_code>/', TimezonesDeleteView.as_view(), name='timezone-delete'),
     
     
 ]

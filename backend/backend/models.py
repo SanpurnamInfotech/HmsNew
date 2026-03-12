@@ -175,6 +175,33 @@ class CompanyMaster(models.Model):
         managed = False
         db_table = 'company_master'
         
+class Currency(models.Model):
+    currency_code = models.CharField(unique=True, max_length=30)
+    currency_name = models.CharField(max_length=50)
+    symbol = models.CharField(max_length=10)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'currency'
+        
+class Timezones(models.Model):
+    timezone_code = models.CharField(unique=True, max_length=45)
+    timezone_name = models.CharField(max_length=100)
+    offset = models.CharField(max_length=10)
+    region = models.CharField(max_length=50)
+    createdon = models.DateTimeField(blank=True, null=True)
+    createdby = models.IntegerField(blank=True, null=True)
+    updatedon = models.DateTimeField(blank=True, null=True)
+    updatedby = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'timezones'
+        
 class EmployeeMaster(models.Model):
     employee_code = models.CharField(unique=True, max_length=45)
     company_code = models.ForeignKey('CompanyMaster', models.DO_NOTHING, db_column='company_code', to_field='company_code')

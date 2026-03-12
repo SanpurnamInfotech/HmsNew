@@ -47,13 +47,13 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from django.contrib.auth.hashers import make_password
 from django.db.models import Max
-from django.utils import timezone # Use Django's timezone utility
+from django.utils import timezone 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 import re
-
+import requests
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -607,7 +607,6 @@ class CountriesDeleteView(APIView):
 # advice master
 class AdvicemasterListView(APIView):
 
-
     def get(self, request):
         try:
             data = Advicemaster.objects.all().order_by('advice_name')
@@ -621,7 +620,6 @@ class AdvicemasterListView(APIView):
 
 class AdvicemasterDetailView(APIView):
 
-
     def get(self, request, advice_code):
         try:
             # Fetches a single record or returns 404
@@ -634,7 +632,6 @@ class AdvicemasterDetailView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             ) 
 class AdvicemasterCreateView(APIView):
-
 
     def post(self, request):
         try:
@@ -653,7 +650,6 @@ class AdvicemasterCreateView(APIView):
             )
 
 class AdvicemasterUpdateView(APIView):
-
 
     def put(self, request, advice_code):
         try:
@@ -675,7 +671,6 @@ class AdvicemasterUpdateView(APIView):
 
 class AdvicemasterDeleteView(APIView):
 
-
     def delete(self, request, advice_code):
         try:
             obj = get_object_or_404(Advicemaster, advice_code=advice_code)
@@ -690,8 +685,8 @@ class AdvicemasterDeleteView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-# Adhar OTP
-import requests
+# Aadhar OTP
+
 
 class AadhaarOTPRequestView(APIView):
     # authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
@@ -754,16 +749,6 @@ class AadhaarVerifyView(APIView):
         return Response(res_json)
         
 # company_master
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-
-from .models import CompanyMaster
-from .serializers import CompanyMasterSerializer
-
 
 class CompanyMasterListView(APIView):
 
@@ -1323,19 +1308,13 @@ class BedAllotmentDeleteView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-# patientfrom rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from .models import Patient
-from .serializers import PatientSerializer
+# patient 
 
 # ---------------- LIST ----------------
 class PatientListView(APIView):
     def get(self, request):
         try:
-            # Ordering by sort_order or patient_first_name for consistent UI presentation
+           
             data = Patient.objects.all().order_by('sort_order', 'patient_first_name')
             serializer = PatientSerializer(data, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -1526,15 +1505,6 @@ class MoodHistoryDeleteView(APIView):
         except Exception as e:
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
-    from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
-from .models import States
-from .serializers import StatesSerializer
-import traceback
 
 class StatesListView(APIView):
 
@@ -1719,16 +1689,6 @@ class DistrictsDeleteView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
-from django.utils import timezone
-from .models import Cities
-from .serializers import CitiesSerializer
-import traceback
 
 class CitiesListView(APIView):
 
@@ -2863,27 +2823,7 @@ class PossessionMasterDeleteView(APIView):
         
 
 # doctor
-import traceback
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 
-
-from rest_framework.views import APIView
-
-from rest_framework.response import Response
-
-from rest_framework import status
-
-from django.shortcuts import get_object_or_404
- 
-from .models import Doctor
-
-from .serializers import DoctorSerializer
- 
- 
 class DoctorListView(APIView):
  
     def get(self, request):
@@ -2999,19 +2939,6 @@ class PossessionMasterUpdateView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
  
  
-
-
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-
-from .models import FinancialyearMaster
-from .serializers import FinancialyearMasterSerializer
-
-
 # financial year
 
 # ---------------- LIST ----------------
@@ -4451,15 +4378,7 @@ class TransactionsDeleteView(APIView):
 #                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
 #             )            
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
-from .models import Account
-from .serializers import AccountSerializer
-import traceback
+
 
 # --- List View ---
 class AccountListView(APIView):
@@ -4536,9 +4455,7 @@ class AccountDeleteView(APIView):
             )
 
 
-from .models import Doctor
-from .serializers import DoctorSerializer
-import traceback
+
 
 # --- List View ---
 class DoctorListView(APIView):
@@ -4801,20 +4718,7 @@ class AppointmentDeleteView(APIView):
             return Response({"error": str(e)},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)   
 
-
-
-
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status, permissions
-from django.shortcuts import get_object_or_404
-from backend.authentication import CustomJWTAuthentication
-from rest_framework.authentication import SessionAuthentication
-from .models import HospitalDetails  # Updated name
-from .serializers import HospitalDetailsSerializer # Ensure your serializer matches this name
-import traceback
-
+# Hospital details
 # --- List View ---
 class HospitalListView(APIView):
     authentication_classes = [CustomJWTAuthentication, SessionAuthentication]
@@ -5535,9 +5439,7 @@ class MseMasterDeleteView(APIView):
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-from .models import ThoughtContentMaster
-from .serializers import ThoughtContentMasterSerializer
-import traceback
+
 
 class ThoughtContentListView(APIView):
     
@@ -5641,9 +5543,7 @@ class TransactionModeDeleteView(APIView):
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-from .models import OpdCasesheet
-from .serializers import OpdCasesheetSerializer
-import traceback
+# opd casesheet
 
 # --- List View ---
 class OpdCasesheetListView(APIView):
@@ -5719,7 +5619,7 @@ class DischargeSummaryListView(APIView):
     
     def get(self, request):
         try:
-            # discharge_summary_code ke hisaab se order kiya hai
+           
             objs = DischargeSummary.objects.all().order_by("-createdon")
             serializer = DischargeSummarySerializer(objs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -5742,7 +5642,7 @@ class DischargeSummaryUpdateView(APIView):
   
     def put(self, request, discharge_summary_code):
         try:
-            # discharge_summary_code ko lookup field banaya hai
+            
             obj = get_object_or_404(DischargeSummary, discharge_summary_code=discharge_summary_code)
             serializer = DischargeSummarySerializer(obj, data=request.data, partial=True, context={"request": request})
             if serializer.is_valid():
@@ -5761,9 +5661,6 @@ class DischargeSummaryDeleteView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
 
 # branch
 class BranchListView(APIView):
@@ -5996,3 +5893,142 @@ class OpdBillingDeleteView(APIView):
             return Response({"message": "Bill and items deleted successfully"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Currency
+
+class CurrencyListView(APIView):
+    def get(self, request):
+        try:
+            data = Currency.objects.all().order_by('currency_name')
+            serializer = CurrencySerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class CurrencyDetailView(APIView):
+    def get(self, request, currency_code):
+        try:
+            obj = get_object_or_404(Currency, currency_code=currency_code)
+            serializer = CurrencySerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class CurrencyCreateView(APIView):
+    def post(self, request):
+        try:
+            serializer = CurrencySerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id if request.user.is_authenticated else None,
+                    createdon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class CurrencyUpdateView(APIView):
+    def put(self, request, currency_code):
+        try:
+            obj = get_object_or_404(Currency, currency_code=currency_code)
+            serializer = CurrencySerializer(obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id if request.user.is_authenticated else None,
+                    updatedon=timezone.now()
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+class CurrencyDeleteView(APIView):
+    def delete(self, request, currency_code):
+        try:
+            obj = get_object_or_404(Currency, currency_code=currency_code)
+            obj.delete()
+            return Response(
+                {"message": "Currency deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+# timezones
+
+class TimezonesListView(APIView):
+    def get(self, request):
+        try:
+            # Ordering by timezone_name for a better dropdown experience in React
+            data = Timezones.objects.all().order_by('timezone_name')
+            serializer = TimezonesSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TimezonesDetailView(APIView):
+    def get(self, request, timezone_code):
+        try:
+            obj = get_object_or_404(Timezones, timezone_code=timezone_code)
+            serializer = TimezonesSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TimezonesCreateView(APIView):
+    def post(self, request):
+        try:
+            serializer = TimezonesSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id if request.user.is_authenticated else None,
+                    createdon=timezone.now(),
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TimezonesUpdateView(APIView):
+    def put(self, request, timezone_code):
+        try:
+            obj = get_object_or_404(Timezones, timezone_code=timezone_code)
+            serializer = TimezonesSerializer(obj, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save(
+                    updatedby=request.user.id if request.user.is_authenticated else None,
+                    updatedon=timezone.now()
+                )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TimezonesDeleteView(APIView):
+    def delete(self, request, timezone_code):
+        try:
+            obj = get_object_or_404(Timezones, timezone_code=timezone_code)
+            obj.delete()
+            return Response(
+                {"message": "Timezone deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
