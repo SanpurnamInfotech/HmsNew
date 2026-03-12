@@ -1165,6 +1165,7 @@ class OpdCasesheetSerializer(serializers.ModelSerializer):
             return super().update(instance, validated_data)
 
 
+
 class DischargeSummarySerializer(serializers.ModelSerializer):
     class Meta:
         model = DischargeSummary
@@ -1215,6 +1216,95 @@ class DischargeSummarySerializer(serializers.ModelSerializer):
                 pass
         return super().update(instance, validated_data)
 
+from rest_framework import serializers
+from .models import UsertypeMaster
+from django.utils import timezone
+
+
+class UsertypeMasterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UsertypeMaster
+        fields = "__all__"
+
+        read_only_fields = [
+            "createdon",
+            "createdby",
+            "updatedon",
+            "updatedby",
+        ]
+
+    # def validate_usertype_code(self, value):
+    #     if not value:
+    #         raise serializers.ValidationError("Usertype code is required.")
+    #     return value.strip()
+
+    # def validate_usertype_name(self, value):
+    #     if not value:
+    #         raise serializers.ValidationError("Usertype name is required.")
+    #     return value.strip()
+
+    # def create(self, validated_data):
+    #     request = self.context.get('request')
+
+    #     # timestamps
+    #     validated_data['createdon'] = timezone.now()
+    #     validated_data['updatedon'] = timezone.now()
+
+    #     # user tracking
+    #     if request and hasattr(request, 'user'):
+    #         try:
+    #             validated_data['createdby'] = request.user.id
+    #             validated_data['updatedby'] = request.user.id
+    #         except Exception:
+    #             pass
+
+    #     return super().create(validated_data)
+
+    # def update(self, instance, validated_data):
+    #     request = self.context.get('request')
+
+    #     validated_data['updatedon'] = timezone.now()
+
+    #     if request and hasattr(request, 'user'):
+    #         try:
+    #             validated_data['updatedby'] = request.user.id
+    #         except Exception:
+    #             pass
+
+    #     return super().update(instance, validated_data)
+
+
+
+
+class FinancialyearMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FinancialyearMaster
+        fields = '__all__'
+        read_only_fields = [
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby'
+        ]
+
+
+from rest_framework import serializers
+from .models import CompanyMaster
+
+
+class CompanyMasterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CompanyMaster
+        fields = '__all__'
+        read_only_fields = [
+            'createdon',
+            'createdby',
+            'updatedon',
+            'updatedby'
+        ]
+    
 
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:

@@ -755,60 +755,171 @@ class AadhaarVerifyView(APIView):
         
 # company_master
 
-class CompanyMasterListView(APIView):
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
+from .models import CompanyMaster
+from .serializers import CompanyMasterSerializer
+
+
+class CompanyMasterListView(APIView):
 
     def get(self, request):
         try:
             data = CompanyMaster.objects.all().order_by('company_name')
             serializer = CompanyMasterSerializer(data, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-class CompanyMasterDetailView(APIView):
 
+class CompanyMasterDetailView(APIView):
 
     def get(self, request, company_code):
         try:
             obj = get_object_or_404(CompanyMaster, company_code=company_code)
             serializer = CompanyMasterSerializer(obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
+
         except Exception as e:
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-class CompanyMasterCreateView(APIView):
 
+class CompanyMasterCreateView(APIView):
 
     def post(self, request):
         try:
             serializer = CompanyMasterSerializer(data=request.data)
+
             if serializer.is_valid():
+
+                user_id = request.user.id if request.user.is_authenticated else None
+
                 serializer.save(
-                    createdby=request.user.id,
-                    createdon=timezone.now(),
+                    createdby=user_id,
+                    createdon=timezone.now()
                 )
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
         except Exception as e:
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-class CompanyMasterUpdateView(APIView):
 
+class CompanyMasterUpdateView(APIView):
 
     def put(self, request, company_code):
         try:
             obj = get_object_or_404(CompanyMaster, company_code=company_code)
-            serializer = CompanyMasterSerializer(obj, data=request.data, partial=True)
+
+            serializer = CompanyMasterSerializer(
+                obj,
+                data=request.data,
+                partial=True
+            )
+
+            if serializer.is_valid():
+
+                user_id = request.user.id if request.user.is_authenticated else None
+
+                serializer.save(
+                    updatedby=user_id,
+                    updatedon=timezone.now()
+                )
+
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class CompanyMasterDeleteView(APIView):
+
+    def delete(self, request, company_code):
+        try:
+            obj = get_object_or_404(CompanyMaster, company_code=company_code)
+            obj.delete()
+
+            return Response(
+                {"message": "Company deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+# employee_master
+
+class EmployeeMasterListView(APIView):
+
+
+    def get(self, request):
+        try:
+            data = EmployeeMaster.objects.all().order_by('employee_firstname')
+            serializer = EmployeeMasterSerializer(data, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class EmployeeMasterDetailView(APIView):
+
+
+    def get(self, request, employee_code):
+        try:
+            obj = get_object_or_404(EmployeeMaster, employee_code=employee_code)
+            serializer = EmployeeMasterSerializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class EmployeeMasterCreateView(APIView):
+
+
+    def post(self, request):
+        try:
+            serializer = EmployeeMasterSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(
+                    createdby=request.user.id,
+                    createdon=timezone.now()
+                )
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class EmployeeMasterUpdateView(APIView):
+
+
+    def put(self, request, employee_code):
+        try:
+            obj = get_object_or_404(EmployeeMaster, employee_code=employee_code)
+            serializer = EmployeeMasterSerializer(obj, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save(
                     updatedby=request.user.id,
@@ -817,27 +928,19 @@ class CompanyMasterUpdateView(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-
-class CompanyMasterDeleteView(APIView):
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-    def delete(self, request, company_code):
+class EmployeeMasterDeleteView(APIView):
+
+
+    def delete(self, request, employee_code):
         try:
-            obj = get_object_or_404(CompanyMaster, company_code=company_code)
+            obj = get_object_or_404(EmployeeMaster, employee_code=employee_code)
             obj.delete()
-            return Response(
-                {"message": "Company deleted successfully"},
-                status=status.HTTP_204_NO_CONTENT
-            )
+            return Response({"message": "Employee deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         
 # marital_status_master
@@ -2899,6 +3002,15 @@ class PossessionMasterUpdateView(APIView):
 
 
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+
+from .models import FinancialyearMaster
+from .serializers import FinancialyearMasterSerializer
+
 
 # financial year
 
@@ -2906,44 +3018,131 @@ class PossessionMasterUpdateView(APIView):
 class FinancialyearMasterListView(APIView):
     def get(self, request):
         try:
-            # Changed 'financialyear_name' to 'financialyear_code' to match your model
             data = FinancialyearMaster.objects.all().order_by('financialyear_code')
             serializer = FinancialyearMasterSerializer(data, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
+
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 # ---------------- DETAIL ----------------
 class FinancialyearMasterDetailView(APIView):
     def get(self, request, financialyear_code):
         try:
-            obj = get_object_or_404(FinancialyearMaster, financialyear_code=financialyear_code)
+            obj = get_object_or_404(
+                FinancialyearMaster,
+                financialyear_code=financialyear_code
+            )
+
             serializer = FinancialyearMasterSerializer(obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
+
         except Exception as e:
-            # Note: get_object_or_404 will raise a 404, not a 500. 
-            # This catch-all is fine for other unexpected errors.
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 # ---------------- CREATE ----------------
 class FinancialyearMasterCreateView(APIView):
     def post(self, request):
         try:
             serializer = FinancialyearMasterSerializer(data=request.data)
+
             if serializer.is_valid():
-                # Handling user ID safely (check if user is authenticated)
+
                 user_id = request.user.id if request.user.is_authenticated else None
-                
+
                 serializer.save(
                     createdby=user_id,
                     createdon=timezone.now()
                 )
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
+
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# ---------------- UPDATE ----------------
+class FinancialyearMasterUpdateView(APIView):
+    def put(self, request, financialyear_code):
+        try:
+            obj = get_object_or_404(
+                FinancialyearMaster,
+                financialyear_code=financialyear_code
+            )
+
+            serializer = FinancialyearMasterSerializer(
+                obj,
+                data=request.data,
+                partial=True
+            )
+
+            if serializer.is_valid():
+
+                user_id = request.user.id if request.user.is_authenticated else None
+
+                serializer.save(
+                    updatedby=user_id,
+                    updatedon=timezone.now()
+                )
+
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_200_OK
+                )
+
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# ---------------- DELETE ----------------
+class FinancialyearMasterDeleteView(APIView):
+    def delete(self, request, financialyear_code):
+        try:
+            obj = get_object_or_404(
+                FinancialyearMaster,
+                financialyear_code=financialyear_code
+            )
+
+            obj.delete()
+
+            return Response(
+                {"message": "Financial Year deleted successfully"},
+                status=status.HTTP_204_NO_CONTENT
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
 # ---------------- UPDATE ----------------
 class MedicineUpdateView(APIView):
 
@@ -5514,8 +5713,7 @@ class OpdCasesheetDeleteView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-from .models import DischargeSummary
-from .serializers import DischargeSummarySerializer
+
 
 class DischargeSummaryListView(APIView):
     
@@ -5563,6 +5761,16 @@ class DischargeSummaryDeleteView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+class UsertypeMasterListView(APIView):
+
+    def get(self, request):
+        try:
+            objs = UsertypeMaster.objects.all().order_by("usertype_code")
+            serializer = UsertypeMasterSerializer(objs, many=True)
         
 # branch
 class BranchListView(APIView):
@@ -5574,6 +5782,59 @@ class BranchListView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class UsertypeMasterCreateView(APIView):
+
+    def post(self, request):
+        try:
+            serializer = UsertypeMasterSerializer(data=request.data, context={"request": request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UsertypeMasterUpdateView(APIView):
+
+    def put(self, request, usertype_code):
+        try:
+            obj = get_object_or_404(UsertypeMaster, usertype_code=usertype_code)
+
+            serializer = UsertypeMasterSerializer(
+                obj,
+                data=request.data,
+                partial=True,
+                context={"request": request}
+            )
+
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class UsertypeMasterDeleteView(APIView):
+
+    def delete(self, request, usertype_code):
+        try:
+            obj = get_object_or_404(UsertypeMaster, usertype_code=usertype_code)
+            obj.delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e), "trace": traceback.format_exc()},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 class BranchDetailView(APIView):
     def get(self, request, branch_code):
         try:

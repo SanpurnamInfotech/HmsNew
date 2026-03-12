@@ -211,7 +211,7 @@ const AccountMst = () => {
               <label className="form-label">Account Code</label>
               <input
                 className="form-input w-full"
-                value={formData.account_code}
+                value={formData.account_code || ""}
                 disabled={isEdit}
                 required
                 onChange={(e) =>
@@ -235,6 +235,20 @@ const AccountMst = () => {
               />
             </div>
 
+                <div className="space-y-1.5">
+              <label className="form-label">Account Number</label>
+              <input
+                className="form-input w-full"
+                value={formData.account_number}
+                required
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    account_number: e.target.value,
+                  })
+                }
+              />
+            </div>
             {/* BANK CODE DROPDOWN */}
             <div className="space-y-1.5 relative">
               <label className="form-label">Bank Code</label>
@@ -296,20 +310,7 @@ const AccountMst = () => {
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="form-label">Account Number</label>
-              <input
-                className="form-input w-full"
-                value={formData.account_number}
-                required
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    account_number: e.target.value,
-                  })
-                }
-              />
-            </div>
+            
 
             <div className="space-y-1.5">
               <label className="form-label">Status</label>
