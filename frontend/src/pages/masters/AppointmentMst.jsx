@@ -50,6 +50,8 @@ const AppointmentMst = () => {
   const [patients, setPatients] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [appointmentTypes, setAppointmentTypes] = useState([]);
+  const [hospitals, setHospitals] = useState([]); 
+  const [hospitalSearch, setHospitalSearch] = useState("");
 
   /* ---------- search dropdown states ---------- */
   const [openDropdown, setOpenDropdown] = useState(null);
@@ -71,6 +73,7 @@ const AppointmentMst = () => {
     api.get("patient/").then(r => setPatients(r.data || []));
     api.get("doctor/").then(r => setDoctors(r.data || []));
     api.get("appointment-type-master/").then(r => setAppointmentTypes(r.data || []));
+    api.get("hospital/").then(r => setHospitals(r.data || []));
   }, []);
 
   /* ---------- filtered lists ---------- */
@@ -97,6 +100,14 @@ const AppointmentMst = () => {
         .includes(apptTypeSearch.toLowerCase())
     );
   }, [appointmentTypes, apptTypeSearch]);
+
+  const filteredHospitals = useMemo(() => {
+  return hospitals.filter(h =>
+    h.hospital_code
+      ?.toLowerCase()
+      .includes(hospitalSearch.toLowerCase())
+  );
+}, [hospitals, hospitalSearch]);
 
   const resetForm = () => {
     setShowForm(false);
@@ -281,17 +292,64 @@ const AppointmentMst = () => {
 />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="form-label">Hospital Code</label>
-              <input
-                className="form-input w-full"
-                value={formData.hospital_code}
-                onChange={e =>
-                  setFormData({ ...formData, hospital_code: e.target.value })
-                }
-              />
-            </div>
+            <div className="space-y-1.5 relative">
+  <label className="form-label">Hospital Code</label>
 
+  <div
+    className="form-input w-full flex justify-between items-center cursor-pointer"
+    onClick={() =>
+      setOpenDropdown(openDropdown === "hospital" ? null : "hospital")
+    }
+  >
+    <span className={formData.hospital_code ? "" : "opacity-50"}>
+      {formData.hospital_code || "Select Hospital"}
+    </span>
+    <FaChevronDown size={12} className="opacity-50" />
+  </div>
+
+  {openDropdown === "hospital" && (
+    <div
+      className="absolute z-[60] w-full mt-2 rounded-xl shadow-2xl border overflow-hidden"
+      style={{
+        backgroundColor: "var(--input-bg)",
+        borderColor: "var(--border-color)",
+      }}
+    >
+      <div
+        className="p-3 border-b flex items-center gap-2"
+        style={{ borderColor: "var(--border-color)" }}
+      >
+        <FaSearch size={14} className="opacity-40" />
+        <input
+          autoFocus
+          className="bg-transparent outline-none text-sm w-full"
+          placeholder="Search hospital..."
+          value={hospitalSearch}
+          onChange={e => setHospitalSearch(e.target.value)}
+        />
+      </div>
+
+      <div className="max-h-48 overflow-y-auto custom-scrollbar">
+        {filteredHospitals.map(h => (
+          <div
+            key={h.hospital_code}
+            className="px-4 py-3 hover:bg-emerald-500/10 cursor-pointer text-sm"
+            onClick={() => {
+              setFormData({
+                ...formData,
+                hospital_code: h.hospital_code
+              });
+              setOpenDropdown(null);
+              setHospitalSearch("");
+            }}
+          >
+            {h.hospital_code}
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
             {/* ---------------- Patient dropdown ---------------- */}
             <div className="space-y-1.5 relative">
               <label className="form-label">Patient Code</label>

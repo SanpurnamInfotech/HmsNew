@@ -150,39 +150,62 @@ class PrescriptionItemsSerializer(serializers.ModelSerializer):
         fields = ['medicine_code', 'medicine_name', 'dosage', 'duration', 'instructions', 'status']
 
 class PrescriptionReportSerializer(serializers.ModelSerializer):
-    # source='prescriptionitems_set' works because of the ForeignKey in PrescriptionItems
+
     items = PrescriptionItemsSerializer(many=True, read_only=True, source='prescriptionitems_set')
     doctor_details = serializers.SerializerMethodField()
     patient_details = serializers.SerializerMethodField()
+    chief_complaints = serializers.SerializerMethodField()
+    clinical_findings = serializers.SerializerMethodField()
 
     class Meta:
         model = PrescriptionHeader
-        fields = '__all__'
+        fields = [
+            'prescription_code', 'appointment_code', 'patient_code', 'doctor_code', 'prescription_date',
+            'diagnosis', 'symptoms', 'case_history', 'next_visit_date', 'pdf_file_path', 'status', 'sort_order',
+            'createdon', 'createdby', 'updatedon', 'updatedby',
+            'items', 'doctor_details', 'patient_details', 'chief_complaints', 'clinical_findings'
+        ]
 
     def get_doctor_details(self, obj):
-        # Dynamically fetch doctor from the Doctor model using the code from header
         doc = Doctor.objects.filter(doctor_code=obj.doctor_code).first()
         if doc:
             return {
                 "name": doc.doctor_name,
                 "degree": doc.qualification,
+                "reg_no": getattr(doc, 'registration_no', ''),
                 "mobile": doc.mobile
             }
         return None
 
     def get_patient_details(self, obj):
-        # Dynamically fetch patient using patient_code
         patient = Patient.objects.filter(patient_code=obj.patient_code).first()
         if patient:
-            # Map gender integer to text
             gender_map = {1: "Male", 2: "Female", 3: "Other"}
+            address = f"{patient.address1 or ''} {patient.address2 or ''} {patient.city_code or ''} {patient.district_code or ''} {patient.state_code or ''} {patient.country_code or ''} {patient.pincode or ''}"
             return {
                 "full_name": f"{patient.patient_first_name} {patient.patient_last_name}",
                 "age": patient.age,
                 "sex": gender_map.get(patient.gender, "Unknown"),
-                "mobile": patient.mobile
+                "mobile": patient.mobile,
+                "id": patient.patient_code,
+                "address": address.strip(),
+                "weight": float(patient.weight_kg) if patient.weight_kg else None,
+                "height": None,  # Add if you have height field
+                "bp": None,      # Add if you have BP field
             }
         return None
+
+    def get_chief_complaints(self, obj):
+        # Assume symptoms is a text field with complaints separated by newlines or commas
+        if obj.symptoms:
+            return [s.strip() for s in obj.symptoms.replace('\r', '').split('\n') if s.strip()] or [obj.symptoms]
+        return []
+
+    def get_clinical_findings(self, obj):
+        # Assume case_history is a text field with findings separated by newlines or commas
+        if obj.case_history:
+            return [s.strip() for s in obj.case_history.replace('\r', '').split('\n') if s.strip()] or [obj.case_history]
+        return []
         
 class AdvicemasterSerializer(serializers.ModelSerializer):  
     class Meta:
