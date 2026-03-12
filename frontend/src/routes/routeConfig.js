@@ -5,7 +5,7 @@ import SubmoduleMst from "../pages/masters/SubmoduleMst";
 import Activities from "../pages/masters/Activities";
 import AdviceMaster from "../pages/masters/AdviceMaster";
 import Ipdregister from "../pages/IPD/Ipdregister";
-
+import PrescriptionReportViewPage from "../pages/PrescriptionReportViewPage.jsx";
 
 import MoodHistoryMst from '../pages/masters/MoodHistoryMst.jsx';
 import StatesMst from '../pages/masters/StatesMst.jsx';
@@ -57,10 +57,6 @@ import OpdBilling from "../pages/masters/OpdBilling.jsx";
 import OpdBillingDetails from "../pages/masters/OpdBillingDetails.jsx";
 
 
-
-
-
-
 export const adminRoutes = [
   { path: "dashboard", label: "Dashboard", component: Dashboard },
   { path: "countries", label: "Countries", component: Countries },
@@ -88,6 +84,7 @@ export const adminRoutes = [
   { path: "cities", label: "Cities Master", component: CitiesMst },
   { path: "mood_history", label: "Mood History Master", component: MoodHistoryMst },
   { path: "prescription_report", label: "Prescription Report", component: PrescriptionReport},
+  { path: "prescription_report_view", label: "Prescription Report View", component: PrescriptionReportViewPage, hideFromMenu: true },
   { path: "icd-master", label:"ICD Master", component:IcdMasterMst},
   { path: "dsm_master", label:"DSM Master", component:DsmMaster},
   { path: "room_type", label: "Room Type Master", component:RoomTypeMasterMst},
