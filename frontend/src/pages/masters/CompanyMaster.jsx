@@ -7,7 +7,7 @@ import {
 
 
 const CompanyMaster = () => {
-  const PATH = "company_master";
+  const PATH = "companies";
   const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${PATH}/`);
 
   // Master Data for Dropdowns
@@ -15,6 +15,8 @@ const CompanyMaster = () => {
   const { data: states } = useCrud("states/");
   const { data: districts } = useCrud("districts/");
   const { data: cities } = useCrud("cities/");
+  const { data: currencies } = useCrud("currencies/");
+  const { data: timezones } = useCrud("timezones/");
 
   /* ================= UI STATE ================= */
   const [showForm, setShowForm] = useState(false);
@@ -23,7 +25,7 @@ const CompanyMaster = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [modal, setModal] = useState({ visible: false, message: "", type: "success" });
 
-  const [dSearch, setDSearch] = useState({ cn: "", st: "", dt: "", ct: "" });
+  const [dSearch, setDSearch] = useState({ cn: "", st: "", dt: "", ct: "", cr: "", tz: "" });
   const [otherValues, setOtherValues] = useState({ district: "", city: "" });
 
   const initialForm = {
@@ -86,7 +88,7 @@ const CompanyMaster = () => {
     setOpenDropdown(null);
     setFormData(initialForm);
     setOtherValues({ district: "", city: "" });
-    setDSearch({ cn: "", st: "", dt: "", ct: "" });
+    setDSearch({ cn: "", st: "", dt: "", ct: "",cr: "", tz: "" });
   };
 
   const showModal = (message, type = "success") => setModal({ visible: true, message, type });
@@ -143,29 +145,30 @@ const CompanyMaster = () => {
 
   /* ================= SUBMIT & DELETE ================= */
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    // Prepare payload
-    const payload = { 
-        ...formData,
-        // If "OTHER" is selected, store the manual name in the code field
-        district_code: formData.district_code === "OTHER" ? otherValues.district : formData.district_code,
-        city_code: formData.city_code === "OTHER" ? otherValues.city : formData.city_code,
-        sort_order: formData.sort_order === "" ? null : Number(formData.sort_order),
-        status: Number(formData.status)
-    };
+      e.preventDefault();
+      
+      const payload = { 
+          ...formData,
+          district_code: formData.district_code === "OTHER" ? otherValues.district : formData.district_code,
+          city_code: formData.city_code === "OTHER" ? otherValues.city : formData.city_code,
+          sort_order: (formData.sort_order === "" || formData.sort_order === null) ? 0 : Number(formData.sort_order),
+          status: Number(formData.status),
+          // Send logo only if it is a new Base64 upload
+          company_logo: formData.company_logo?.startsWith('data:') ? formData.company_logo : null 
+      };
 
-    const actionPath = isEdit ? `${PATH}/update/${formData.company_code}/` : `${PATH}/create/`;
-    const result = isEdit ? await updateItem(actionPath, payload) : await createItem(actionPath, payload);
-    
-    if (result.success) {
-      showModal(`Company ${isEdit ? "updated" : "created"} successfully!`);
-      resetForm();
-      refresh();
-    } else {
-      showModal(result.error || "Failed to save", "error");
-    }
-  };
+      const actionPath = isEdit ? `${PATH}/update/${formData.company_code}/` : `${PATH}/create/`;
+      const result = isEdit ? await updateItem(actionPath, payload) : await createItem(actionPath, payload);
+      
+      if (result.success) {
+        showModal(`Company ${isEdit ? "updated" : "created"} successfully!`);
+        resetForm();
+        refresh();
+      } else {
+        // result.error is now a string, so this won't crash React
+        showModal(result.error, "error");
+      }
+    };
 
   const handleDelete = async () => {
     if (!selectedRow) return;
@@ -263,9 +266,9 @@ const CompanyMaster = () => {
                     <input className="form-input w-full mt-2 animate-in slide-in-from-top-2" placeholder="Enter City Name" value={otherValues.city} onChange={e => setOtherValues({...otherValues, city: e.target.value})} />
                   )}
                 </div>
+                <SearchDropdown label="Currency" options={currencies} valKey="currency_code" dispKey="currency_name" stateKey="currency" dKey="cr" />
+                <SearchDropdown label="Timezone" options={timezones} valKey="timezone_code" dispKey="timezone_name" stateKey="timezone" dKey="tz" />
 
-                <div className="space-y-1.5"><label className="form-label">Currency</label><input className="form-input w-full" value={formData.currency || ""} onChange={e => setFormData({...formData, currency: e.target.value})} /></div>
-                <div className="space-y-1.5"><label className="form-label">Timezone</label><input className="form-input w-full" value={formData.timezone || ""} onChange={e => setFormData({...formData, timezone: e.target.value})} /></div>
                 <div className="space-y-1.5"><label className="form-label">Status</label>
                   <select className="form-input w-full" value={formData.status} onChange={e => setFormData({ ...formData, status: Number(e.target.value) })}>
                     <option value={1}>Active</option><option value={0}>Inactive</option>
