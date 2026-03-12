@@ -52,11 +52,16 @@ export const AuthProvider = ({ children }) => {
           setToken(newAccess);
           console.log("JWT Access Token rotated successfully");
         } catch (err) {
-          console.error("Session expired during auto-refresh");
-          if (err.response?.status === 401 || err.response?.status === 403) {
-            logout();
+            console.error("Session expired during auto-refresh");
+
+            if (
+              err.response?.status === 401 ||
+              err.response?.status === 403 ||
+              err.response?.status === 500
+            ) {
+              logout();
+            }
           }
-        }
       }
     }, 4 * 60 * 1000); 
 

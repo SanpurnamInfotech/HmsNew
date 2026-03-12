@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
 import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 import SearchableSelect from "../../components/common/SearchableSelect";
+
 const OpdCaseSheet = () => {
 
 const OPD_PATH = "opd-casesheet";
@@ -43,6 +44,32 @@ status:1
 };
 
 const [formData,setFormData] = useState(initialForm);
+
+/* -------- AUTO GENERATE CASE CODE -------- */
+
+useEffect(()=>{
+
+if(!isEdit && data){
+
+const list = data?.results || data || [];
+
+if(list.length>0){
+
+const last = list[list.length-1].opd_casesheet_code;
+const number = parseInt(last.replace("OPD",""))+1;
+const newCode = "OPD"+String(number).padStart(4,"0");
+
+setFormData(prev=>({...prev,opd_casesheet_code:newCode}));
+
+}else{
+
+setFormData(prev=>({...prev,opd_casesheet_code:"OPD0001"}));
+
+}
+
+}
+
+},[data,isEdit]);
 
 /* -------- TABLE -------- */
 
@@ -261,12 +288,13 @@ Back to List
 
 <div>
 <label className="text-[10px] font-bold text-gray-400 uppercase">Case Code *</label>
+
 <input
-className="w-full px-3 py-2 rounded border"
+className="w-full px-3 py-2 rounded border bg-gray-100"
 value={formData.opd_casesheet_code}
-onChange={e=>setFormData({...formData,opd_casesheet_code:e.target.value})}
-required
+readOnly
 />
+
 </div>
 
 <div>

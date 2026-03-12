@@ -94,6 +94,7 @@ const DischargeSummary = () => {
   /* -------- SUBMIT -------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("FORM SUBMIT TRIGGERED", formData); 
 
     const actionPath = isEdit
       ? `${PATH}/update/${formData.discharge_summary_code}/`
@@ -218,10 +219,9 @@ const DischargeSummary = () => {
                 value={formData.patient_code}
                 onChange={v => setFormData({ ...formData, patient_code: v })}
                 options={patientList.map(p => ({
-                  key: p.patient_code,
-                  value: p.patient_code,
-                  label: `${p.patient_first_name} ${p.patient_last_name} (${p.patient_code})`
-                }))}
+  value: p.patient_code,
+  label: `${p.patient_first_name} ${p.patient_last_name} (${p.patient_code})`
+}))}
               />
             </div>
 
@@ -302,7 +302,12 @@ const DischargeSummary = () => {
 
             {/* Buttons */}
             <div className="col-span-3 flex justify-end gap-3 pt-4 border-t">
-              <button type="submit" className="bg-emerald-600 text-white px-10 py-2.5 rounded-lg font-bold">Save Summary</button>
+              <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="bg-emerald-600 text-white px-10 py-2.5 rounded-lg font-bold">
+                  Save Summary
+                </button>
               <button type="button" className="text-gray-400 font-bold px-4" onClick={resetForm}>Cancel</button>
             </div>
 

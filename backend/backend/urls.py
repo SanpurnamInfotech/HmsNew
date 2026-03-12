@@ -60,11 +60,15 @@ urlpatterns = [
     path('api/advice_master/update/<str:advice_code>/', AdvicemasterUpdateView.as_view(), name='advice-update'),
     path('api/advice_master/delete/<str:advice_code>/', AdvicemasterDeleteView.as_view(), name='advice-delete'),
 
-    path('api/company_master/', CompanyMasterListView.as_view(), name='company-master-list'),
-    path('api/company_master/detail/<str:company_code>/', CompanyMasterDetailView.as_view(), name='company-master-detail'),
-    path('api/company_master/create/', CompanyMasterCreateView.as_view(), name='company-master-create'),
-    path('api/company_master/update/<str:company_code>/', CompanyMasterUpdateView.as_view(), name='company-master-update'),
-    path('api/company_master/delete/<str:company_code>/', CompanyMasterDeleteView.as_view(), name='company-master-delete'),
+    path('api/companies/', CompanyMasterListView.as_view(), name='company-list'),
+
+    path('api/companies/create/', CompanyMasterCreateView.as_view(), name='company-create'),
+
+    path('api/companies/update/<str:company_code>/', CompanyMasterUpdateView.as_view(), name='company-update'),
+
+    path('api/companies/delete/<str:company_code>/', CompanyMasterDeleteView.as_view(), name='company-delete'),
+
+    path('api/companies/<str:company_code>/', CompanyMasterDetailView.as_view(), name='company-detail'),
 
     path('api/employee_master/', EmployeeMasterListView.as_view(), name='employee-master-list'),
     path('api/employee_master/detail/<str:employee_code>/', EmployeeMasterDetailView.as_view(), name='employee-master-detail'),
@@ -226,12 +230,16 @@ path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name
     path('api/possession-master/delete/<str:possession_code>/', PossessionMasterDeleteView.as_view(), name='possession-master-delete'),
     path('api/possession-master/<str:possession_code>/', PossessionMasterDetailView.as_view(), name='possession-master-detail'),    
         
-    path('api/financialyear-master/',FinancialyearMasterListView.as_view(),name='financialyear-master-list'),
-    path('api/financialyear-master/create/',FinancialyearMasterCreateView.as_view(),name='financialyear-master-create'),
-    path('api/financialyear-master/update/<str:financialyear_code>/',FinancialyearMasterUpdateView.as_view(),name='financialyear-master-update'),
-    path('api/financialyear-master/delete/<str:financialyear_code>/',FinancialyearMasterDeleteView.as_view(),name='financialyear-master-delete'),
-    path('api/financialyear-master/<str:financialyear_code>/',FinancialyearMasterDetailView.as_view(),name='financialyear-master-detail'),
-    
+    path('api/financialyears/', FinancialyearMasterListView.as_view(), name='financialyear-list'),
+
+    path('api/financialyears/create/', FinancialyearMasterCreateView.as_view(), name='financialyear-create'),
+
+    path('api/financialyears/update/<str:financialyear_code>/', FinancialyearMasterUpdateView.as_view(), name='financialyear-update'),
+
+    path('api/financialyears/delete/<str:financialyear_code>/', FinancialyearMasterDeleteView.as_view(), name='financialyear-delete'),
+
+    path('api/financialyears/<str:financialyear_code>/', FinancialyearMasterDetailView.as_view(), name='financialyear-detail'),
+
     
     path('api/settings/', SettingsListView.as_view(), name='settings-list'),
     path('api/settings/create/', SettingsCreateView.as_view(), name='settings-create'),
@@ -351,6 +359,12 @@ path('api/patient/delete/<str:patient_code>/', PatientDeleteView.as_view(), name
     path('api/discharge-summary/create/', DischargeSummaryCreateView.as_view(), name='discharge-summary-create'),
     path('api/discharge-summary/update/<str:discharge_summary_code>/', DischargeSummaryUpdateView.as_view(), name='discharge-summary-update'),
     path('api/discharge-summary/delete/<str:discharge_summary_code>/', DischargeSummaryDeleteView.as_view(), name='discharge-summary-delete'),
+
+
+    path('api/usertype-master/', UsertypeMasterListView.as_view(), name='usertype-master-list'),
+    path('api/usertype-master/create/', UsertypeMasterCreateView.as_view(), name='usertype-master-create'),
+    path('api/usertype-master/update/<str:usertype_code>/', UsertypeMasterUpdateView.as_view(), name='usertype-master-update'),
+    path('api/usertype-master/delete/<str:usertype_code>/', UsertypeMasterDeleteView.as_view(), name='usertype-master-delete'),
 ]
 
 
