@@ -104,43 +104,40 @@ type
 });
 };
 
-/* -------- SUBMIT -------- */
+/* -------- SUBMIT (UPDATE THIS) -------- */
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-const handleSubmit = async(e)=>{
+  // FIX: NaN ko 0 mein convert karein taki backend crash na ho
+  const payload = {
+    ...formData,
+    weight_kg: parseFloat(formData.weight_kg) || 0,
+    height_cm: parseFloat(formData.height_cm) || 0,
+    bp_sys: parseInt(formData.bp_sys) || 0,
+    bp_dia: parseInt(formData.bp_dia) || 0,
+  };
 
-e.preventDefault();
+  try {
+    const actionPath = isEdit
+      ? `${OPD_PATH}/update/${formData.opd_casesheet_code}/`
+      : `${OPD_PATH}/create/`;
 
-const payload = {
+    const result = isEdit
+      ? await updateItem(actionPath, payload)
+      : await createItem(actionPath, payload);
 
-...formData,
-weight_kg:parseFloat(formData.weight_kg) || 0,
-height_cm:parseFloat(formData.height_cm) || 0,
-bp_sys:parseInt(formData.bp_sys) || 0,
-bp_dia:parseInt(formData.bp_dia) || 0
-
-};
-
-const actionPath = isEdit
-? `${OPD_PATH}/update/${formData.opd_casesheet_code}/`
-: `${OPD_PATH}/create/`;
-
-const result = isEdit
-? await updateItem(actionPath,payload)
-: await createItem(actionPath,payload);
-
-if(result.success){
-
-showModal(`OPD Case ${isEdit?"updated":"created"} successfully!`);
-
-resetForm();
-refresh();
-
-}else{
-
-showModal(result.error || "Failed to save","error");
-
-}
-
+    if (result && result.success) {
+      showModal(`OPD Case ${isEdit ? "updated" : "created"} successfully!`);
+      resetForm();
+      refresh();
+    } else {
+      // FIX: Agar error ho to modal dikhayein, page blank na hone dein
+      showModal(result?.error || "Failed to save data. Check fields.", "error");
+    }
+  } catch (err) {
+    console.error("Submission Error:", err);
+    showModal("An unexpected error occurred.", "error");
+  }
 };
 
 /* -------- DELETE -------- */

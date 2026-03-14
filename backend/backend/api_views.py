@@ -5641,9 +5641,6 @@ class TransactionModeDeleteView(APIView):
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-from .models import OpdCasesheet
-from .serializers import OpdCasesheetSerializer
-import traceback
 
 # --- List View ---
 class OpdCasesheetListView(APIView):
