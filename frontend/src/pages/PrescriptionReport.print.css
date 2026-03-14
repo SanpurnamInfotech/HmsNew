@@ -1,0 +1,23 @@
+@media print {
+  .admin-layout,
+  .main-wrapper,
+  .top-navbar,
+  .sidebar,
+  .section-header,
+  .form-container,
+  .btn-primary,
+  .btn-secondary,
+  .page-title,
+  .print-hidden {
+    display: none !important;
+  }
+  .print-report-only {
+    display: block !important;
+    position: absolute !important;
+    left: 0; top: 0; width: 100vw; min-height: 100vh;
+    background: white !important;
+    z-index: 9999;
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

@@ -10,8 +10,8 @@ const EmployeeMaster = () => {
   const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${EMP_PATH}/`);
   
   // Master Data for Dropdowns
-  const { data: companies } = useCrud("company_master/");
-  const { data: financialYears } = useCrud("financialyear-master/");
+  const { data: companies } = useCrud("companies/");
+  const { data: financialYears } = useCrud("financial_years/");
   const { data: departments } = useCrud("departments/");
   const { data: designations } = useCrud("designations/");
   const { data: divisions } = useCrud("divisions/");
@@ -317,7 +317,10 @@ const EmployeeMaster = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
                 <div className="space-y-1.5"><label className="form-label">Email</label><input type="email" className="form-input w-full" value={formData.email || ""} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
                 <div className="space-y-1.5"><label className="form-label">Mobile</label><input className="form-input w-full" value={formData.mobile || ""} onChange={e => setFormData({...formData, mobile: e.target.value})} /></div>
+                
+                <div className="space-y-1.5"><label className="form-label">Lanmark</label><input className="form-input w-full" value={formData.landmark || ""} onChange={e => setFormData({...formData, landmark: e.target.value})} /></div>
                 <div className="space-y-1.5"><label className="form-label">Address 1</label><input className="form-input w-full" value={formData.address1 || ""} onChange={e => setFormData({...formData, address1: e.target.value})} /></div>
+                <div className="space-y-1.5"><label className="form-label">Address 2</label><input className="form-input w-full" value={formData.address2 || ""} onChange={e => setFormData({...formData, address2: e.target.value})} /></div>
                 <SearchDropdown label="Country" options={countries} valKey="country_code" dispKey="country_name" stateKey="country_code" dKey="cn" />
                 <SearchDropdown label="State" options={states} valKey="state_code" dispKey="state_name" stateKey="state_code" dKey="st" />
                 

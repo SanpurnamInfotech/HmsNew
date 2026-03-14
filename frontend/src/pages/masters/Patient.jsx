@@ -242,7 +242,7 @@ const Patient = () => {
             <button className="btn-primary" onClick={() => {
                 setFormData({ ...initialForm, patient_code: nextPatientCode });
                 setShowForm(true);
-            }}><FaPlus size={14} /> Register New</button>
+            }}><FaPlus size={14} />Add New</button>
             {selectedRow && (
               <div className="flex items-center gap-2">
                 <button className="btn-warning" onClick={() => { setFormData({ ...selectedRow }); setIsEdit(true); setShowForm(true); }}><FaEdit size={14} /> Edit</button>
@@ -367,7 +367,7 @@ const Patient = () => {
                         {selectedRow?.patient_code === item.patient_code && <div className="selection-dot" />}
                       </div>
                     </td>
-                    <td className="text-admin-td font-bold text-emerald-600">{item.patient_code}</td>
+                    <td className="text-admin-td">{item.patient_code}</td>
                     <td className="text-admin-td">{item.uhid}</td>
                     <td className="text-admin-td uppercase font-medium">{`${item.patient_first_name} ${item.patient_last_name}`}</td>
                     <td className="text-admin-td">{item.mobile || "---"}</td>

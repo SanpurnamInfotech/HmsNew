@@ -82,6 +82,7 @@ DATABASES = {
         'NAME': 'hmis',
         'USER': 'root',
         'PASSWORD':'fatima1415',
+        'PASSWORD':'root',
         'HOST': 'localhost',
         'PORT': '3306',
     }

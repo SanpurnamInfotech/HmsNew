@@ -48,7 +48,7 @@ const ServiceSearchableDropdown = ({ services, value, onChange, placeholder }) =
       </div>
 
       {isOpen && (
-        <div className="absolute z-[100] w-full mt-1 bg-white dark:bg-slate-800 border rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute z-100 w-full mt-1 bg-white dark:bg-slate-800 border rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100">
           <div className="p-2 border-b bg-slate-50 dark:bg-slate-900 flex items-center gap-2">
             <FaSearch size={12} className="opacity-30" />
             <input 
