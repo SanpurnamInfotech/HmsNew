@@ -189,10 +189,7 @@ class AdvicemasterSerializer(serializers.ModelSerializer):
         model = Advicemaster
         fields = "__all__"
 
-class CompanyMasterSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CompanyMaster
-        fields = '__all__'
+
 
 class EmployeeMasterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -1289,22 +1286,7 @@ class FinancialyearMasterSerializer(serializers.ModelSerializer):
         ]
 
 
-from rest_framework import serializers
-from .models import CompanyMaster
 
-
-class CompanyMasterSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = CompanyMaster
-        fields = '__all__'
-        read_only_fields = [
-            'createdon',
-            'createdby',
-            'updatedon',
-            'updatedby'
-        ]
-    
 
 class BranchSerializer(serializers.ModelSerializer):
     class Meta:
