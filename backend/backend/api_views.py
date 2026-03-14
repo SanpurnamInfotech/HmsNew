@@ -5662,6 +5662,11 @@ class DischargeSummaryDeleteView(APIView):
         except Exception as e:
             return Response({"error": str(e), "trace": traceback.format_exc()}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+
+
+
+        
 # branch
 class BranchListView(APIView):
     def get(self, request):

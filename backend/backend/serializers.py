@@ -211,6 +211,7 @@ class AdvicemasterSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+
 class EmployeeMasterSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeMaster
@@ -1304,6 +1305,7 @@ class FinancialyearMasterSerializer(serializers.ModelSerializer):
             'updatedon',
             'updatedby'
         ]
+
 
 
 

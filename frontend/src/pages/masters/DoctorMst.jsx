@@ -1,24 +1,31 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import { useCrud, useTable, Pagination, TableToolbar } from "../../components/common/BaseCRUD";
 import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaSearch, FaChevronDown, FaUserMd, FaMapMarkerAlt, FaPhoneAlt } from "react-icons/fa";
- 
+
+/* --- Helper for Numeric Only Input --- */
+const onlyNumber = (e) => {
+  if (!/[0-9]/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
 const SearchableSelect = ({ options = [], value, onChange, placeholder = "Select", required, className = "" }) => {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const ref = useRef(null);
   const searchRef = useRef(null);
- 
+
   useEffect(() => {
     const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
- 
+
   useEffect(() => { if (open && searchRef.current) searchRef.current.focus(); }, [open]);
- 
+
   const filtered = options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()));
   const selectedLabel = options.find(o => String(o.value) === String(value))?.label;
- 
+
   return (
     <div ref={ref} className={"relative " + className}>
       <button type="button" className="w-full px-3 py-2 rounded border text-left flex items-center justify-between bg-white" onClick={() => { setOpen(!open); setSearch(""); }}>
@@ -47,49 +54,30 @@ const SearchableSelect = ({ options = [], value, onChange, placeholder = "Select
     </div>
   );
 };
- 
+
 const DoctorMst = () => {
   const DOCTOR_PATH = "doctor";
- 
-  // --- FETCHING DATA ---
-  // Main Doctor Data
+
   const { data, loading, refresh, createItem, updateItem, deleteItem } = useCrud(`${DOCTOR_PATH}/`);
- 
-  // Dropdown Data (Inhe fetch karna zaroori hai dropdown dikhane ke liye)
   const { data: departments = [] } = useCrud("departments/");
   const { data: countries } = useCrud("countries/");
   const { data: states } = useCrud("states/");
   const { data: districts } = useCrud("districts/");
   const { data: cities } = useCrud("cities/");
- 
+
   const [showForm, setShowForm] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
   const [modal, setModal] = useState({ message: "", visible: false, type: "success" });
- 
+
   const [formData, setFormData] = useState({
-    doctor_code: "",
-    doctor_name: "",
-    department_code: "",
-    qualification: "",
-    total_experience: "",
-    dob: "",
-    gender: "",
-    marital_status_code: "",
-    email: "",
-    mobile: "",
-    phone: "",
-    landmark: "",
-    address1: "",
-    address2: "",
-    city_code: "",
-    district_code: "",
-    state_code: "",
-    country_code: "",
-    pincode: "",
-    status: 1
+    doctor_code: "", doctor_name: "", department_code: "", qualification: "",
+    total_experience: "", dob: "", gender: "", marital_status_code: "",
+    email: "", mobile: "", phone: "", landmark: "", address1: "", address2: "",
+    city_code: "", district_code: "", state_code: "", country_code: "",
+    pincode: "", status: 1
   });
- 
+
   const resetForm = () => {
     setShowForm(false);
     setIsEdit(false);
@@ -102,40 +90,42 @@ const DoctorMst = () => {
       pincode: "", status: 1
     });
   };
- 
+
   const showModal = (message, type = "success") => setModal({ message, visible: true, type });
- 
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const cleanedData = { ...formData };
+    // Data Parsing: Convert specific strings to Integers for Backend
+    const cleanedData = { 
+      ...formData,
+      mobile: formData.mobile ? parseInt(formData.mobile) : null,
+      phone: formData.phone ? parseInt(formData.phone) : null,
+      pincode: formData.pincode ? parseInt(formData.pincode) : null,
+      total_experience: formData.total_experience ? parseInt(formData.total_experience) : 0,
+      status: Number(formData.status)
+    };
 
-  // doctor code auto generate ke liye remove
-  if (!isEdit) {
-    delete cleanedData.doctor_code;
-  }
+    if (!isEdit) delete cleanedData.doctor_code;
+    if (!cleanedData.dob) cleanedData.dob = null;
 
-  // empty date fix
-  if (!cleanedData.dob) {
-    cleanedData.dob = null;
-  }
+    const actionPath = isEdit
+      ? `${DOCTOR_PATH}/update/${formData.doctor_code}/`
+      : `${DOCTOR_PATH}/create/`;
 
-  const actionPath = isEdit
-    ? `${DOCTOR_PATH}/update/${formData.doctor_code}/`
-    : `${DOCTOR_PATH}/create/`;
+    const result = isEdit
+      ? await updateItem(actionPath, cleanedData)
+      : await createItem(actionPath, cleanedData);
 
-  const result = isEdit
-    ? await updateItem(actionPath, cleanedData)
-    : await createItem(actionPath, cleanedData);
+    if (result.success) {
+      showModal(`Doctor ${isEdit ? "updated" : "created"} successfully!`);
+      resetForm();
+      refresh();
+    } else {
+      showModal(result.error || "Failed to save data", "error");
+    }
+  };
 
-  if (result.success) {
-    showModal(`Doctor ${isEdit ? "updated" : "created"} successfully!`);
-    resetForm();
-    refresh();
-  } else {
-    showModal(result.error || "Failed to save data", "error");
-  }
-};
   const handleDelete = async () => {
     if (!selectedRow) return showModal("Please select a record", "error");
     if (window.confirm(`Delete Dr. ${selectedRow.doctor_name}?`)) {
@@ -143,14 +133,13 @@ const DoctorMst = () => {
       if (result.success) { showModal("Deleted!"); refresh(); setSelectedRow(null); }
     }
   };
- 
+
   const { search, setSearch, currentPage, setCurrentPage, itemsPerPage, setItemsPerPage, paginatedData, filteredData, totalPages } = useTable(data || []);
- 
+
   if (loading) return <div className="p-10 text-center font-bold text-emerald-600 italic">Loading...</div>;
- 
+
   return (
     <div className="app-container">
-      {/* MODAL */}
       {modal.visible && (
         <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="form-container max-w-sm w-full p-8 text-center animate-in zoom-in-95 duration-200 shadow-2xl">
@@ -165,8 +154,7 @@ const DoctorMst = () => {
           </div>
         </div>
       )}
- 
-      {/* HEADER */}
+
       <div className="flex justify-between items-center mb-6 bg-white p-6 rounded-xl shadow-sm border-l-4 border-emerald-500">
         <h4 className="text-2xl font-black text-gray-800">Doctor Master</h4>
         <div className="flex gap-2">
@@ -185,53 +173,34 @@ const DoctorMst = () => {
           )}
         </div>
       </div>
- 
+
       {showForm && (
         <div className="bg-white rounded-xl shadow-md p-8 mb-8 border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-8">
- 
-            {/* --- SECTION: Professional Info --- */}
+            
+            {/* Professional Info */}
             <div>
               <h5 className="flex items-center gap-2 text-emerald-700 font-bold mb-4 border-b pb-2"><FaUserMd /> Professional Information</h5>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Doctor Code *</label>
-                  <input
-className="w-full px-3 py-2 rounded border bg-gray-100 cursor-not-allowed"
-value={formData.doctor_code || "Auto Generated"}
-disabled
-/>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Doctor Code</label>
+                  <input className="w-full px-3 py-2 rounded border bg-gray-100 cursor-not-allowed" value={formData.doctor_code || "Auto Generated"} disabled />
                 </div>
                 <div className="space-y-1 md:col-span-2">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Doctor Name *</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.doctor_name} required onChange={e => setFormData({ ...formData, doctor_name: e.target.value })} />
+                  <input type="text" className="w-full px-3 py-2 rounded border" value={formData.doctor_name} required onChange={e => setFormData({ ...formData, doctor_name: e.target.value })} />
                 </div>
-               <div className="space-y-1">
-  <label className="text-[10px] font-bold text-gray-400 uppercase">
-    Department *
-  </label>
-
-  <SearchableSelect
-    placeholder="Select Dept"
-    required
-    value={formData.department_code}
-    onChange={(v)=>setFormData({
-      ...formData,
-      department_code:v
-    })}
-    options={(Array.isArray(departments)?departments:[]).map(d=>({
-      value:d.department_code,
-      label:d.department_code
-    }))}
-  />
-</div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Department *</label>
+                  <SearchableSelect placeholder="Select Dept" required value={formData.department_code} onChange={(v)=>setFormData({...formData, department_code:v})} options={(Array.isArray(departments)?departments:[]).map(d=>({value:d.department_code, label:d.department_code}))} />
+                </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Qualification</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.qualification} onChange={e => setFormData({ ...formData, qualification: e.target.value })} />
+                  <input type="text" className="w-full px-3 py-2 rounded border" value={formData.qualification} onChange={e => setFormData({ ...formData, qualification: e.target.value })} />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Experience</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.total_experience} onChange={e => setFormData({ ...formData, total_experience: e.target.value })} />
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Experience (Years)</label>
+                  <input type="text" onKeyPress={onlyNumber} className="w-full px-3 py-2 rounded border" value={formData.total_experience} onChange={e => setFormData({ ...formData, total_experience: e.target.value })} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">DOB</label>
@@ -243,8 +212,8 @@ disabled
                 </div>
               </div>
             </div>
- 
-            {/* --- SECTION: Contact Info --- */}
+
+            {/* Contact Info */}
             <div>
               <h5 className="flex items-center gap-2 text-emerald-700 font-bold mb-4 border-b pb-2"><FaPhoneAlt /> Contact Information</h5>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -253,57 +222,35 @@ disabled
                   <input type="email" className="w-full px-3 py-2 rounded border" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Mobile</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} />
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Mobile (Integer)</label>
+                  <input type="text" maxLength="10" onKeyPress={onlyNumber} className="w-full px-3 py-2 rounded border" value={formData.mobile} onChange={e => setFormData({ ...formData, mobile: e.target.value })} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Phone</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
+                  <input type="text" onKeyPress={onlyNumber} className="w-full px-3 py-2 rounded border" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} />
                 </div>
                 <div className="space-y-1">
-  <label className="text-[10px] font-bold text-gray-400 uppercase">
-    Marital Status
-  </label>
-
-  <SearchableSelect
-    placeholder="Select"
-    value={formData.marital_status_code}
-    onChange={(v) =>
-      setFormData({
-        ...formData,
-        marital_status_code: v
-      })
-    }
-    options={[
-      { value: "Single", label: "Single" },
-      { value: "Married", label: "Married" },
-      { value: "Divorced", label: "Divorced" },
-      { value: "Widowed", label: "Widowed" }
-    ]}
-  />
-</div>
+                  <label className="text-[10px] font-bold text-gray-400 uppercase">Marital Status</label>
+                  <SearchableSelect placeholder="Select" value={formData.marital_status_code} onChange={(v) => setFormData({ ...formData, marital_status_code: v })} options={[{ value: "Single", label: "Single" }, { value: "Married", label: "Married" }, { value: "Divorced", label: "Divorced" }, { value: "Widowed", label: "Widowed" }]} />
+                </div>
               </div>
             </div>
- 
-            {/* --- SECTION: Address Info --- */}
+
+            {/* Address Info */}
             <div>
               <h5 className="flex items-center gap-2 text-emerald-700 font-bold mb-4 border-b pb-2"><FaMapMarkerAlt /> Address Details</h5>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="md:col-span-2 space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Address Line 1</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.address1} onChange={e => setFormData({ ...formData, address1: e.target.value })} />
+                  <input type="text" className="w-full px-3 py-2 rounded border" value={formData.address1} onChange={e => setFormData({ ...formData, address1: e.target.value })} />
                 </div>
                 <div className="md:col-span-2 space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Address Line 2</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.address2} onChange={e => setFormData({ ...formData, address2: e.target.value })} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">Landmark</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.landmark} onChange={e => setFormData({ ...formData, landmark: e.target.value })} />
+                  <input type="text" className="w-full px-3 py-2 rounded border" value={formData.address2} onChange={e => setFormData({ ...formData, address2: e.target.value })} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Pincode</label>
-                  <input className="w-full px-3 py-2 rounded border" value={formData.pincode} onChange={e => setFormData({ ...formData, pincode: e.target.value })} />
+                  <input type="text" maxLength="6" onKeyPress={onlyNumber} className="w-full px-3 py-2 rounded border" value={formData.pincode} onChange={e => setFormData({ ...formData, pincode: e.target.value })} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">Country</label>
@@ -312,10 +259,6 @@ disabled
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">State</label>
                   <SearchableSelect placeholder="Select" value={formData.state_code} onChange={v => setFormData({ ...formData, state_code: v })} options={(states || []).map(s => ({ value: s.state_code, label: s.state_name }))} />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase">District</label>
-                  <SearchableSelect placeholder="Select" value={formData.district_code} onChange={v => setFormData({ ...formData, district_code: v })} options={(districts || []).map(d => ({ value: d.district_code, label: d.district_name }))} />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold text-gray-400 uppercase">City</label>
@@ -327,7 +270,7 @@ disabled
                 </div>
               </div>
             </div>
- 
+
             <div className="flex justify-end gap-3 pt-6 border-t">
               <button type="submit" className="bg-emerald-600 text-white px-10 py-2.5 rounded-lg font-bold">Save Record</button>
               <button type="button" className="text-gray-400 font-bold px-4" onClick={resetForm}>Cancel</button>
@@ -335,7 +278,7 @@ disabled
           </form>
         </div>
       )}
- 
+
       {/* TABLE */}
       {!showForm && (
         <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
@@ -348,7 +291,6 @@ disabled
                   <th className="p-4 text-[10px] font-bold text-gray-400 uppercase">Code</th>
                   <th className="p-4 text-[10px] font-bold text-gray-400 uppercase">Doctor Name</th>
                   <th className="p-4 text-[10px] font-bold text-gray-400 uppercase">Department</th>
-                  <th className="p-4 text-[10px] font-bold text-gray-400 uppercase">Mobile</th>
                   <th className="p-4 text-[10px] font-bold text-gray-400 uppercase text-center">Status</th>
                 </tr>
               </thead>
@@ -362,7 +304,6 @@ disabled
                     <td className="p-4 text-sm font-bold">{row.doctor_code}</td>
                     <td className="p-4 text-sm font-bold text-gray-700">{row.doctor_name}</td>
                     <td className="p-4 text-sm text-gray-500">{row.department_code}</td>
-                    <td className="p-4 text-sm text-gray-500">{row.mobile}</td>
                     <td className="p-4 text-center">
                       <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase ${row.status === 1 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
                         {row.status === 1 ? "Active" : "Inactive"}
@@ -381,5 +322,5 @@ disabled
     </div>
   );
 };
- 
+
 export default DoctorMst;
